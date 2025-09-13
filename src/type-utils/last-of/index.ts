@@ -1,0 +1,1 @@
+export type { LastOf } from "./last-of";

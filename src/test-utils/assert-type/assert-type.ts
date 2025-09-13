@@ -1,4 +1,4 @@
-import { Equal } from "../equal/equal";
+import { Equal } from "../equal";
 
 /**
  * Compile-time assertion that two types are exactly equal.

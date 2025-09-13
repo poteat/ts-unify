@@ -1,25 +1,15 @@
-import type { Capture } from "../capture/capture";
+import type { Capture } from "../capture";
+import type {
+  Prettify,
+  HasNever,
+  KeysToTuple,
+} from "../type-utils";
 
 /**
  * Extracts the name from a Capture type
  * @internal
  */
 type GetCaptureName<T> = T extends Capture<infer Name> ? Name : never;
-
-/**
- * Flattens an intersection of objects into a single clean object type
- * Improves IDE display of complex intersection types
- * @internal
- */
-type Prettify<T> = {
-  [K in keyof T]: T[K];
-} & {};
-
-/**
- * Checks if a type contains never (for validation)
- * @internal
- */
-type HasNever<T> = [T] extends [never] ? true : false;
 
 /**
  * Work item for the TCO processing queue
@@ -33,44 +23,6 @@ type Work<O = any, P = any, Keys extends readonly any[] = []> = {
   p: P;
   keys: Keys;
 };
-
-/**
- * Helper for union to intersection conversion
- * @internal
- */
-type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
-  k: infer I
-) => void
-  ? I
-  : never;
-
-/**
- * Extract last element of a union using variance
- * @internal
- */
-type LastOf<T> = UnionToIntersection<
-  T extends any ? () => T : never
-> extends () => infer R
-  ? R
-  : never;
-
-/**
- * TCO union to tuple conversion with accumulator
- * @internal
- */
-type UnionToTupleTCO<T, Acc extends readonly any[] = []> = 0 extends 1
-  ? never
-  : [T] extends [never]
-  ? Acc
-  : LastOf<T> extends infer Last
-  ? UnionToTupleTCO<Exclude<T, Last>, [...Acc, Last]>
-  : never;
-
-/**
- * Convert object keys to tuple for sequential processing
- * @internal
- */
-type KeysToTuple<T> = T extends object ? UnionToTupleTCO<keyof T> : [];
 
 /**
  * Tail-recursive work processor

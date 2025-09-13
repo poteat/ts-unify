@@ -1,0 +1,1 @@
+export type { HasNever } from "./has-never";

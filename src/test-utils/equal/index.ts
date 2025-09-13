@@ -1,0 +1,1 @@
+export type { Equal } from "./equal";

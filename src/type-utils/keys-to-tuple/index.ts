@@ -1,0 +1,1 @@
+export type { KeysToTuple } from "./keys-to-tuple";

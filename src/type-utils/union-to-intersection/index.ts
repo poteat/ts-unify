@@ -1,0 +1,1 @@
+export type { UnionToIntersection } from "./union-to-intersection";

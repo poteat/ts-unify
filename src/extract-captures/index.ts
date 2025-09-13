@@ -1,0 +1,1 @@
+export type { ExtractCaptures } from "./extract-captures";
