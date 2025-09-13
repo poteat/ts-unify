@@ -11,12 +11,14 @@ import { CAPTURE_BRAND } from "../capture-type";
  *
  * @param name - Unique identifier for this capture (cannot be empty string)
  */
-export const $ = <const Name extends string>(name: Name): Capture<Name> => {
+export const $ = <const Name extends string, Value = unknown>(
+  name: Name
+): Capture<Name, Value> => {
   if (name === "") {
     throw new Error("Capture name cannot be empty string");
   }
   return Object.freeze({
     [CAPTURE_BRAND]: true,
     name,
-  } as Capture<Name>);
+  } as Capture<Name, Value>);
 };
