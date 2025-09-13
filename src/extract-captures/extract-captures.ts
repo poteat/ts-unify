@@ -22,7 +22,12 @@ type GetCaptureName<T> = T extends Capture<infer Name> ? Name : never;
  * @param Keys - For objects, remaining keys to process
  * @internal
  */
-type Work<O = any, P = any, Key extends string = "", Keys extends readonly any[] = []> = {
+type Work<
+  O = any,
+  P = any,
+  Key extends string = "",
+  Keys extends readonly any[] = []
+> = {
   o: O;
   p: P;
   key: Key;
@@ -47,7 +52,7 @@ type ProcessWorkTCO<Queue extends readonly any[], Acc = {}> = 0 extends 1
           : ProcessWorkTCO<Tail, Acc>
         : // Nested $ - use current key as capture name
           ProcessWorkTCO<Tail, Acc & { [K in CurrentKey]: O }>
-      : P extends Capture<any>
+      : P extends Capture
       ? ProcessWorkTCO<Tail, Acc & { [K in GetCaptureName<P>]: O }>
       : P extends readonly [...infer PItems]
       ? O extends readonly any[]
@@ -58,7 +63,7 @@ type ProcessWorkTCO<Queue extends readonly any[], Acc = {}> = 0 extends 1
                 [K in keyof PItems]: Work<
                   K extends keyof O ? O[K] : O[number],
                   PItems[K],
-                  `${K & string}`,  // Array index as key
+                  `${K & string}`, // Array index as key
                   []
                 >;
               }
@@ -135,7 +140,7 @@ type ValidateExtraction<T> = T extends Record<string, any>
  * type Pattern = { user: { id: Capture<"userId">; name: Capture<"name"> } };
  * type Result = ExtractCaptures<Data, Pattern>;
  * //   ^? { userId: number; name: string }
- * 
+ *
  * // Implicit captures using $
  * type Pattern2 = { user: { id: typeof $; name: typeof $ } };
  * type Result2 = ExtractCaptures<Data, Pattern2>;

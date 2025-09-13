@@ -11,9 +11,7 @@ import { CAPTURE_BRAND } from "../capture-type";
  *
  * @param name - Unique identifier for this capture (cannot be empty string)
  */
-export const $ = <const Name extends string>(
-  name: Name extends "" ? never : Name
-): Capture<Name> => {
+export const $ = <const Name extends string>(name: Name): Capture<Name> => {
   if (name === "") {
     throw new Error("Capture name cannot be empty string");
   }
