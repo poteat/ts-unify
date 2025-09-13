@@ -4,6 +4,8 @@
 
 `ExtractCaptures<Original, Pattern>` walks two type structures in parallel to
 extract capture names and their corresponding types from the original structure.
+Supports both explicit captures using `Capture<Name>` and implicit captures
+using the `$` function as a sentinel.
 
 ## Core Semantics
 
@@ -14,23 +16,61 @@ type `T`:
 
 - Extract the mapping `{ [Name]: T }`
 
+### Implicit Captures with $ Function
+
+When the bare `$` function (not called) appears in `Pattern`:
+
+- **In object properties**: Uses the property key as the capture name
+- **In arrays**: Uses the array index as the capture name
+- **At root level**: Captures all keys from the original object
+
+**Examples:**
+
+```typescript
+// Object properties - uses key names
+type Original = { name: string; age: number };
+type Pattern = { name: typeof $; age: typeof $ };
+type Extracted = ExtractCaptures<Original, Pattern>;
+// Result: { name: string; age: number }
+
+// Arrays - uses indices as names
+type Original = [string, number];
+type Pattern = [typeof $, typeof $];
+type Extracted = ExtractCaptures<Original, Pattern>;
+// Result: { "0": string; "1": number }
+
+// Root wildcard - captures entire object
+type Original = { a: 1; b: 2; c: 3 };
+type Pattern = typeof $;
+type Extracted = ExtractCaptures<Original, Pattern>;
+// Result: { a: 1; b: 2; c: 3 }
+```
+
 ### Multiple Captures with Same Name
 
-When the same capture name appears multiple times:
+When the same capture name appears multiple times (either explicit or implicit):
 
 - **Type level**: The final type is the intersection of all captured types
 - **Runtime semantics**: All positions must contain the same (deep equal) value
 - **Validation**: If the intersection results in `never`, the entire extraction
   returns `never`
 
-**Example:**
+**Examples:**
 
 ```typescript
+// Explicit captures
 type Original = { a: number; b: number };
 type Pattern = { a: Capture<"x">; b: Capture<"x"> };
 type Extracted = ExtractCaptures<Original, Pattern>;
 // Result: { x: number & number } = { x: number }
 
+// Implicit captures with same key name
+type Original = { data: { x: number }; other: { x: number } };
+type Pattern = { data: { x: typeof $ }; other: { x: typeof $ } };
+type Extracted = ExtractCaptures<Original, Pattern>;
+// Result: { x: number } (unified)
+
+// Conflicting types
 type Original2 = { a: number; b: string };
 type Pattern2 = { a: Capture<"x">; b: Capture<"x"> };
 type Extracted2 = ExtractCaptures<Original2, Pattern2>;

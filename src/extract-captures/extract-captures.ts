@@ -1,5 +1,12 @@
 import type { Capture } from "../capture";
+import type { $ } from "../capture";
 import type { Prettify, HasNever, KeysToTuple } from "../type-utils";
+
+/**
+ * Checks if a type is the $ function itself (for implicit captures)
+ * @internal
+ */
+type IsDollarFunction<T> = T extends typeof $ ? true : false;
 
 /**
  * Extracts the name from a Capture type
@@ -8,20 +15,22 @@ import type { Prettify, HasNever, KeysToTuple } from "../type-utils";
 type GetCaptureName<T> = T extends Capture<infer Name> ? Name : never;
 
 /**
- * Work item for the TCO processing queue
+ * Work item for the TCO processing queue with key context
  * @param O - Original type at this position
  * @param P - Pattern type at this position
+ * @param Key - Current key name for implicit captures
  * @param Keys - For objects, remaining keys to process
  * @internal
  */
-type Work<O = any, P = any, Keys extends readonly any[] = []> = {
+type Work<O = any, P = any, Key extends string = "", Keys extends readonly any[] = []> = {
   o: O;
   p: P;
+  key: Key;
   keys: Keys;
 };
 
 /**
- * Tail-recursive work processor
+ * Tail-recursive work processor with implicit capture support
  * @internal
  */
 type ProcessWorkTCO<Queue extends readonly any[], Acc = {}> = 0 extends 1
@@ -29,8 +38,16 @@ type ProcessWorkTCO<Queue extends readonly any[], Acc = {}> = 0 extends 1
   : Queue extends readonly []
   ? Acc
   : Queue extends readonly [infer Head, ...infer Tail]
-  ? Head extends Work<infer O, infer P, infer Keys>
-    ? P extends Capture<any>
+  ? Head extends Work<infer O, infer P, infer CurrentKey, infer Keys>
+    ? IsDollarFunction<P> extends true
+      ? CurrentKey extends ""
+        ? // Root-level $ - capture all keys of O
+          O extends object
+          ? ProcessWorkTCO<Tail, Acc & O>
+          : ProcessWorkTCO<Tail, Acc>
+        : // Nested $ - use current key as capture name
+          ProcessWorkTCO<Tail, Acc & { [K in CurrentKey]: O }>
+      : P extends Capture<any>
       ? ProcessWorkTCO<Tail, Acc & { [K in GetCaptureName<P>]: O }>
       : P extends readonly [...infer PItems]
       ? O extends readonly any[]
@@ -41,6 +58,7 @@ type ProcessWorkTCO<Queue extends readonly any[], Acc = {}> = 0 extends 1
                 [K in keyof PItems]: Work<
                   K extends keyof O ? O[K] : O[number],
                   PItems[K],
+                  `${K & string}`,  // Array index as key
                   []
                 >;
               }
@@ -56,14 +74,14 @@ type ProcessWorkTCO<Queue extends readonly any[], Acc = {}> = 0 extends 1
               ? // Process one object key, queue rest
                 ProcessWorkTCO<
                   [
-                    Work<O, P, RestKeys>,
-                    Work<O[Key], P[Key], KeysToTuple<P[Key]>>,
+                    Work<O, P, CurrentKey, RestKeys>,
+                    Work<O[Key], P[Key], Key & string, KeysToTuple<P[Key]>>,
                     ...Tail
                   ],
                   Acc
                 >
-              : ProcessWorkTCO<[Work<O, P, RestKeys>, ...Tail], Acc>
-            : ProcessWorkTCO<[Work<O, P, RestKeys>, ...Tail], Acc>
+              : ProcessWorkTCO<[Work<O, P, CurrentKey, RestKeys>, ...Tail], Acc>
+            : ProcessWorkTCO<[Work<O, P, CurrentKey, RestKeys>, ...Tail], Acc>
           : ProcessWorkTCO<Tail, Acc> // No more keys
         : ProcessWorkTCO<Tail, Acc>
       : ProcessWorkTCO<Tail, Acc>
@@ -74,10 +92,10 @@ type ProcessWorkTCO<Queue extends readonly any[], Acc = {}> = 0 extends 1
  * Process a single work item by delegating to TCO implementation
  * @internal
  */
-type ProcessWork<W> = W extends Work<infer O, infer P>
+type ProcessWork<W> = W extends Work<infer O, infer P, infer Key>
   ? P extends object
-    ? ProcessWorkTCO<[Work<O, P, KeysToTuple<P>>]>
-    : ProcessWorkTCO<[Work<O, P, []>]>
+    ? ProcessWorkTCO<[Work<O, P, Key, KeysToTuple<P>>]>
+    : ProcessWorkTCO<[Work<O, P, Key, []>]>
   : {};
 
 /**
@@ -108,17 +126,24 @@ type ValidateExtraction<T> = T extends Record<string, any>
 
 /**
  * Extracts typed capture bindings from a pattern matched against a type.
+ * Supports both explicit captures and implicit captures using $ function.
  * Same-named captures must have compatible types or returns `never`.
  *
  * @example
+ * // Explicit captures
  * type Data = { user: { id: number; name: string } };
  * type Pattern = { user: { id: Capture<"userId">; name: Capture<"name"> } };
  * type Result = ExtractCaptures<Data, Pattern>;
  * //   ^? { userId: number; name: string }
+ * 
+ * // Implicit captures using $
+ * type Pattern2 = { user: { id: typeof $; name: typeof $ } };
+ * type Result2 = ExtractCaptures<Data, Pattern2>;
+ * //   ^? { id: number; name: string }
  *
  * @typeParam Original - Source type to extract from
- * @typeParam Pattern - Pattern containing Capture sentinels
+ * @typeParam Pattern - Pattern containing Capture sentinels or $ function
  */
 export type ExtractCaptures<Original, Pattern> = ValidateExtraction<
-  Prettify<ExtractCapturesImpl<[Work<Original, Pattern>]>>
+  Prettify<ExtractCapturesImpl<[Work<Original, Pattern, "">]>>
 >;
