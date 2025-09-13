@@ -1,4 +1,4 @@
-import type { Capture } from "../capture/capture";
+import type { Capture } from "../capture";
 import type { ExtractCaptures } from "./extract-captures";
 import { assertType } from "../test-utils/assert-type/assert-type";
 

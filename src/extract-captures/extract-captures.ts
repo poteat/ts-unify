@@ -1,9 +1,5 @@
 import type { Capture } from "../capture";
-import type {
-  Prettify,
-  HasNever,
-  KeysToTuple,
-} from "../type-utils";
+import type { Prettify, HasNever, KeysToTuple } from "../type-utils";
 
 /**
  * Extracts the name from a Capture type
