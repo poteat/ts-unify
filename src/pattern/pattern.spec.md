@@ -15,8 +15,9 @@ not interpret names, unify duplicates, or perform any runtime work.
 ## Allowed Positions
 
 - Primitives: either the original value type `T`, or a capture token.
-- Objects: either a capture token for the whole subtree, or an object whose
-  properties are `Pattern<T[K]>` for each `K`.
+- Objects: either a capture token for the whole subtree, or an object with any
+  subset of properties from `T`, where each present property is
+  `Pattern<T[K]>`. Omitted keys are treated as "don’t care".
 - Arrays/Tuples (sequences): either a capture token for the whole sequence, or a
   sequence of items where each item is one of:
   - `Pattern<E>` — a nested pattern for the element type `E`.
@@ -47,11 +48,11 @@ Notes:
 
 ## Examples
 
-Object with nested captures:
+Object with nested captures (omitted keys allowed):
 
 ```ts
 type Shape = { id: number; user: { name: string; active: boolean } };
-const p: Pattern<Shape> = { id: $("id"), user: { name: $, active: true } };
+const p: Pattern<Shape> = { id: $("id"), user: { name: $ } };
 ```
 
 Tuple with single-element captures:

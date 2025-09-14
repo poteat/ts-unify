@@ -43,4 +43,20 @@ describe("Pattern type", () => {
     };
     expect(typeof p).toBe("object");
   });
+
+  it("allows omitting object keys (loose patterns)", () => {
+    type Shape = { id: number; user: { name: string; active: boolean } };
+    const p1: Pattern<Shape> = { id: $("id") };
+    const p2: Pattern<Shape> = { user: { name: $ } };
+    expect(typeof p1).toBe("object");
+    expect(typeof p2).toBe("object");
+  });
+
+  it("rejects extra keys not in the shape", () => {
+    type Shape = { id: number };
+    // @ts-expect-error - extra property not in Shape
+    const bad: Pattern<Shape> = { id: $("id"), extra: true };
+    void bad;
+    expect(true).toBe(true);
+  });
 });
