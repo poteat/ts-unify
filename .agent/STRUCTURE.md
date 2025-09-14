@@ -28,12 +28,21 @@ Notes:
 
 ## Barrels
 
-- Every non-root folder should have an `index.ts` that re-exports the public
-  APIs of that folder (barrel pattern).
+- Every non-root folder should have an `index.ts` barrel that re-exports the
+  folder's public API using `export * from "./file"` form for simplicity.
 - The root-level `src/index.ts` defines the external interface of the package
   and should re-export only the public API intended for consumers.
-- Internal utilities should remain within their concept barrels and not be
-  re-exported at the root unless explicitly part of the public API.
+- Internal utilities remain within their concept barrels and are not re-exported
+  at the root unless explicitly part of the public API.
+
+## Imports
+
+- Configure path aliases so `@/` points to `src/` (set in `tsconfig` and Jest).
+- Use `@/…` when importing from a parent or sibling folder (avoid `../…`).
+- Use `./…` for same-folder or deeper relative imports.
+- Prefer importing from a concept's top-level barrel when available (e.g.,
+  `@/capture` instead of `@/capture/dollar`). Use deep paths only for internals
+  that are intentionally not exported by the top-level barrel.
 
 ## Naming
 
