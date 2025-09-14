@@ -1,5 +1,7 @@
 import type { Pattern } from ".";
 import { $ } from "@/capture";
+import type { Spread } from "@/capture";
+import { SPREAD_BRAND } from "@/capture/spread/spread";
 
 describe("Pattern type", () => {
   it("accepts original shape", () => {
@@ -20,6 +22,16 @@ describe("Pattern type", () => {
       tup: [$, $],
     };
     expect(typeof p).toBe("object");
+  });
+
+  it("accepts spread token in sequence position (type-level)", () => {
+    type Shape = readonly number[];
+    const rest = { [SPREAD_BRAND]: true, name: "rest" } as Spread<
+      "rest",
+      number
+    >;
+    const p: Pattern<Shape> = [rest];
+    expect(Array.isArray(p)).toBe(true);
   });
 
   it("accepts explicit captures", () => {
