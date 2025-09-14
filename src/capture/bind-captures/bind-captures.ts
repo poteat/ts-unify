@@ -1,5 +1,6 @@
 import type { $ } from "@/capture/dollar";
 import type { Capture } from "@/capture/capture-type";
+import type { Spread } from "@/capture/spread/spread";
 
 /**
  * Bind capture names and value types in a pattern `P` using a reference
@@ -30,7 +31,7 @@ type BindNode<P, S, Key extends string> =
       ? S extends readonly any[]
         ? number extends S["length"]
           ? ReadonlyArray<Capture<`${number}`, S[number]>>
-          : TupleCaptures<S>
+          : Readonly<TupleCaptures<S>>
         : S extends object
         ? { [K in keyof S]: Capture<K & string, S[K]> }
         : never
@@ -38,15 +39,31 @@ type BindNode<P, S, Key extends string> =
     : // Explicit capture keeps provided value type; if unknown, upgrade to S
     P extends Capture<infer Name, infer V>
     ? Capture<Name & string, unknown extends V ? S : V>
+    : // Spread capture in sequence positions: bind element type from S[number]
+    P extends Spread<infer Name, infer Elem>
+    ? S extends readonly any[]
+      ? Spread<
+          Name & string,
+          unknown extends Elem ? S[number] : Elem & S[number]
+        >
+      : Spread<Name & string, Elem>
     : // Tuples/arrays: align with S if tuple or array
     P extends readonly [...infer PI]
     ? S extends readonly any[]
       ? number extends S["length"]
-        ? { [I in keyof PI]: BindNode<PI[I], S[number], `${I & string}`> }
-        : { [I in keyof PI]: BindNode<PI[I], S[I & number], `${I & string}`> }
-      : {
+        ? Readonly<{
+            [I in keyof PI]: PI[I] extends Spread<any, any>
+              ? BindNode<PI[I], S, `${I & string}`>
+              : BindNode<PI[I], S[number], `${I & string}`>;
+          }>
+        : Readonly<{
+            [I in keyof PI]: PI[I] extends Spread<any, any>
+              ? BindNode<PI[I], S, `${I & string}`>
+              : BindNode<PI[I], S[I & number], `${I & string}`>;
+          }>
+      : Readonly<{
           [I in keyof PI]: BindNode<PI[I], unknown, `${I & string}`>;
-        }
+        }>
     : // Objects: map each property using its key; align with S if available
     P extends object
     ? {

@@ -50,7 +50,7 @@ describe("BindCaptures - type-level", () => {
     type Shape = [number, string];
     type Pattern = $;
     type Result = BindCaptures<Pattern, Shape>;
-    type Expected = [Capture<"0", number>, Capture<"1", string>];
+    type Expected = readonly [Capture<"0", number>, Capture<"1", string>];
     assertType<Result, Expected>(0);
   });
 
