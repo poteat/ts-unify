@@ -1,4 +1,4 @@
-import type { Pattern } from "@";
+import type { Pattern } from ".";
 import { $ } from "@/capture";
 
 describe("Pattern type", () => {
