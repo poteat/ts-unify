@@ -12,14 +12,25 @@ import type { Capture } from "@/capture/capture-type";
  */
 export type BindCaptures<P, Shape> = BindNode<P, Shape, "">;
 
+// Build a tuple of captures from a tuple shape `S`, preserving per-index types.
+type TupleCaptures<
+  S extends readonly unknown[],
+  Acc extends readonly unknown[] = []
+> = S extends readonly [infer H, ...infer R]
+  ? TupleCaptures<
+      R extends readonly unknown[] ? R : never,
+      [...Acc, Capture<`${Acc["length"] & number}`, H>]
+    >
+  : Acc;
+
 type BindNode<P, S, Key extends string> =
   // Implicit placeholder becomes named capture with the property key
   P extends $
     ? Key extends ""
-      ? S extends readonly [...infer SI]
-        ? { [I in keyof SI]: Capture<`${I & string}`, SI[I & number]> }
-        : S extends readonly (infer Elem)[]
-        ? ReadonlyArray<Capture<`${number}`, Elem>>
+      ? S extends readonly any[]
+        ? number extends S["length"]
+          ? ReadonlyArray<Capture<`${number}`, S[number]>>
+          : TupleCaptures<S>
         : S extends object
         ? { [K in keyof S]: Capture<K & string, S[K]> }
         : never
