@@ -43,6 +43,28 @@ const pattern = {
 const arrayPattern = [$("first"), $("second"), $("third")];
 ```
 
+### Spread form (sequence sugar)
+
+In sequence contexts (arrays/tuples), the spread form `...$('name')` denotes a
+spread-capture at that position. At the type level, this is equivalent to
+including a `Spread<'name', Value>` token in the sequence pattern.
+
+```ts
+// Conceptual, type-level semantics:
+// [ $('head'), ...$('rest') ]  ~>  [ Capture<'head', V>, Spread<'rest', V> ]
+
+// Typed spreads use the same generic parameter `Value` for element type:
+// [ ...$<'rest', string>('rest') ]  ~>  [ Spread<'rest', string> ]
+```
+
+Notes:
+- Spread form is only valid in sequences and always uses the called form
+  `$('name')` (the bare `$` placeholder is not iterable at runtime).
+- Adjacent spreads are DC (unspecified) and may be constrained by consumers.
+- This module documents the semantics; runtime support for `...$('name')`
+  requires `$` to return a value that is iterable and yields a single
+  spread token (to be implemented by consumers).
+
 ## Type Signature
 
 ```ts

@@ -1,6 +1,7 @@
 import type { $ as DollarFn } from "@/capture";
 import { $ } from "./dollar";
 import type { Capture } from "@/capture/capture-type";
+import type { Spread } from "@/capture";
 import { assertType } from "@/test-utils/assert-type";
 
 describe("$ type alias", () => {
@@ -14,12 +15,15 @@ describe("$ type alias", () => {
   it("supports explicit Value generic parameter", () => {
     const capture = $<"id", number>("id");
     type C = typeof capture;
-    assertType<C, Capture<"id", number>>(0);
+    type Expected = Capture<"id", number> & Readonly<[Spread<"id", number>]>;
+    assertType<C, Expected>(0);
   });
 
   it("defaults Value generic parameter to unknown", () => {
     const capture = $("name");
     type C = typeof capture;
-    assertType<C, Capture<"name", unknown>>(0);
+    type Expected = Capture<"name", unknown> &
+      Readonly<[Spread<"name", unknown>]>;
+    assertType<C, Expected>(0);
   });
 });
