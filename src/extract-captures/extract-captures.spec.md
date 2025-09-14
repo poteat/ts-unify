@@ -40,9 +40,9 @@ type Extracted = ExtractCaptures<Pattern>;
 ### Multiple Captures with Same Name
 
 When the same capture name appears multiple times (either explicit or implicit),
-all occurrences coalesce to a single entry in the extracted mapping. Value
-types combine via intersection: e.g. `number` and `string` become
-`number & string` (which is `never`).
+all occurrences coalesce to a single entry in the extracted mapping. Value types
+combine via intersection: e.g. `number` and `string` become `number & string`
+(which is `never`).
 
 **Examples:**
 
@@ -84,6 +84,19 @@ Captures within array patterns:
 type Pattern = [Capture<"first">, Capture<"second">];
 type Extracted = ExtractCaptures<Pattern>;
 // Result: { first: unknown; second: unknown }
+```
+
+### Spread Captures (sequences)
+
+When a `Spread<Name, Elem>` appears in a sequence pattern (array/tuple), the
+extracted mapping includes `Name` with value type `ReadonlyArray<Elem>`.
+
+```typescript
+import type { Spread } from "@/capture";
+
+type Pattern = [string, Spread<"rest", number>, string];
+type Extracted = ExtractCaptures<Pattern>;
+// Result: { rest: ReadonlyArray<number> }
 ```
 
 ### Explicit Capture Value Types

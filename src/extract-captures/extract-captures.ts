@@ -1,5 +1,6 @@
 import type { Capture } from "@/capture";
 import type { $ } from "@/capture";
+import type { Spread } from "@/capture";
 import type { Prettify, UnionToIntersection, Values } from "@/type-utils";
 
 type ExtractFromPropertyValue<T, Key extends string> =
@@ -24,6 +25,11 @@ type ExtractFromPattern<P, Key extends string = ""> =
     P extends Capture
     ? P extends Capture<infer Name, infer V>
       ? { [K in Name]: V }
+      : never
+    : // Spread capture: map to readonly element array
+    P extends Spread
+    ? P extends Spread<infer Name, infer Elem>
+      ? { [K in Name]: ReadonlyArray<Elem> }
       : never
     : // Handle arrays
     P extends readonly [...infer Items]
