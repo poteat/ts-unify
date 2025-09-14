@@ -4,11 +4,11 @@ import { assertType } from "@/test-utils/assert-type/assert-type";
 
 describe("ExtractCaptures type tests", () => {
   test("type assertions compile", () => {
-    // Test 1: Basic extraction
+    // Test 1: Basic extraction (implicit value => unknown)
     type TestBasic = ExtractCaptures<{ value: Capture<"v"> }>;
     assertType<TestBasic, { v: unknown }>(0);
 
-    // Test 2: Multiple different captures
+    // Test 2: Multiple different captures (implicit values => unknown)
     type TestMultiple = ExtractCaptures<{
       name: Capture<"n">;
       age: Capture<"a">;
@@ -69,6 +69,17 @@ describe("ExtractCaptures type tests", () => {
       };
     }>;
     assertType<TestComplex, { id: unknown; tag1: unknown; tag2: unknown }>(0);
+
+    // Test 11: Explicit typed capture propagates value type
+    type TestTyped = ExtractCaptures<{ value: Capture<"v", number> }>;
+    assertType<TestTyped, { v: number }>(0);
+
+    // Test 12: Same name with different explicit value types intersects
+    type TestIntersect = ExtractCaptures<{
+      a: Capture<"x", number>;
+      b: Capture<"x", string>;
+    }>;
+    assertType<TestIntersect, { x: number & string }>(0);
 
     expect(true).toBe(true);
   });

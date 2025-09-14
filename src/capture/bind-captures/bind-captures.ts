@@ -16,14 +16,10 @@ type BindNode<P, S, Key extends string> =
   // Implicit placeholder becomes named capture with the property key
   P extends $
     ? Key extends ""
-      ? S extends readonly any[]
-        ? number extends S["length"]
-          ? ReadonlyArray<Capture<`${number}`, S[number]>>
-          : {
-              [I in keyof S]: I extends `${number}`
-                ? Capture<`${I & string}`, S[I & number]>
-                : never;
-            }
+      ? S extends readonly [...infer SI]
+        ? { [I in keyof SI]: Capture<`${I & string}`, SI[I & number]> }
+        : S extends readonly (infer Elem)[]
+        ? ReadonlyArray<Capture<`${number}`, Elem>>
         : S extends object
         ? { [K in keyof S]: Capture<K & string, S[K]> }
         : never
@@ -36,13 +32,7 @@ type BindNode<P, S, Key extends string> =
     ? S extends readonly any[]
       ? number extends S["length"]
         ? { [I in keyof PI]: BindNode<PI[I], S[number], `${I & string}`> }
-        : {
-            [I in keyof S]: BindNode<
-              PI[I & number],
-              S[I & number],
-              `${I & string}`
-            >;
-          }
+        : { [I in keyof PI]: BindNode<PI[I], S[I & number], `${I & string}`> }
       : {
           [I in keyof PI]: BindNode<PI[I], unknown, `${I & string}`>;
         }

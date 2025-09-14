@@ -1,38 +1,29 @@
-import type { Capture } from "../capture";
-import type { $ } from "../capture";
-import type { Prettify, UnionToIntersection, Values } from "../type-utils";
+import type { Capture } from "@/capture";
+import type { $ } from "@/capture";
+import type { Prettify, UnionToIntersection, Values } from "@/type-utils";
 
-/**
- * Extract captures from a property value, handling unions
- * @internal
- */
 type ExtractFromPropertyValue<T, Key extends string> =
   // Check if type contains a Capture (works with unions)
   T extends Capture
-    ? T extends Capture<infer Name>
-      ? { [K in Name]: unknown }
+    ? T extends Capture<infer Name, infer V>
+      ? { [K in Name]: V }
       : {}
-    : T extends typeof $
+    : T extends $
     ? { [K in Key]: unknown }
     : T extends object
     ? ExtractFromPattern<T, Key>
     : {};
 
-/**
- * Recursively walks a pattern structure to extract all captures.
- * Each capture maps to unknown type.
- * @internal
- */
 type ExtractFromPattern<P, Key extends string = ""> =
   // Check if it's the $ function (implicit capture)
-  P extends typeof $
+  P extends $
     ? Key extends ""
       ? {} // Root-level $ doesn't capture without context
       : { [K in Key]: unknown } // Use the key as capture name
     : // Check if it's an explicit capture
     P extends Capture
-    ? P extends Capture<infer Name>
-      ? { [K in Name]: unknown }
+    ? P extends Capture<infer Name, infer V>
+      ? { [K in Name]: V }
       : never
     : // Handle arrays
     P extends readonly [...infer Items]
@@ -54,21 +45,21 @@ type ExtractFromPattern<P, Key extends string = ""> =
       {};
 
 /**
- * Extracts capture names from a pattern structure.
- * All captures are typed as unknown.
- * Supports both explicit captures and implicit captures using $.
+ * Extract capture names from a pattern type. For explicit captures,
+ * propagates the declared value type; for implicit placeholders, uses
+ * `unknown`.
+ *
+ * - Supports explicit capture tokens and the placeholder token `$` in type
+ *   positions.
+ * - Recurses through objects, tuples, and arrays; duplicate names coalesce via
+ *   intersection: e.g. `{ x: number } & { x: string }` → `{ x: number & string }`.
  *
  * @example
- * // Explicit captures
- * type Pattern = { user: { id: Capture<"userId">; name: Capture<"name"> } };
- * type Result = ExtractCaptures<Pattern>;
- * //   ^? { userId: unknown; name: unknown }
+ * type P1 = { value: Capture<"v", number> };
+ * type R1 = ExtractCaptures<P1>; // { v: number }
  *
- * // Implicit captures using $
- * type Pattern2 = { user: { id: typeof $; name: typeof $ } };
- * type Result2 = ExtractCaptures<Pattern2>;
- * //   ^? { id: unknown; name: unknown }
- *
- * @typeParam Pattern - Pattern containing Capture sentinels or $ function
+ * @example
+ * type P2 = { id: $; name: $ };
+ * type R2 = ExtractCaptures<P2>; // { id: unknown; name: unknown }
  */
 export type ExtractCaptures<Pattern> = Prettify<ExtractFromPattern<Pattern>>;
