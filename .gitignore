@@ -15,6 +15,3 @@ coverage/
 .npm/
 .yarn/
 .pnp.*
-*.md
-
-!README.md
