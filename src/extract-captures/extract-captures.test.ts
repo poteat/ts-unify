@@ -1,6 +1,6 @@
-import type { Capture } from "../capture";
+import type { Capture } from "@/capture";
 import type { ExtractCaptures } from "./extract-captures";
-import { assertType } from "../test-utils/assert-type/assert-type";
+import { assertType } from "@/test-utils/assert-type/assert-type";
 
 describe("ExtractCaptures type tests", () => {
   test("type assertions compile", () => {

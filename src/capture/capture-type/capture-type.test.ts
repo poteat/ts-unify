@@ -1,4 +1,4 @@
-import { assertType } from "../../test-utils/assert-type";
+import { assertType } from "@/test-utils/assert-type";
 import type { Capture } from "./capture-type";
 import { CAPTURE_BRAND } from "./capture-type";
 

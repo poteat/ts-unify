@@ -1,5 +1,5 @@
 import type { Equal } from "./equal";
-import { assertType } from "../assert-type/assert-type";
+import { assertType } from "@/test-utils/assert-type/assert-type";
 
 describe("Equal type tests", () => {
   test("exact matches return true", () => {

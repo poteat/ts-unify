@@ -1,4 +1,4 @@
-import { Equal } from "../equal";
+import { Equal } from "@/test-utils/equal";
 
 /**
  * Type-safe expectation helper that enforces exact type equality at compile

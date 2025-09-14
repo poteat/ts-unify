@@ -1,5 +1,5 @@
 import { $ } from "./dollar";
-import { CAPTURE_BRAND } from "../capture-type";
+import { CAPTURE_BRAND } from "@/capture";
 
 describe("$ function", () => {
   it("should create a capture with the given name", () => {

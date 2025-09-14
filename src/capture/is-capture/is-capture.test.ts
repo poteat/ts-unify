@@ -1,5 +1,5 @@
 import { isCapture } from "./is-capture";
-import { $ } from "../dollar";
+import { $ } from "@/capture";
 
 describe("isCapture", () => {
   it("should return true for capture sentinels", () => {

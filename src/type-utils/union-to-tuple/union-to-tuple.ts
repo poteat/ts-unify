@@ -1,4 +1,4 @@
-import type { LastOf } from "../last-of";
+import type { LastOf } from "@/type-utils/last-of";
 
 /**
  * Converts a union type to a tuple type.

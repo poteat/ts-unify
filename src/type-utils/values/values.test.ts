@@ -1,4 +1,4 @@
-import { assertType } from "../../test-utils/assert-type";
+import { assertType } from "@/test-utils/assert-type";
 import type { Values } from "./values";
 
 describe("Values type utility", () => {

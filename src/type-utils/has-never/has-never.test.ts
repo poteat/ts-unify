@@ -1,4 +1,4 @@
-import { assertType } from "../../test-utils/assert-type/assert-type";
+import { assertType } from "@/test-utils/assert-type/assert-type";
 import type { HasNever } from "./has-never";
 
 describe("HasNever", () => {

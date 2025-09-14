@@ -1,4 +1,4 @@
-import { assertType } from "../../test-utils/assert-type/assert-type";
+import { assertType } from "@/test-utils/assert-type/assert-type";
 import type { UnionToIntersection } from "./union-to-intersection";
 
 describe("UnionToIntersection", () => {

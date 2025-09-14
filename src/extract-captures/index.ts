@@ -1,1 +1,1 @@
-export type { ExtractCaptures } from "./extract-captures";
+export * from "./extract-captures";

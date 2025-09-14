@@ -1,4 +1,4 @@
-export type { Capture } from "./capture-type";
-export { CAPTURE_BRAND } from "./capture-type";
-export { $ } from "./dollar";
-export { isCapture } from "./is-capture";
+export * from "./capture-type";
+export * from "./dollar";
+export * from "./is-capture";
+export * from "./finalize-captures/finalize-captures";

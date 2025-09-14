@@ -1,7 +1,7 @@
-import type { Capture } from "../capture";
-import { $ } from "../capture";
+import type { Capture } from "@/capture";
+import { $ } from "@/capture";
 import type { ExtractCaptures } from "./extract-captures";
-import { assertType } from "../test-utils/assert-type";
+import { assertType } from "@/test-utils/assert-type";
 
 describe("ExtractCaptures implicit $ tests", () => {
   it("should handle implicit captures with $ function", () => {

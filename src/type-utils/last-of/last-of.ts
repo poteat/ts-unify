@@ -1,4 +1,4 @@
-import type { UnionToIntersection } from "../union-to-intersection";
+import type { UnionToIntersection } from "@/type-utils/union-to-intersection";
 
 /**
  * Extracts the last element of a union using variance.

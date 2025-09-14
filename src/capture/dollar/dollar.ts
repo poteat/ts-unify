@@ -1,5 +1,5 @@
-import type { Capture } from "../capture-type";
-import { CAPTURE_BRAND } from "../capture-type";
+import type { Capture } from "@/capture/capture-type";
+import { CAPTURE_BRAND } from "@/capture/capture-type";
 
 export type $ = <const Name extends string, Value = unknown>(
   name: Name

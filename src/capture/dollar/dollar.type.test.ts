@@ -1,7 +1,7 @@
-import type { $ as DollarFn } from "../";
+import type { $ as DollarFn } from "@/capture";
 import { $ } from "./dollar";
-import type { Capture } from "../capture-type";
-import { assertType } from "../../test-utils/assert-type";
+import type { Capture } from "@/capture/capture-type";
+import { assertType } from "@/test-utils/assert-type";
 
 describe("$ type alias", () => {
   it("exports a function type compatible with typeof $", () => {

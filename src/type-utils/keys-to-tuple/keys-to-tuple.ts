@@ -1,4 +1,4 @@
-import type { UnionToTuple } from "../union-to-tuple";
+import type { UnionToTuple } from "@/type-utils/union-to-tuple";
 
 /**
  * Converts object keys to a tuple for sequential processing.
