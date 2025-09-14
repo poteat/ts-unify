@@ -55,6 +55,10 @@ type $ = <const Name extends string, Value = unknown>(
 - `Value` is optional and defaults to `unknown`. You can provide it explicitly
   using `$<"name", Value>("name")`.
 
+Type-level shorthand: this module also exports a type alias named `$` that is
+equivalent to `typeof $`. In type positions you may use `$` instead of writing
+`typeof $`.
+
 ## Implementation Notes
 
 - Uses `const` type parameter for literal type preservation
