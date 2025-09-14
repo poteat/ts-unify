@@ -4,7 +4,7 @@ import type { Spread } from "@/capture/spread/spread";
 
 export type $ = <const Name extends string, Value = unknown>(
   name: Name
-) => Capture<Name, Value> & readonly [Spread<Name, Value>];
+) => Capture<Name, Value> & Iterable<Spread<Name, Value>>;
 
 /**
  * Create a capture sentinel with a literal-typed name.
@@ -31,4 +31,4 @@ export const $: $ = <const Name extends string, Value = unknown>(name: Name) =>
       const token = { name } as unknown as Spread<Name, Value>;
       yield token;
     },
-  }) as Capture<Name, Value> & readonly [Spread<Name, Value>];
+  }) as Capture<Name, Value> & Iterable<Spread<Name, Value>>;

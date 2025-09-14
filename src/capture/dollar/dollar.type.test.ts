@@ -15,15 +15,14 @@ describe("$ type alias", () => {
   it("supports explicit Value generic parameter", () => {
     const capture = $<"id", number>("id");
     type C = typeof capture;
-    type Expected = Capture<"id", number> & Readonly<[Spread<"id", number>]>;
+    type Expected = Capture<"id", number> & Iterable<Spread<"id", number>>;
     assertType<C, Expected>(0);
   });
 
   it("defaults Value generic parameter to unknown", () => {
     const capture = $("name");
     type C = typeof capture;
-    type Expected = Capture<"name", unknown> &
-      Readonly<[Spread<"name", unknown>]>;
+    type Expected = Capture<"name", unknown> & Iterable<Spread<"name", unknown>>;
     assertType<C, Expected>(0);
   });
 });
