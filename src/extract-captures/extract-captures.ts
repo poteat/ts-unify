@@ -42,11 +42,15 @@ type ExtractFromPattern<P, Key extends string = ""> =
         >
     : // Handle objects
     P extends object
-    ? UnionToIntersection<
-        Values<{
-          [K in keyof P]-?: ExtractFromPropertyValue<P[K], K & string>;
-        }>
-      >
+    ? {
+        [K in keyof P]-?: ExtractFromPropertyValue<P[K], K & string>;
+      } extends infer M
+      ? Values<M & {}> extends infer U
+        ? [U] extends [never]
+          ? {}
+          : UnionToIntersection<U>
+        : never
+      : never
     : // Primitives and other types don't contain captures
       {};
 
