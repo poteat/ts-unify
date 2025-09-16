@@ -5,4 +5,7 @@ import type { $ } from "@/capture/dollar";
  * CaptureLike is a type-level token that represents either a placeholder
  * token (`$`) or an explicit capture token (`Capture`).
  */
-export type CaptureLike<Value = unknown> = $ | Capture<string, Value>;
+export type CaptureLike<Value = unknown> =
+  | $
+  | Capture<string, Value>
+  | Capture<string, unknown>;
