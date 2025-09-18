@@ -3,8 +3,7 @@ import type { Capture } from "@/capture/capture-type";
 import type { Spread } from "@/capture/spread/spread";
 
 /**
- * Bind capture names and value types in a pattern `P` using a reference
- * `Shape`. This is purely type-level.
+ * Bind capture names and value types in a pattern `P` using a reference `Shape`.
  *
  * - Implicit placeholders at key `K` become `Capture<K, Shape[K]>`.
  * - Explicit `Capture<Name, V>` retains `V`; if `V` is `unknown`, it upgrades
