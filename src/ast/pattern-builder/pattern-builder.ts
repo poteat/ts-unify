@@ -3,6 +3,7 @@ import type { BindCaptures } from "@/capture";
 import type { Prettify } from "@/type-utils";
 import type { NodeByKind } from "@/ast/node-by-kind";
 import type { NodeKind } from "@/ast/node-kind";
+import type { NodeWithWhen } from "@/ast/node-with-when";
 
 type InternalKeys = "type" | "parent" | "loc" | "range";
 
@@ -15,11 +16,18 @@ type InternalKeys = "type" | "parent" | "loc" | "range";
  *   discriminant plus capture bindings projected via `BindCaptures`.
  */
 export type PatternBuilder<K extends NodeKind> = {
-  (): { type: NodeByKind[K]["type"] };
-  <P extends Pattern<NodeByKind[K]>>(pattern: P): Prettify<
-    { type: NodeByKind[K]["type"] } & BindCaptures<
-      P,
-      Omit<NodeByKind[K], InternalKeys>
-    >
+  (): NodeWithWhen<{ type: NodeByKind[K]["type"] }>;
+  <P extends Pattern<NodeByKind[K]>>(pattern: P): NodeWithWhen<
+    Prettify<{ type: NodeByKind[K]["type"] } & BindAgainstNodeKind<P, K>>
   >;
 };
+
+/**
+ * Assuming a pattern `P` conforms to the shape of AST node kind `K`, bind
+ * the capture bag type from `P` using the specific corresponding types from
+ * the AST node shape `NodeByKind[K]`.
+ */
+type BindAgainstNodeKind<P, K extends NodeKind> = BindCaptures<
+  P,
+  Omit<NodeByKind[K], InternalKeys>
+>;

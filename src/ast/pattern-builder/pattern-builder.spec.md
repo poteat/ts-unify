@@ -2,29 +2,39 @@
 
 ## Overview
 
-`PatternBuilder<K>` is the type of a builder function for a node of kind `K`.
-It supports two forms: nullary and parameterized.
+`PatternBuilder<K>` creates typed AST patterns for a node kind `K`.
 
-## Semantics
+- Call with no args to get the discriminant only — “any `K`”.
+- Call with a `Pattern<NodeByKind[K]>` to build a typed pattern with capture
+  positions bound to the node’s shape.
+- Returned nodes support fluent constraints via `.when` (see `NodeWithWhen`).
 
-- `()` → returns just the discriminant `{ type: … }` for kind `K`.
-- `(pattern)` → returns `{ type: … }` intersected with capture bindings derived
-  from the provided `Pattern<NodeByKind[K]>` via `BindCaptures`.
+## Why two forms?
 
-## Design Notes
+- Nullary keeps things lightweight when you only need the `type` tag.
+- Parameterized binds capture tokens (`$`/`Capture`/`Spread`) against the
+  concrete AST shape, so downstream tools see precise capture value types.
 
-- The nullary form is intentionally shallow (discriminant only) to avoid deep
-  type instantiation and recursive traversal in utilities like
-  `ExtractCaptures`.
-- The parameterized form excludes internal fields (`type`, `parent`, `loc`,
-  `range`) from the bound shape to produce stable, consumer-facing results.
+## Using `.when`
 
-## Example
+Builders return `NodeWithWhen`, which adds a fluent `.when` method:
+
+- Single-capture patterns can accept the value directly: `(v) => …`.
+- Multi-capture patterns use a bag: `({ a, b }) => …`.
+- Predicates keep types as-is; type-guard callbacks narrow both the bag and the
+  embedded capture tokens in the node. See `src/ast/node-with-when/` for full
+  semantics and examples.
+
+## Examples
 
 ```ts
-// Nullary: any BlockStatement
-const a = U.BlockStatement(); // { type: 'BlockStatement' }
+// Single-capture: value-only callback
+const r = U.ReturnStatement({ argument: $("arg") }).when((arg) => arg != null);
 
-// Parameterized: capture the test of an IfStatement
-const b = U.IfStatement({ test: $ });
+// Bag form: multiple captures
+const i = U.IfStatement({
+  test: $("t"),
+  consequent: $("c"),
+  alternate: $("a"),
+}).when(({ a }) => a != null);
 ```
