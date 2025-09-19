@@ -63,10 +63,11 @@ type BindAttribute<P, S, Key extends string> =
       : Readonly<{
           [I in keyof PI]: BindAttribute<PI[I], unknown, `${I & string}`>;
         }>
-    : // Objects: map each property using its key; align with S if available
+    : // Objects: map each property using its key; align with S if available.
+    // Skip the fluent method key 'when' used on builder-returned nodes.
     P extends object
     ? {
-        [K in keyof P]: BindAttribute<
+        [K in keyof P as K extends "when" ? never : K & string]: BindAttribute<
           P[K],
           K extends keyof S ? S[K] : unknown,
           K & string
