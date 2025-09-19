@@ -10,7 +10,7 @@ import type { Spread } from "@/capture/spread/spread";
  *   to the corresponding type from `Shape` at that position.
  * - Recurses through objects, tuples, and arrays.
  */
-export type BindCaptures<P, Shape> = BindNode<P, Shape, "">;
+export type BindCaptures<P, Shape> = BindAttribute<P, Shape, "">;
 
 // Build a tuple of captures from a tuple shape `S`, preserving per-index types.
 type TupleCaptures<
@@ -23,7 +23,7 @@ type TupleCaptures<
     >
   : Acc;
 
-type BindNode<P, S, Key extends string> =
+type BindAttribute<P, S, Key extends string> =
   // Implicit placeholder becomes named capture with the property key
   P extends $
     ? Key extends ""
@@ -52,21 +52,21 @@ type BindNode<P, S, Key extends string> =
       ? number extends S["length"]
         ? Readonly<{
             [I in keyof PI]: PI[I] extends Spread<any, any>
-              ? BindNode<PI[I], S, `${I & string}`>
-              : BindNode<PI[I], S[number], `${I & string}`>;
+              ? BindAttribute<PI[I], S, `${I & string}`>
+              : BindAttribute<PI[I], S[number], `${I & string}`>;
           }>
         : Readonly<{
             [I in keyof PI]: PI[I] extends Spread<any, any>
-              ? BindNode<PI[I], S, `${I & string}`>
-              : BindNode<PI[I], S[I & number], `${I & string}`>;
+              ? BindAttribute<PI[I], S, `${I & string}`>
+              : BindAttribute<PI[I], S[I & number], `${I & string}`>;
           }>
       : Readonly<{
-          [I in keyof PI]: BindNode<PI[I], unknown, `${I & string}`>;
+          [I in keyof PI]: BindAttribute<PI[I], unknown, `${I & string}`>;
         }>
     : // Objects: map each property using its key; align with S if available
     P extends object
     ? {
-        [K in keyof P]: BindNode<
+        [K in keyof P]: BindAttribute<
           P[K],
           K extends keyof S ? S[K] : unknown,
           K & string
