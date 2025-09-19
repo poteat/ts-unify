@@ -7,6 +7,8 @@ should read this file first, then follow the documents in `.agent/`.
 
 - `.agent/JSDOC_VS_SPEC.md`: JSDoc vs Spec rules (scope, style, duties). Follow
   the import graph; providers do not document their consumers.
+- `.agent/COMMENTS.md`: in-code comments guidance; keep comments minimal,
+  evergreen, and non-conversational.
 - `.agent/SPECS.md`: spec formatting guide (sections, tone, examples); keep
   specs consistent and provider-scoped.
 - `.agent/META.md`: meta-rules for writing and evolving guidelines; keep
