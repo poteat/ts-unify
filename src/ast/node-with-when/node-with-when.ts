@@ -2,6 +2,7 @@ import type { Capture } from "@/capture/capture-type";
 import type { Spread } from "@/capture/spread/spread";
 import type { KeysToTuple } from "@/type-utils/keys-to-tuple";
 import type { ExtractCaptures } from "@/pattern";
+import type { FluentNode } from "@/ast/fluent-node";
 
 /**
  * Add a fluent `.when` method to a node value `N`.
@@ -28,14 +29,17 @@ export type NodeWithWhen<Node> = Node & {
    * result excludes the node from matching.
    * @returns A node with the capture and its occurrences narrowed.
    */
-  when<VNarrow extends SingleValueOf<BagOf<Node>>>(
-    guard: [SingleKeyOf<BagOf<Node>>] extends [never]
+  when<VNarrow extends SingleValueOf<ExtractCaptures<Node>>>(
+    guard: [SingleKeyOf<ExtractCaptures<Node>>] extends [never]
       ? never
-      : (value: SingleValueOf<BagOf<Node>>) => value is VNarrow
-  ): [SingleKeyOf<BagOf<Node>>] extends [never]
+      : (value: SingleValueOf<ExtractCaptures<Node>>) => value is VNarrow
+  ): [SingleKeyOf<ExtractCaptures<Node>>] extends [never]
     ? never
-    : NodeWithWhen<
-        ApplyCaptureBagToNode<Node, BagFromSingle<BagOf<Node>, VNarrow>>
+    : FluentNode<
+        ApplyCaptureBagToNode<
+          Node,
+          BagFromSingle<ExtractCaptures<Node>, VNarrow>
+        >
       >;
 
   /**
@@ -47,10 +51,10 @@ export type NodeWithWhen<Node> = Node & {
    * @returns The same node type (no narrowing).
    */
   when(
-    predicate: [SingleKeyOf<BagOf<Node>>] extends [never]
+    predicate: [SingleKeyOf<ExtractCaptures<Node>>] extends [never]
       ? never
-      : (value: SingleValueOf<BagOf<Node>>) => boolean
-  ): NodeWithWhen<Node>;
+      : (value: SingleValueOf<ExtractCaptures<Node>>) => boolean
+  ): FluentNode<Node>;
 
   /**
    * Bag type guard overload. Accepts a guard over the capture bag derived from
@@ -61,9 +65,9 @@ export type NodeWithWhen<Node> = Node & {
    * excludes the node from matching.
    * @returns A node with all occurrences narrowed per the refined bag.
    */
-  when<Narrow extends BagOf<Node>>(
-    guard: (bag: BagOf<Node>) => bag is Narrow
-  ): NodeWithWhen<ApplyCaptureBagToNode<Node, Narrow>>;
+  when<Narrow extends ExtractCaptures<Node>>(
+    guard: (bag: ExtractCaptures<Node>) => bag is Narrow
+  ): FluentNode<ApplyCaptureBagToNode<Node, Narrow>>;
 
   /**
    * Bag boolean predicate overload. Accepts a predicate over the capture bag
@@ -73,7 +77,7 @@ export type NodeWithWhen<Node> = Node & {
    * the node from matching.
    * @returns The same node type (no narrowing).
    */
-  when(predicate: (bag: BagOf<Node>) => boolean): NodeWithWhen<Node>;
+  when(predicate: (bag: ExtractCaptures<Node>) => boolean): FluentNode<Node>;
 };
 
 // Helper types for single-capture ergonomics
@@ -84,7 +88,7 @@ type SingleValueOf<T> = SingleKeyOf<T> extends infer K ? T[K & keyof T] : never;
 type BagFromSingle<T, V> = SingleKeyOf<T> extends infer K
   ? { [P in K & keyof T]: V }
   : never;
-type BagOf<N> = ExtractCaptures<N>;
+// Inlined ExtractCaptures in signatures; alias removed for clarity.
 
 /**
  * Apply a narrowed capture bag `B` to the node shape `N` by structurally
