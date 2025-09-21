@@ -3,3 +3,6 @@ export * from "./node-by-kind";
 export * from "./pattern-builder";
 export * from "./builder-map";
 export * from "./node-with-when";
+export * from "./node-with-to";
+export * from "./fluent-node";
+export * from "./ast-transform";
