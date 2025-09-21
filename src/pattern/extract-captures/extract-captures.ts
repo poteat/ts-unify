@@ -2,22 +2,27 @@ import type { Capture } from "@/capture";
 import type { $ } from "@/capture";
 import type { Spread } from "@/capture";
 import type { Prettify, UnionToIntersection, Values } from "@/type-utils";
+import type { Expression } from "@typescript-eslint/types/dist/generated/ast-spec";
 
-type ExtractFromPropertyValue<T, Key extends string> =
-  // Check if type contains a Capture (works with unions)
+type ExtractFromPropertyValue<T, Key extends string> = T extends Expression
+  ? {}
+  : // Check if type contains a Capture (works with unions)
   T extends Capture
-    ? T extends Capture<infer Name, infer V>
-      ? { [K in Name]: V }
-      : {}
-    : T extends $
-    ? { [K in Key]: unknown }
-    : T extends object
-    ? ExtractFromPattern<T, Key>
-    : {};
+  ? T extends Capture<infer Name, infer V>
+    ? { [K in Name]: V }
+    : {}
+  : T extends $
+  ? { [K in Key]: unknown }
+  : T extends object
+  ? ExtractFromPattern<T, Key>
+  : {};
 
 type ExtractFromPattern<P, Key extends string = ""> =
-  // Check if it's the $ function (implicit capture)
-  P extends $
+  // Short circuit: don't recurse into generic Expression types
+  P extends Expression
+    ? {}
+    : // Check if it's the $ function (implicit capture)
+    P extends $
     ? Key extends ""
       ? {} // Root-level $ doesn't capture without context
       : { [K in Key]: unknown } // Use the key as capture name
