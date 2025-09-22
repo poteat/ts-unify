@@ -5,3 +5,4 @@ export * from "./last-of";
 export * from "./union-to-tuple";
 export * from "./keys-to-tuple";
 export * from "./values";
+export * from "./without-internal-ast-fields";

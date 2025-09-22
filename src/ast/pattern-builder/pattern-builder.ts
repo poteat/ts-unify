@@ -4,8 +4,7 @@ import type { Prettify } from "@/type-utils";
 import type { NodeByKind } from "@/ast/node-by-kind";
 import type { NodeKind } from "@/ast/node-kind";
 import type { FluentNode } from "@/ast/fluent-node";
-
-type InternalKeys = "type" | "parent" | "loc" | "range";
+import type { WithoutInternalAstFields } from "@/type-utils";
 
 /**
  * Create builders for AST kind `K`.
@@ -25,7 +24,7 @@ export type PatternBuilder<K extends NodeKind> = {
   (): FluentNode<{ type: NodeByKind[K]["type"] }>;
 
   /** Build a concrete `K` node (no capture tokens). Returns a fluent node. */
-  <S extends Omit<NodeByKind[K], InternalKeys>>(shape: S): FluentNode<
+  <S extends WithoutInternalAstFields<NodeByKind[K]>>(shape: S): FluentNode<
     Prettify<{ type: NodeByKind[K]["type"] } & S>
   >;
 
@@ -42,5 +41,5 @@ export type PatternBuilder<K extends NodeKind> = {
  */
 type BindAgainstNodeKind<P, K extends NodeKind> = BindCaptures<
   P,
-  Omit<NodeByKind[K], InternalKeys>
+  WithoutInternalAstFields<NodeByKind[K]>
 >;

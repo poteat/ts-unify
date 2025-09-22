@@ -1,5 +1,7 @@
 import type { ExtractCaptures } from "@/pattern";
 import type { AstTransform } from "@/ast/ast-transform";
+import type { Node as ConcreteNode } from "@typescript-eslint/types/dist/generated/ast-spec";
+import type { WithoutInternalAstFields } from "@/type-utils";
 
 /**
  * Add a terminal `.to` method to a node value `N`.
@@ -18,9 +20,7 @@ export type NodeWithTo<Node> = {
    * @param factory Callback receiving the capture bag.
    * @returns A semantic descriptor that is not a `Pattern`.
    */
-  to<Result>(
+  to<Result extends WithoutInternalAstFields<ConcreteNode>>(
     factory: (bag: ExtractCaptures<Node>) => Result
   ): AstTransform<Node, Result>;
 };
-
-// Terminal result type is defined in `src/ast/ast-transform`.
