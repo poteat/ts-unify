@@ -1,7 +1,7 @@
 import type { NodeWithTo } from "@/ast/node-with-to";
 import type { AstTransform } from "@/ast/ast-transform";
 import type { Capture } from "@/capture";
-import type { Node as ConcreteNode } from "@typescript-eslint/types/dist/generated/ast-spec";
+import type { TSESTree } from "@typescript-eslint/types";
 import type { WithoutInternalAstFields } from "@/type-utils";
 
 describe("NodeWithTo typing (terminal)", () => {
@@ -14,7 +14,7 @@ describe("NodeWithTo typing (terminal)", () => {
     type N = Node & NodeWithTo<Node>;
 
     function check(n: N) {
-      const p = n.to<WithoutInternalAstFields<ConcreteNode>>((bag) => {
+      const p = n.to<WithoutInternalAstFields<TSESTree.Node>>((bag) => {
         void bag;
         return {
           type: "ReturnStatement",
@@ -22,10 +22,10 @@ describe("NodeWithTo typing (terminal)", () => {
             type: "Identifier",
             name: "result",
           },
-        } as WithoutInternalAstFields<ConcreteNode>;
+        } as WithoutInternalAstFields<TSESTree.Node>;
       });
       // The exact shape is opaque; compile-time only usage check.
-      void (p as AstTransform<Node, WithoutInternalAstFields<ConcreteNode>>);
+      void (p as AstTransform<Node, WithoutInternalAstFields<TSESTree.Node>>);
     }
     void check;
   });

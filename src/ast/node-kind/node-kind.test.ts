@@ -17,4 +17,3 @@ describe("NodeKind", () => {
     void _x;
   });
 });
-

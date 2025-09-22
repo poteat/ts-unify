@@ -1,6 +1,6 @@
 import type { ExtractCaptures } from "@/pattern";
 import type { AstTransform } from "@/ast/ast-transform";
-import type { Node as ConcreteNode } from "@typescript-eslint/types/dist/generated/ast-spec";
+import type { TSESTree } from "@typescript-eslint/types";
 import type { WithoutInternalAstFields } from "@/type-utils";
 
 /**
@@ -20,7 +20,7 @@ export type NodeWithTo<Node> = {
    * @param factory Callback receiving the capture bag.
    * @returns A semantic descriptor that is not a `Pattern`.
    */
-  to<Result extends WithoutInternalAstFields<ConcreteNode>>(
+  to<Result extends WithoutInternalAstFields<TSESTree.Node>>(
     factory: (bag: ExtractCaptures<Node>) => Result
   ): AstTransform<Node, Result>;
 };

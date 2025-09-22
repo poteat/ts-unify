@@ -2,9 +2,12 @@ import type { Capture } from "@/capture";
 import type { $ } from "@/capture";
 import type { Spread } from "@/capture";
 import type { Prettify, UnionToIntersection, Values } from "@/type-utils";
-import type { Expression } from "@typescript-eslint/types/dist/generated/ast-spec";
+import type { TSESTree } from "@typescript-eslint/types";
 
-type ExtractFromPropertyValue<T, Key extends string> = T extends Expression
+type ExtractFromPropertyValue<
+  T,
+  Key extends string
+> = T extends TSESTree.Expression
   ? {}
   : // Check if type contains a Capture (works with unions)
   T extends Capture
@@ -19,7 +22,7 @@ type ExtractFromPropertyValue<T, Key extends string> = T extends Expression
 
 type ExtractFromPattern<P, Key extends string = ""> =
   // Short circuit: don't recurse into generic Expression types
-  P extends Expression
+  P extends TSESTree.Expression
     ? {}
     : // Check if it's the $ function (implicit capture)
     P extends $
@@ -66,8 +69,8 @@ type ExtractFromPattern<P, Key extends string = ""> =
  *
  * - Supports explicit capture tokens and the placeholder token `$` in type
  *   positions.
- * - Recurses through objects, tuples, and arrays; duplicate names coalesce via
- *   intersection: e.g. `{ x: number } & { x: string }` → `{ x: number & string }`.
+ * - Recurses through objects, tuples, and arrays; duplicate names coalesce
+ *   e.g. `{ x: number } & { x: string }` → `{ x: number & string }`.
  *
  * @example
  * type P1 = { value: Capture<"v", number> };

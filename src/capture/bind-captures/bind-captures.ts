@@ -1,7 +1,7 @@
 import type { $ } from "@/capture/dollar";
 import type { Capture } from "@/capture/capture-type";
 import type { Spread } from "@/capture/spread/spread";
-import type { Expression } from "@typescript-eslint/types/dist/generated/ast-spec";
+import type { TSESTree } from "@typescript-eslint/types";
 
 /**
  * Bind capture names and value types in a pattern `P` using a reference `Shape`.
@@ -26,7 +26,7 @@ type TupleCaptures<
 
 type BindAttribute<P, S, Key extends string> =
   // Short-circuit: don't recurse into generic Expression types
-  Expression extends P
+  TSESTree.Expression extends P
     ? P
     : // Implicit placeholder becomes named capture with the property key
     P extends $
