@@ -1,1 +1,1 @@
-export type { HasNever } from "./has-never";
+export * from "./has-never";

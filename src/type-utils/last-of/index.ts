@@ -1,1 +1,1 @@
-export type { LastOf } from "./last-of";
+export * from "./last-of";

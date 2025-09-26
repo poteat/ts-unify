@@ -1,1 +1,1 @@
-export type { KeysToTuple } from "./keys-to-tuple";
+export * from "./keys-to-tuple";

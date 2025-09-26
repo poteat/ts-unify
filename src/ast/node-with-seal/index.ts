@@ -1,1 +1,1 @@
-export type { NodeWithSeal } from "./node-with-seal";
+export * from "./node-with-seal";

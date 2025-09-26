@@ -1,1 +1,1 @@
-export type { Prettify } from "./prettify";
+export * from "./prettify";

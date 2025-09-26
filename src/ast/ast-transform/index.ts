@@ -1,2 +1,1 @@
-export type { AstTransform } from "./ast-transform";
-
+export * from "./ast-transform";

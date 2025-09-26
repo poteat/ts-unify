@@ -1,1 +1,1 @@
-export type { NodeByKind } from "./node-by-kind";
+export * from "./node-by-kind";

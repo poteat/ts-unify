@@ -1,1 +1,1 @@
-export type { KeysOfUnion } from "./keys-of-union";
+export * from "./keys-of-union";

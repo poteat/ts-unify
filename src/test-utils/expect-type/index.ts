@@ -1,1 +1,1 @@
-export { expectType } from "./expect-type";
+export * from "./expect-type";

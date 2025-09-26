@@ -1,1 +1,1 @@
-export type { PatternBuilder } from "./pattern-builder";
+export * from "./pattern-builder";

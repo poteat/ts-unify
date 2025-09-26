@@ -1,1 +1,1 @@
-export type { Values } from "./values";
+export * from "./values";

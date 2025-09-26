@@ -1,1 +1,1 @@
-export type { Equal } from "./equal";
+export * from "./equal";

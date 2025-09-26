@@ -1,2 +1,1 @@
-export type { FluentNode } from "./fluent-node";
-
+export * from "./fluent-node";

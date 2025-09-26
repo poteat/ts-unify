@@ -1,2 +1,1 @@
-export type { SingleKeyOf } from "./single-key-of";
-
+export * from "./single-key-of";

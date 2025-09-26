@@ -1,1 +1,1 @@
-export { isCapture } from "./is-capture";
+export * from "./is-capture";

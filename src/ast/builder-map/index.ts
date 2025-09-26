@@ -1,1 +1,1 @@
-export type { BuilderMap } from "./builder-map";
+export * from "./builder-map";
