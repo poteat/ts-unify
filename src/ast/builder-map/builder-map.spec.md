@@ -4,12 +4,17 @@
 
 `BuilderMap` is the registry shape mapping each `NodeKind` to its
 `PatternBuilder<K>`. It represents the public surface of builder namespaces like
-`U`.
+`U`. In addition to builders keyed by `NodeKind`, the map may include typed
+utility members (see `BuilderUtilities`) that are convenient to use with fluent
+helpers.
 
 ## Semantics
 
-- The key space is exactly `NodeKind`.
-- For key `K`, the value is `PatternBuilder<K>`.
+- Builders: The key space includes all `NodeKind`, where for key `K`, the value
+  is `PatternBuilder<K>`.
+- Helpers: The map may also include utility members from `BuilderUtilities` that
+  are not tied to a specific kind. These are provider‑scoped utilities to
+  improve ergonomics when composing builders and fluent helpers.
 
 ## Usage
 
