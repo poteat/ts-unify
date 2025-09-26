@@ -2,6 +2,7 @@ import type { Capture } from "@/capture";
 import type { $ } from "@/capture";
 import type { Spread } from "@/capture";
 import type { Prettify, UnionToIntersection, Values } from "@/type-utils";
+import type { SingleKeyOf } from "@/type-utils/single-key-of";
 import type { TSESTree } from "@typescript-eslint/types";
 
 type ExtractFromPropertyValue<
@@ -20,9 +21,22 @@ type ExtractFromPropertyValue<
   ? ExtractFromPattern<T, Key>
   : {};
 
+type StripSeal<T> = T extends { readonly __sealed__: true }
+  ? Omit<T, "__sealed__">
+  : T;
+
+type ReKeyIfSingle<Bag, K extends string> = [SingleKeyOf<Bag>] extends [never]
+  ? Bag
+  : { [P in K]: Bag[SingleKeyOf<Bag>] };
+
 type ExtractFromPattern<P, Key extends string = ""> =
-  // Short circuit: don't recurse into generic Expression types
-  P extends TSESTree.Expression
+  // Sealed subtree: extract inner and (under a property key) re-key if single
+  P extends { readonly __sealed__: true }
+    ? Key extends ""
+      ? ExtractFromPattern<StripSeal<P>, "">
+      : ReKeyIfSingle<ExtractFromPattern<StripSeal<P>, "">, Key>
+    : // Short circuit: don't recurse into generic Expression types
+    P extends TSESTree.Expression
     ? {}
     : // Check if it's the $ function (implicit capture)
     P extends $

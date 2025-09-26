@@ -113,3 +113,27 @@ type Extracted = ExtractCaptures<Pattern>;
 
 - This module defines type-level extraction only. Any runtime matching or value
   unification is outside its scope.
+
+### Sealed Subtrees (Re‑keying Single Capture)
+
+When a builder‑returned node is marked as sealed and used as the value of an
+object property in a larger pattern, `ExtractCaptures` applies a re‑key rule:
+
+- If the sealed subtree’s capture bag has exactly one key, that key is renamed
+  to the embedding property’s name.
+- If it has zero or multiple keys, no re‑keying occurs.
+
+This enables helpers that capture a single value (often narrowed via `.when`) to
+contribute that value under the parent’s property name.
+
+```ts
+// Example using the `Sealed<…>` brand to mark a sealed subtree:
+type Pattern = {
+  test: $("t");
+  consequent: Sealed<{ body: [ReturnStatement<{ argument: $ }>] }>;
+  alternate: $("a");
+};
+
+type Bag = ExtractCaptures<Pattern>;
+// Bag includes: { consequent: unknown } — inner single capture re‑keys
+```
