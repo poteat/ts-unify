@@ -17,8 +17,8 @@ another builder‑produced node). The result is an `AstTransform` with `from` an
 
 ## Design
 
-- Terminalization: `.to` returns `AstTransform<In, Out>`, ensuring that finalized
-  nodes are not accepted where a `Pattern` is expected.
+- Terminalization: `.to` returns `AstTransform<In, Out>`, ensuring that
+  finalized nodes are not accepted where a `Pattern` is expected.
 
 ## Semantics
 
@@ -26,6 +26,15 @@ another builder‑produced node). The result is an `AstTransform` with `from` an
   applied by preceding `.when` calls.
 - The `.to` result is intentionally unconstrained here; consumers may restrict
   it to builder‑produced nodes.
+
+### Builder Overload Safety
+
+- The `.to(builder)` overload is accepted only when every key in the capture bag
+  is a valid property key of the target builder’s node kind. This prevents
+  accidentally passing a bag with misspelled or unrelated keys (e.g., `foobar`)
+  to a builder that expects `{ test, consequent, alternate }`.
+- Use the factory form `.to((bag) => builder(bag))` when you need more flexible
+  assembly; general object assignability rules apply in that case.
 
 ## Examples
 
