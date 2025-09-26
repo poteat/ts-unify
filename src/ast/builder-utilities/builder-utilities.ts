@@ -1,4 +1,5 @@
 import type { TruthyGuard } from "@/ast/builder-helpers";
+import type { OrCombinator } from "@/ast/or";
 
 /**
  * BuilderUtilities
@@ -9,4 +10,5 @@ import type { TruthyGuard } from "@/ast/builder-helpers";
  */
 export type BuilderUtilities = {
   truthy: TruthyGuard;
+  or: OrCombinator;
 };

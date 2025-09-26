@@ -24,8 +24,9 @@ another builder‑produced node). The result is an `AstTransform` with `from` an
 
 - The `bag` parameter reflects `ExtractCaptures<N>` and includes any narrowing
   applied by preceding `.when` calls.
-- The `.to` result is intentionally unconstrained here; consumers may restrict
-  it to builder‑produced nodes.
+- The `.to` result is intentionally unconstrained here. You may return a
+  builder‑produced node (e.g., `U.Kind({...})`) or any other value your
+  pipeline expects. Downstream consumers can constrain this further.
 
 ### Builder Overload Safety
 

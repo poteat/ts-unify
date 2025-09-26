@@ -1,6 +1,5 @@
 import type { ExtractCaptures } from "@/pattern";
 import type { AstTransform } from "@/ast/ast-transform";
-import type { TSESTree } from "@typescript-eslint/types";
 import type { WithoutInternalAstFields } from "@/type-utils";
 import type { PatternBuilder } from "@/ast/pattern-builder";
 import type { NodeKind } from "@/ast/node-kind";
@@ -39,11 +38,12 @@ export type NodeWithTo<Node> = {
    * Finalize the node with a rewrite factory.
    *
    * @typeParam Result Arbitrary result type produced by the factory (e.g., a
-   * builder-produced node). Consumers may constrain this further.
+   * builder-produced node). Provider leaves this unconstrained; consumers may
+   * restrict it further.
    * @param factory Callback receiving the capture bag.
-   * @returns A semantic descriptor that is not a `Pattern`.
+   * @returns A semantic descriptor (not a `Pattern`).
    */
-  to<Result extends WithoutInternalAstFields<TSESTree.Node>>(
+  to<Result>(
     factory: (bag: ExtractCaptures<Node>) => Result
   ): AstTransform<Node, Result>;
 };

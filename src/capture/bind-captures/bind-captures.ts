@@ -3,6 +3,7 @@ import type { Capture } from "@/capture/capture-type";
 import type { Spread } from "@/capture/spread/spread";
 import type { TSESTree } from "@typescript-eslint/types";
 import type { SEALED_BRAND, Sealed } from "@/ast/sealed";
+import type { OR_BRAND } from "@/ast/or";
 
 /**
  * Bind capture names and value types in a pattern `P` using a reference `Shape`.
@@ -12,9 +13,28 @@ import type { SEALED_BRAND, Sealed } from "@/ast/sealed";
  *   to the corresponding type from `Shape` at that position.
  * - Recurses through objects, tuples, and arrays.
  */
-export type BindCaptures<P, Shape> = P extends { readonly [SEALED_BRAND]: true }
-  ? Sealed<BindAttribute<Omit<P, typeof SEALED_BRAND>, Shape, "">>
-  : BindAttribute<P, Shape, "">;
+type StripSeal<T> = T extends { readonly [SEALED_BRAND]: true }
+  ? Omit<T, typeof SEALED_BRAND>
+  : T;
+type StripOr<T> = T extends { readonly [OR_BRAND]: true }
+  ? Omit<T, typeof OR_BRAND>
+  : T;
+
+type BindOr<P, S, Key extends string> = StripOr<P> extends infer U
+  ? U extends any
+    ? BindAttribute<U, S, Key>
+    : never
+  : never;
+
+type BindNode<P, S, Key extends string> = P extends {
+  readonly [OR_BRAND]: true;
+}
+  ? BindOr<P, S, Key>
+  : P extends { readonly [SEALED_BRAND]: true }
+  ? Sealed<BindAttribute<StripSeal<P>, S, Key>>
+  : BindAttribute<P, S, Key>;
+
+export type BindCaptures<P, Shape> = BindNode<P, Shape, "">;
 
 // Build a tuple of captures from a tuple shape `S`, preserving per-index types.
 type TupleCaptures<
@@ -78,17 +98,11 @@ type BindAttribute<P, S, Key extends string> =
           ? P[K] extends $
             ? K & string
             : never
-          : K & string]: BindAttribute<
-          P[K] extends { readonly [SEALED_BRAND]: true }
-            ? Omit<P[K], typeof SEALED_BRAND>
-            : P[K],
+          : K & string]: BindNode<
+          P[K],
           K extends keyof S ? S[K] : unknown,
           K & string
-        > extends infer R
-          ? P[K] extends { readonly [SEALED_BRAND]: true }
-            ? Sealed<R & {}>
-            : R
-          : never;
+        >;
       }
     : // Primitives and other types are left as-is
       P;

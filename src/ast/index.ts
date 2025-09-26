@@ -8,3 +8,4 @@ export * from "./fluent-node";
 export * from "./ast-transform";
 export * from "./node-with-seal";
 export * from "./sealed";
+export * from "./or";

@@ -4,6 +4,7 @@ import type { Spread } from "@/capture";
 import type { Prettify, UnionToIntersection, Values } from "@/type-utils";
 import type { SingleKeyOf } from "@/type-utils/single-key-of";
 import type { SEALED_BRAND } from "@/ast/sealed";
+import type { OR_BRAND } from "@/ast/or";
 import type { TSESTree } from "@typescript-eslint/types";
 
 type ExtractFromPropertyValue<
@@ -25,6 +26,9 @@ type ExtractFromPropertyValue<
 type StripSeal<T> = T extends { readonly [SEALED_BRAND]: true }
   ? Omit<T, typeof SEALED_BRAND>
   : T;
+type StripOr<T> = T extends { readonly [OR_BRAND]: true }
+  ? Omit<T, typeof OR_BRAND>
+  : T;
 
 type ReKeyIfSingle<Bag, K extends string> = [SingleKeyOf<Bag>] extends [never]
   ? Bag
@@ -36,6 +40,13 @@ type ExtractFromPattern<P, Key extends string = ""> =
     ? Key extends ""
       ? ExtractFromPattern<StripSeal<P>, "">
       : ReKeyIfSingle<ExtractFromPattern<StripSeal<P>, "">, Key>
+    : // Or-combinator wrapper: distribute extraction over branches
+    P extends { readonly [OR_BRAND]: true }
+    ? StripOr<P> extends infer U
+      ? U extends any
+        ? ExtractFromPattern<U, Key>
+        : never
+      : never
     : // Short circuit: don't recurse into generic Expression types
     P extends TSESTree.Expression
     ? {}

@@ -1,6 +1,5 @@
 import type { Pattern } from "@/pattern";
 import type { BindCaptures } from "@/capture";
-import type { Prettify } from "@/type-utils";
 import type { NodeByKind } from "@/ast/node-by-kind";
 import type { NodeKind } from "@/ast/node-kind";
 import type { FluentNode } from "@/ast/fluent-node";
@@ -21,13 +20,13 @@ import type { WithoutInternalAstFields } from "@/type-utils";
  */
 export type PatternBuilder<K extends NodeKind> = {
   /** Build a concrete `K` node (no capture tokens). Returns a fluent node. */
-  <S extends WithoutInternalAstFields<NodeByKind[K]>>(shape: S): FluentNode<
-    Prettify<{ type: NodeByKind[K]["type"] } & S>
-  >;
+  <
+    S extends Omit<WithoutInternalAstFields<NodeByKind[K]>, "type">
+  >(shape: S): FluentNode<{ type: NodeByKind[K]["type"] } & S>;
 
   /** Match a `K` pattern (supports `$`). Returns fluent node. */
   <P extends Pattern<NodeByKind[K]>>(pattern: P): FluentNode<
-    Prettify<{ type: NodeByKind[K]["type"] } & BindAgainstNodeKind<P, K>>
+    { type: NodeByKind[K]["type"] } & BindAgainstNodeKind<P, K>
   >;
 
   /** Match any `K`. Returns `{ type: … }` with fluent helpers. */
