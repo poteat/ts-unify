@@ -1,6 +1,6 @@
 import type { Capture } from "@/capture/capture-type";
 import type { Spread } from "@/capture/spread/spread";
-import type { KeysToTuple } from "@/type-utils/keys-to-tuple";
+import type { SingleKeyOf } from "@/type-utils/single-key-of";
 import type { ExtractCaptures } from "@/pattern";
 import type { FluentNode } from "@/ast/fluent-node";
 
@@ -81,9 +81,6 @@ export type NodeWithWhen<Node> = Node & {
 };
 
 // Helper types for single-capture ergonomics
-type SingleKeyOf<T> = KeysToTuple<T> extends readonly [infer K]
-  ? K & keyof T
-  : never;
 type SingleValueOf<T> = SingleKeyOf<T> extends infer K ? T[K & keyof T] : never;
 type BagFromSingle<T, V> = SingleKeyOf<T> extends infer K
   ? { [P in K & keyof T]: V }
