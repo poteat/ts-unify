@@ -3,6 +3,7 @@ import type { $ } from "@/capture";
 import type { Spread } from "@/capture";
 import type { Prettify, UnionToIntersection, Values } from "@/type-utils";
 import type { SingleKeyOf } from "@/type-utils/single-key-of";
+import type { SEALED_BRAND } from "@/ast/sealed";
 import type { TSESTree } from "@typescript-eslint/types";
 
 type ExtractFromPropertyValue<
@@ -21,8 +22,8 @@ type ExtractFromPropertyValue<
   ? ExtractFromPattern<T, Key>
   : {};
 
-type StripSeal<T> = T extends { readonly __sealed__: true }
-  ? Omit<T, "__sealed__">
+type StripSeal<T> = T extends { readonly [SEALED_BRAND]: true }
+  ? Omit<T, typeof SEALED_BRAND>
   : T;
 
 type ReKeyIfSingle<Bag, K extends string> = [SingleKeyOf<Bag>] extends [never]
@@ -31,7 +32,7 @@ type ReKeyIfSingle<Bag, K extends string> = [SingleKeyOf<Bag>] extends [never]
 
 type ExtractFromPattern<P, Key extends string = ""> =
   // Sealed subtree: extract inner and (under a property key) re-key if single
-  P extends { readonly __sealed__: true }
+  P extends { readonly [SEALED_BRAND]: true }
     ? Key extends ""
       ? ExtractFromPattern<StripSeal<P>, "">
       : ReKeyIfSingle<ExtractFromPattern<StripSeal<P>, "">, Key>

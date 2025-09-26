@@ -9,11 +9,4 @@ describe("NodeWithSeal name collisions", () => {
     type HasSeal = "seal" extends AllKeys ? true : false;
     assertType<HasSeal, false>(0);
   });
-
-  it("ensures '__sealed__' brand does not collide with AST node fields", () => {
-    type U = NodeByKind[keyof NodeByKind];
-    type AllKeys = KeysOfUnion<U>;
-    type HasBrand = "__sealed__" extends AllKeys ? true : false;
-    assertType<HasBrand, false>(0);
-  });
 });

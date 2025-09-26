@@ -16,7 +16,9 @@ extraction.
 
 ## Semantics
 
-- Brand: Intersects `N` with a readonly `__sealed__` marker property.
+- Brand: Intersects `N` with a readonly symbol‑keyed marker property
+  (`SEALED_BRAND`). Symbol keys are omitted from typical hovers and key unions,
+  keeping types readable while remaining detectable by providers.
 - Re-keying: If the sealed subtree’s extracted capture bag has exactly one key
   and the subtree is the value of an object property `K`, the inner capture key
   is renamed to `K`. Otherwise, the bag is unchanged.
