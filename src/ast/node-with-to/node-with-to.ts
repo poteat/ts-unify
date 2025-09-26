@@ -2,6 +2,9 @@ import type { ExtractCaptures } from "@/pattern";
 import type { AstTransform } from "@/ast/ast-transform";
 import type { TSESTree } from "@typescript-eslint/types";
 import type { WithoutInternalAstFields } from "@/type-utils";
+import type { PatternBuilder } from "@/ast/pattern-builder";
+import type { NodeKind } from "@/ast/node-kind";
+import type { NodeByKind } from "@/ast/node-by-kind";
 
 /**
  * Add a terminal `.to` method to a node value `N`.
@@ -12,6 +15,15 @@ import type { WithoutInternalAstFields } from "@/type-utils";
  * embedded into other patterns (root-only usage emerges from types).
  */
 export type NodeWithTo<Node> = {
+  /**
+   * Finalize the node by directly providing a builder for the output kind.
+   * Accepts a `PatternBuilder<K>` and uses the concrete node shape for `K` as
+   * the output type. Equivalent to `.to((bag) => Builder(bag))`.
+   */
+  to<K extends NodeKind>(
+    builder: PatternBuilder<K>
+  ): AstTransform<Node, WithoutInternalAstFields<NodeByKind[K]>>;
+
   /**
    * Finalize the node with a rewrite factory.
    *

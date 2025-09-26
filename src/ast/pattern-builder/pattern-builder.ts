@@ -20,9 +20,6 @@ import type { WithoutInternalAstFields } from "@/type-utils";
  * - `U.ReturnStatement({ argument: $("arg") })` → pattern with a capture
  */
 export type PatternBuilder<K extends NodeKind> = {
-  /** Match any `K`. Returns `{ type: … }` with fluent helpers. */
-  (): FluentNode<{ type: NodeByKind[K]["type"] }>;
-
   /** Build a concrete `K` node (no capture tokens). Returns a fluent node. */
   <S extends WithoutInternalAstFields<NodeByKind[K]>>(shape: S): FluentNode<
     Prettify<{ type: NodeByKind[K]["type"] } & S>
@@ -32,6 +29,9 @@ export type PatternBuilder<K extends NodeKind> = {
   <P extends Pattern<NodeByKind[K]>>(pattern: P): FluentNode<
     Prettify<{ type: NodeByKind[K]["type"] } & BindAgainstNodeKind<P, K>>
   >;
+
+  /** Match any `K`. Returns `{ type: … }` with fluent helpers. */
+  (): FluentNode<{ type: NodeByKind[K]["type"] }>;
 };
 
 /**
