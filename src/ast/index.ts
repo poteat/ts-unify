@@ -6,3 +6,5 @@ export * from "./node-with-when";
 export * from "./node-with-to";
 export * from "./fluent-node";
 export * from "./ast-transform";
+export * from "./node-with-seal";
+export * from "./sealed";
