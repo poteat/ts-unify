@@ -22,6 +22,9 @@ not pass it around manually.
   element types when the bag entry is a readonly array.
 - Chaining: each guard’s narrowing feeds into the next `.when`.
 - Failure: a `false` result excludes the node from matching.
+- Abstraction boundaries: single‑capture narrowing inside helper subtrees is
+  local to that subtree. To propagate the narrowed single capture to the parent
+  property name when embedding, use `.seal()` (see `NodeWithSeal`).
 
 ## Examples
 
