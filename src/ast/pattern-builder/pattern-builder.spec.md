@@ -2,58 +2,39 @@
 
 ## Overview
 
-`PatternBuilder<K>` creates typed AST patterns or concrete nodes for a kind `K`.
+`PatternBuilder<K>` constructs typed AST values for a node kind `K`.
 
-- Call with no args to get the discriminant only — “any `K`”.
-- Call with a `Pattern<NodeByKind[K]>` to build a typed pattern with capture
-  positions bound to the node’s shape (returns a `FluentNode`).
-- Call with a concrete node shape (no capture tokens) to build a node and get a
-  `FluentNode` back as well — you can still chain `.when`/`.to` even without
-  captures.
-- Returned nodes support fluent constraints via `.when` (see `NodeWithWhen`) and
-  a terminal rewrite via `.to` (see `NodeWithTo`).
+- Discriminant call `()` yields the minimal value `{ type: … }` for “any K”.
+- Build call `(shape)` constructs a concrete node (no capture tokens) matching
+  `NodeByKind[K]` minus internal ESTree fields.
+- Pattern call `(pattern)` accepts a `Pattern<NodeByKind[K]>` and binds capture
+  tokens to the precise positions/types from the node kind.
+
+This provider is agnostic to downstream fluent helpers; composition is outside
+its scope. Implementations may return a fluent‑capable value, but that is not a
+contract of this provider.
 
 ## Design
 
-- Three overloads provide clear, minimal surfaces:
-  - Discriminant `()` — lightweight `{ type: … }` when only the tag is needed.
-  - Build `(shape)` — accepts a concrete node shape (no capture tokens) and
-    returns a `FluentNode` for optional chaining.
-  - Pattern `(pattern)` — accepts a capturable pattern and returns a
-    `FluentNode` with `.when` and `.to`.
-
-## Using `.when`
-
-Pattern/builders return a `FluentNode` with `.when` and a terminal `.to`:
-
-- Single-capture patterns can accept the value directly: `(v) => …`.
-- Multi-capture patterns use a bag: `({ a, b }) => …`.
-- Predicates keep types as-is; type-guard callbacks narrow both the bag and the
-  embedded capture tokens in the node. See `src/ast/node-with-when/` for full
-  semantics and examples.
-- Use `.to((bag) => out)` to finalize with a rewrite. The `.to` result is not a
-  `Pattern`, so it cannot be nested; this effectively scopes `.to` to the
-  outermost pattern.
+- Three overloads keep the surface minimal and predictable:
+  - Discriminant `()` — `{ type: AST_NODE_TYPES[K] }` only.
+  - Build `(shape)` — concrete node with the kind’s fields; no capture tokens.
+  - Pattern `(pattern)` — capturable shape that binds names/types against
+    `NodeByKind[K]`.
+- `BindCaptures` aligns explicit/implicit capture tokens with the node kind so
+  extracted capture bags reflect the actual AST shape.
+- Internal ESTree fields (`parent`, `loc`, `range`) are excluded from input and
+  output shapes.
 
 ## Examples
 
 ```ts
-// Single-capture: value-only callback
-const r = U.ReturnStatement({ argument: $("arg") }).when((arg) => arg != null);
+// Discriminant — match any BlockStatement
+const anyBlock = U.BlockStatement();
 
-// Bag form: multiple captures
-const i = U.IfStatement({
-  test: $("t"),
-  consequent: $("c"),
-  alternate: $("a"),
-}).when(({ a }) => a != null);
+// Build — construct a concrete Identifier node
+const id = U.Identifier({ name: "x" });
 
-// Build form: concrete shape → fluent node
-const out = U.ConditionalExpression({
-  test: someExpr,
-  consequent: otherExpr,
-  alternate: altExpr,
-}).when(() => true).to(({ test, consequent, alternate }) =>
-  U.ConditionalExpression({ test, consequent, alternate })
-);
+// Pattern — capture the argument of a ReturnStatement
+const ret = U.ReturnStatement({ argument: $("arg") });
 ```
