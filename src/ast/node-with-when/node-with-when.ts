@@ -3,6 +3,7 @@ import type { Spread } from "@/capture/spread/spread";
 import type { SingleKeyOf } from "@/type-utils/single-key-of";
 import type { ExtractCaptures } from "@/pattern";
 import type { FluentNode } from "@/ast/fluent-node";
+import type { Sealed } from "@/ast/sealed";
 
 /**
  * Add a fluent `.when` method to a node value `N`.
@@ -107,8 +108,11 @@ type BagFromSingle<T, V> = SingleKeyOf<T> extends infer K
  * - Recurse through tuples, arrays, and objects.
  */
 type ApplyCaptureBagToNode<Node, CaptureBag> =
-  // Refine explicit captures by name
-  Node extends Capture<infer Name, infer _V>
+  // Preserve sealed brand when refining
+  Node extends Sealed<infer Inner>
+    ? Sealed<ApplyCaptureBagToNode<Inner, CaptureBag>>
+    : // Refine explicit captures by name
+    Node extends Capture<infer Name, infer _V>
     ? Name extends keyof CaptureBag
       ? Capture<Name & string, CaptureBag[Name]>
       : Node

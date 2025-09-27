@@ -8,7 +8,7 @@ import type {
   KeysOfUnion,
 } from "@/type-utils";
 import type { SingleKeyOf } from "@/type-utils/single-key-of";
-import type { SEALED_BRAND } from "@/ast/sealed";
+import type { Sealed } from "@/ast/sealed";
 import type { OR_BRAND } from "@/ast/or";
 import type { TSESTree } from "@typescript-eslint/types";
 
@@ -28,9 +28,7 @@ type ExtractFromPropertyValue<
   ? ExtractFromPattern<T, Key>
   : {};
 
-type StripSeal<T> = T extends { readonly [SEALED_BRAND]: true }
-  ? Omit<T, typeof SEALED_BRAND>
-  : T;
+type StripSeal<T> = T extends Sealed<infer Inner> ? Inner : T;
 type StripOr<T> = T extends { readonly [OR_BRAND]: true }
   ? Omit<T, typeof OR_BRAND>
   : T;
@@ -54,7 +52,7 @@ type CoalesceUnionOfBags<U> = {
 
 type ExtractFromPattern<P, Key extends string = ""> =
   // Sealed subtree: extract inner and (under a property key) re-key if single
-  P extends { readonly [SEALED_BRAND]: true }
+  P extends Sealed<infer _Inner>
     ? Key extends ""
       ? ExtractFromPattern<StripSeal<P>, "">
       : ReKeyIfSingle<ExtractFromPattern<StripSeal<P>, "">, Key>

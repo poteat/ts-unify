@@ -2,7 +2,7 @@ import type { $ } from "@/capture/dollar";
 import type { Capture } from "@/capture/capture-type";
 import type { Spread } from "@/capture/spread/spread";
 import type { TSESTree } from "@typescript-eslint/types";
-import type { SEALED_BRAND, Sealed } from "@/ast/sealed";
+import type { Sealed } from "@/ast/sealed";
 import type { OR_BRAND } from "@/ast/or";
 
 /**
@@ -13,9 +13,7 @@ import type { OR_BRAND } from "@/ast/or";
  *   to the corresponding type from `Shape` at that position.
  * - Recurses through objects, tuples, and arrays.
  */
-type StripSeal<T> = T extends { readonly [SEALED_BRAND]: true }
-  ? Omit<T, typeof SEALED_BRAND>
-  : T;
+type StripSeal<T> = T extends Sealed<infer Inner> ? Inner : T;
 type StripOr<T> = T extends { readonly [OR_BRAND]: true }
   ? Omit<T, typeof OR_BRAND>
   : T;
@@ -30,7 +28,7 @@ type BindNode<P, S, Key extends string> = P extends {
   readonly [OR_BRAND]: true;
 }
   ? BindOr<P, S, Key>
-  : P extends { readonly [SEALED_BRAND]: true }
+  : P extends Sealed<infer _Inner>
   ? Sealed<BindAttribute<StripSeal<P>, S, Key>>
   : BindAttribute<P, S, Key>;
 
