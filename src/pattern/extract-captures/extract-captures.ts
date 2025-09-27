@@ -32,7 +32,21 @@ type StripOr<T> = T extends { readonly [OR_BRAND]: true }
 
 type ReKeyIfSingle<Bag, K extends string> = [SingleKeyOf<Bag>] extends [never]
   ? Bag
-  : { [P in K]: Bag[SingleKeyOf<Bag>] };
+  : { [P in K]: Bag extends any ? Bag[SingleKeyOf<Bag>] : never };
+
+// Coalesce a union of capture bags into a single bag by
+// - taking the union of keys across variants
+// - mapping each key to the union of its value across variants
+// Utility to coalesce a union of bags into a single bag by
+// uniting keys and unioning value types per key.
+type KeysOfUnion<T> = T extends any ? keyof T : never;
+type CoalesceUnionOfBags<U> = {
+  [K in KeysOfUnion<U>]: U extends any
+    ? K extends keyof U
+      ? U[K]
+      : never
+    : never;
+};
 
 type ExtractFromPattern<P, Key extends string = ""> =
   // Sealed subtree: extract inner and (under a property key) re-key if single
@@ -77,7 +91,9 @@ type ExtractFromPattern<P, Key extends string = ""> =
     : // Handle objects
     P extends object
     ? {
-        [K in keyof P]-?: ExtractFromPropertyValue<P[K], K & string>;
+        [K in keyof P]-?: CoalesceUnionOfBags<
+          ExtractFromPropertyValue<P[K], K & string>
+        >;
       } extends infer M
       ? Values<M & {}> extends infer U
         ? [U] extends [never]

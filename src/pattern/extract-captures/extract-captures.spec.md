@@ -137,3 +137,12 @@ type Pattern = {
 type Bag = ExtractCaptures<Pattern>;
 // Bag includes: { consequent: unknown } — inner single capture re‑keys
 ```
+
+### OR Branches under Properties
+
+When a property value is an OR of sealed subtrees that each contribute a single
+capture with the same name, extraction first coalesces the branch bags by
+uniting value types for that single key, then re‑keys to the property name
+before merging across sibling properties. This preserves nullability when a
+guard is present in only some branches (e.g., `Expression | null` vs
+`Expression`).
