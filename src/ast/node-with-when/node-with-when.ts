@@ -1,9 +1,7 @@
-import type { Capture } from "@/capture/capture-type";
-import type { Spread } from "@/capture/spread/spread";
 import type { SingleKeyOf } from "@/type-utils/single-key-of";
 import type { ExtractCaptures } from "@/pattern";
 import type { FluentNode } from "@/ast/fluent-node";
-import type { Sealed } from "@/ast/sealed";
+import type { SubstituteCaptures } from "@/ast/substitute-captures";
 
 /**
  * Add a fluent `.when` method to a node value `N`.
@@ -37,10 +35,7 @@ export type NodeWithWhen<Node> = Node & {
   ): [SingleKeyOf<ExtractCaptures<Node>>] extends [never]
     ? never
     : FluentNode<
-        ApplyCaptureBagToNode<
-          Node,
-          BagFromSingle<ExtractCaptures<Node>, VNarrow>
-        >
+        SubstituteCaptures<Node, BagFromSingle<ExtractCaptures<Node>, VNarrow>>
       >;
 
   /**
@@ -71,7 +66,7 @@ export type NodeWithWhen<Node> = Node & {
       ? (bag: ExtractCaptures<Node>) => bag is Narrow
       : never
   ): [SingleKeyOf<ExtractCaptures<Node>>] extends [never]
-    ? FluentNode<ApplyCaptureBagToNode<Node, Narrow>>
+    ? FluentNode<SubstituteCaptures<Node, Narrow>>
     : never;
 
   /**
@@ -96,43 +91,3 @@ type SingleValueOf<T> = SingleKeyOf<T> extends infer K ? T[K & keyof T] : never;
 type BagFromSingle<T, V> = SingleKeyOf<T> extends infer K
   ? { [P in K & keyof T]: V }
   : never;
-// Inlined ExtractCaptures in signatures; alias removed for clarity.
-
-/**
- * Apply a narrowed capture bag `B` to the node shape `N` by structurally
- * refining embedded capture/spread tokens.
- *
- * - Capture<'name', _> → Capture<'name', B['name']> (if present in B)
- * - Spread<'name', Elem> → Spread<'name', ElemN> when B['name'] is
- *   ReadonlyArray<ElemN>
- * - Recurse through tuples, arrays, and objects.
- */
-type ApplyCaptureBagToNode<Node, CaptureBag> =
-  // Preserve sealed brand when refining
-  Node extends Sealed<infer Inner>
-    ? Sealed<ApplyCaptureBagToNode<Inner, CaptureBag>>
-    : // Refine explicit captures by name
-    Node extends Capture<infer Name, infer _V>
-    ? Name extends keyof CaptureBag
-      ? Capture<Name & string, CaptureBag[Name]>
-      : Node
-    : // Refine spread captures when bag provides a readonly array type
-    Node extends Spread<infer SName, infer Elem>
-    ? SName extends keyof CaptureBag
-      ? CaptureBag[SName] extends ReadonlyArray<infer ElemN>
-        ? Spread<SName & string, ElemN>
-        : Node
-      : Spread<SName & string, Elem>
-    : // Tuples
-    Node extends readonly [...infer Items]
-    ? Readonly<{
-        [I in keyof Items]: ApplyCaptureBagToNode<Items[I], CaptureBag>;
-      }>
-    : // Arrays
-    Node extends ReadonlyArray<infer Elem2>
-    ? ReadonlyArray<ApplyCaptureBagToNode<Elem2, CaptureBag>>
-    : // Objects
-    Node extends object
-    ? { [K in keyof Node]: ApplyCaptureBagToNode<Node[K], CaptureBag> }
-    : // Primitives
-      Node;
