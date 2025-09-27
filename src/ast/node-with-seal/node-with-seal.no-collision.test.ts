@@ -1,5 +1,5 @@
 import type { NodeByKind } from "@/ast/node-by-kind";
-import type { KeysOfUnion } from "@/test-utils/keys-of-union";
+import type { KeysOfUnion } from "@/type-utils";
 import { assertType } from "@/test-utils/assert-type/assert-type";
 
 describe("NodeWithSeal name collisions", () => {

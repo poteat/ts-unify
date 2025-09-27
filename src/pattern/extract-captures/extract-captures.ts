@@ -1,7 +1,12 @@
 import type { Capture } from "@/capture";
 import type { $ } from "@/capture";
 import type { Spread } from "@/capture";
-import type { Prettify, UnionToIntersection, Values } from "@/type-utils";
+import type {
+  Prettify,
+  UnionToIntersection,
+  Values,
+  KeysOfUnion,
+} from "@/type-utils";
 import type { SingleKeyOf } from "@/type-utils/single-key-of";
 import type { SEALED_BRAND } from "@/ast/sealed";
 import type { OR_BRAND } from "@/ast/or";
@@ -39,7 +44,6 @@ type ReKeyIfSingle<Bag, K extends string> = [SingleKeyOf<Bag>] extends [never]
 // - mapping each key to the union of its value across variants
 // Utility to coalesce a union of bags into a single bag by
 // uniting keys and unioning value types per key.
-type KeysOfUnion<T> = T extends any ? keyof T : never;
 type CoalesceUnionOfBags<U> = {
   [K in KeysOfUnion<U>]: U extends any
     ? K extends keyof U

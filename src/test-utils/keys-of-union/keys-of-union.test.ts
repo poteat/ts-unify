@@ -1,4 +1,4 @@
-import type { KeysOfUnion } from "./keys-of-union";
+import type { KeysOfUnion } from "@/type-utils";
 import { assertType } from "@/test-utils/assert-type/assert-type";
 
 describe("KeysOfUnion - type-level", () => {

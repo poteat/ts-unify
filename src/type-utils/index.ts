@@ -7,3 +7,4 @@ export * from "./keys-to-tuple";
 export * from "./values";
 export * from "./without-internal-ast-fields";
 export * from "./single-key-of";
+export * from "./keys-of-union";

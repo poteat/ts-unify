@@ -3,8 +3,8 @@
 ## Overview
 
 `KeysOfUnion<T>` produces the union of property keys across a union type `T`. It
-is primarily useful in tests for checking name collisions against unions of AST
-node shapes.
+is useful for type-level checks where a union of object shapes must be analyzed
+for key collisions.
 
 ## Semantics
 
@@ -17,3 +17,4 @@ node shapes.
 type U = { a: 1 } | { b: 2 };
 type K = KeysOfUnion<U>; // "a" | "b"
 ```
+
