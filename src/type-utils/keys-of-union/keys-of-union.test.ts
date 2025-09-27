@@ -23,3 +23,4 @@ describe("KeysOfUnion - type-level", () => {
     assertType<K, Expected>(0);
   });
 });
+
