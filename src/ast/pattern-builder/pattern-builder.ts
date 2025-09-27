@@ -18,11 +18,13 @@ import type { WithoutInternalAstFields } from "@/type-utils";
  * - `U.ConditionalExpression({ test, consequent, alternate })` → build node
  * - `U.ReturnStatement({ argument: $("arg") })` → pattern with a capture
  */
+export declare const PATTERN_BUILDER_BRAND: unique symbol;
+
 export type PatternBuilder<K extends NodeKind> = {
   /** Build a concrete `K` node (no capture tokens). Returns a fluent node. */
-  <
-    S extends Omit<WithoutInternalAstFields<NodeByKind[K]>, "type">
-  >(shape: S): FluentNode<{ type: NodeByKind[K]["type"] } & S>;
+  <S extends Omit<WithoutInternalAstFields<NodeByKind[K]>, "type">>(
+    shape: S
+  ): FluentNode<{ type: NodeByKind[K]["type"] } & S>;
 
   /** Match a `K` pattern (supports `$`). Returns fluent node. */
   <P extends Pattern<NodeByKind[K]>>(pattern: P): FluentNode<
@@ -31,7 +33,7 @@ export type PatternBuilder<K extends NodeKind> = {
 
   /** Match any `K`. Returns `{ type: … }` with fluent helpers. */
   (): FluentNode<{ type: NodeByKind[K]["type"] }>;
-};
+} & { readonly [PATTERN_BUILDER_BRAND]: true };
 
 /**
  * Assuming a pattern `P` conforms to the shape of AST node kind `K`, bind

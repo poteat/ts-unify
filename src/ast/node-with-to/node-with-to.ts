@@ -1,7 +1,10 @@
 import type { ExtractCaptures } from "@/pattern";
 import type { AstTransform } from "@/ast/ast-transform";
 import type { WithoutInternalAstFields } from "@/type-utils";
-import type { PatternBuilder } from "@/ast/pattern-builder";
+import type {
+  PatternBuilder,
+  PATTERN_BUILDER_BRAND,
+} from "@/ast/pattern-builder";
 import type { NodeKind } from "@/ast/node-kind";
 import type { NodeByKind } from "@/ast/node-by-kind";
 
@@ -13,12 +16,6 @@ import type { NodeByKind } from "@/ast/node-by-kind";
  * semantic descriptor and is intentionally not a `Pattern<…>` so it cannot be
  * embedded into other patterns (root-only usage emerges from types).
  */
-type RequireKeysSubset<Small, Big> = Exclude<
-  keyof Small,
-  keyof Big
-> extends never
-  ? {}
-  : never;
 
 export type NodeWithTo<Node> = {
   /**
@@ -27,11 +24,13 @@ export type NodeWithTo<Node> = {
    * the output type. Equivalent to `.to((bag) => Builder(bag))`.
    */
   to<K extends NodeKind>(
-    builder: PatternBuilder<K> &
-      RequireKeysSubset<
-        ExtractCaptures<Node>,
-        WithoutInternalAstFields<NodeByKind[K]>
-      >
+    builder: PatternBuilder<K>,
+    ..._enforce: ExtractCaptures<Node> extends Omit<
+      WithoutInternalAstFields<NodeByKind[K]>,
+      "type"
+    >
+      ? []
+      : [never]
   ): AstTransform<Node, WithoutInternalAstFields<NodeByKind[K]>>;
 
   /**
@@ -44,6 +43,8 @@ export type NodeWithTo<Node> = {
    * @returns A semantic descriptor (not a `Pattern`).
    */
   to<Result>(
-    factory: (bag: ExtractCaptures<Node>) => Result
+    factory: ((bag: ExtractCaptures<Node>) => Result) & {
+      readonly [PATTERN_BUILDER_BRAND]?: never;
+    }
   ): AstTransform<Node, Result>;
 };
