@@ -5,6 +5,10 @@ import type { NodeKind } from "@/ast/node-kind";
 import type { FluentNode } from "@/ast/fluent-node";
 import type { WithoutInternalAstFields } from "@/type-utils";
 
+type OmitDistributive<T, K extends keyof any> = T extends any
+  ? Omit<T, K>
+  : never;
+
 /**
  * Create builders for AST kind `K`.
  *
@@ -22,9 +26,9 @@ export declare const PATTERN_BUILDER_BRAND: unique symbol;
 
 export type PatternBuilder<K extends NodeKind> = {
   /** Build a concrete `K` node (no capture tokens). Returns a fluent node. */
-  <S extends Omit<WithoutInternalAstFields<NodeByKind[K]>, "type">>(
+  <S extends OmitDistributive<WithoutInternalAstFields<NodeByKind[K]>, "type">>(
     shape: S
-  ): FluentNode<{ type: NodeByKind[K]["type"] } & S>;
+  ): FluentNode<NodeByKind[K]>;
 
   /** Match a `K` pattern (supports `$`). Returns fluent node. */
   <P extends Pattern<NodeByKind[K]>>(pattern: P): FluentNode<
