@@ -13,4 +13,3 @@ export type NodeByKind = {
     { type: (typeof TSESTree.AST_NODE_TYPES)[K] }
   >;
 };
-
