@@ -46,8 +46,8 @@ type TupleCaptures<
   : Acc;
 
 type BindAttribute<P, S, Key extends string> =
-  // Short-circuit: don't recurse into generic Expression types
-  P extends TSESTree.Expression
+  // Short-circuit: don't recurse into generic nodes
+  P extends TSESTree.Node
     ? P
     : // Implicit placeholder becomes named capture with the property key
     P extends $

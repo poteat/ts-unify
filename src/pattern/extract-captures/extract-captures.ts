@@ -63,8 +63,8 @@ type ExtractFromPattern<P, Key extends string = ""> =
         ? ExtractFromPattern<U, Key>
         : never
       : never
-    : // Short circuit: don't recurse into generic Expression types
-    P extends TSESTree.Expression
+    : // Short circuit: don't recurse into generic nodes
+    P extends TSESTree.Node
     ? {}
     : // Check if it's the $ function (implicit capture)
     P extends $
