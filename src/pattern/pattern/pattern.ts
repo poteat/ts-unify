@@ -1,6 +1,7 @@
 import type { Capturable } from "@/capture/capturable";
 import type { CaptureLike } from "@/capture/capture-like";
 import type { Spread } from "@/capture";
+import type { DollarObjectSpread } from "@/capture";
 
 // For object shapes, allow specifying any subset of keys.
 // Omitted keys are treated as "don't care" by consumers.
@@ -28,5 +29,9 @@ type SequencePattern<S extends readonly unknown[]> = ReadonlyArray<
 export type Pattern<T> = T extends readonly any[]
   ? Capturable<T> | SequencePattern<T>
   : T extends object
-  ? Capturable<T> | PatternChildren<T>
+  ?
+      | Capturable<T>
+      | PatternChildren<T>
+      | (PatternChildren<T> & DollarObjectSpread)
+      | DollarObjectSpread
   : Capturable<T>;

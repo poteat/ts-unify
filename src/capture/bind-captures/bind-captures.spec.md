@@ -60,3 +60,21 @@ type R1 = BindCaptures<P1, S1>;
 type P2 = [Spread<"xs", string>];
 type R2 = BindCaptures<P2, S1>; // [Spread<'xs', string>]
 ```
+
+## Object Spread-$ (objects)
+
+When an object pattern includes `{ ...$ }`, `BindCaptures` synthesizes captures
+for all properties not explicitly present in the pattern. Explicit properties
+use their provided subpatterns.
+
+### Example
+
+```ts
+type S = { a: number; b: string };
+type P = { ...$; a: typeof $ };
+// At the type level, use a value-expression form to construct the pattern:
+const pat = { ...$, a: $ } as const;
+type R = BindCaptures<typeof pat, S>;
+// Result is equivalent to:
+// { a: Capture<'a', number>; b: Capture<'b', string> }
+```

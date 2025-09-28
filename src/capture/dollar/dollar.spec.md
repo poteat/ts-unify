@@ -81,6 +81,18 @@ Type-level shorthand: this module also exports a type alias named `$` that is
 equivalent to `typeof $`. In type positions you may use `$` instead of writing
 `typeof $`.
 
+### Object spread (object-pattern sugar)
+
+In object contexts you may spread the dollar value: `{ ...$ }`.
+
+- Acceptance: object patterns allow `{ ...$ }` or `{ ...$, key: subpattern }`.
+- Semantics (as interpreted by consumers like `BindCaptures`):
+  - Explicit keys use their provided subpattern.
+  - All other keys in the target shape are captured by their property name with
+    the correct property type.
+- Runtime: `$` has no enumerable properties, so `{ ...$ }` spreads nothing at
+  runtime; it only influences typing and capture derivation.
+
 ## Implementation Notes
 
 - Uses `const` type parameter for literal type preservation

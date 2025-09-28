@@ -2,9 +2,14 @@ import type { Capture } from "@/capture/capture-type";
 import { CAPTURE_BRAND } from "@/capture/capture-type";
 import type { Spread } from "@/capture/spread/spread";
 
-export type $ = <const Name extends string, Value = unknown>(
+// Brand to signal object-spread-$ semantics in object pattern contexts
+export declare const OBJECT_SPREAD_BRAND: unique symbol;
+export type DollarObjectSpread = { readonly [OBJECT_SPREAD_BRAND]: true };
+
+export type $ = (<const Name extends string, Value = unknown>(
   name: Name
-) => Capture<Name, Value> & Iterable<Spread<Name, Value>>;
+) => Capture<Name, Value> & Iterable<Spread<Name, Value>>)
+  & DollarObjectSpread;
 
 /**
  * Create a capture sentinel with a literal-typed name.
@@ -20,7 +25,7 @@ export type $ = <const Name extends string, Value = unknown>(
  * const b = $<"id", number>("id");    // Capture<"id", number>
  * // type-level implicit: type P = { id: typeof $ }
  */
-export const $: $ = <const Name extends string, Value = unknown>(name: Name) =>
+export const $ = (<const Name extends string, Value = unknown>(name: Name) =>
   Object.freeze({
     [CAPTURE_BRAND]: true,
     name,
@@ -31,4 +36,16 @@ export const $: $ = <const Name extends string, Value = unknown>(name: Name) =>
       const token = { name } as unknown as Spread<Name, Value>;
       yield token;
     },
-  }) as Capture<Name, Value> & Iterable<Spread<Name, Value>>;
+  }) as Capture<Name, Value> & Iterable<Spread<Name, Value>>) as $ & DollarObjectSpread;
+
+// Non-enumerable brand so `{ ...$ }` is a runtime no-op spread but carries type info
+try {
+  Object.defineProperty($, "__brand_object_spread__", {
+    value: true,
+    enumerable: false,
+    configurable: false,
+    writable: false,
+  });
+} catch {
+  // ignore if defineProperty fails in exotic environments
+}

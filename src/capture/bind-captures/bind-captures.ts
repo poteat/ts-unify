@@ -1,4 +1,5 @@
 import type { $ } from "@/capture/dollar";
+import type { OBJECT_SPREAD_BRAND } from "@/capture/dollar";
 import type { Capture } from "@/capture/capture-type";
 import type { Spread } from "@/capture/spread/spread";
 import type { TSESTree } from "@typescript-eslint/types";
@@ -91,16 +92,33 @@ type BindAttribute<P, S, Key extends string> =
     : // Objects: map each property using its key; align with S if available.
     // Omit function-valued keys except the `$` token type.
     P extends object
-    ? {
-        [K in keyof P as P[K] extends (...args: any) => any
-          ? P[K] extends $
-            ? K & string
-            : never
-          : K & string]: BindNode<
-          P[K],
-          K extends keyof S ? S[K] : unknown,
-          K & string
-        >;
-      }
+    ? P extends { readonly [OBJECT_SPREAD_BRAND]: true }
+      ? {
+          [K in keyof P as P[K] extends (...args: any) => any
+            ? P[K] extends $
+              ? K & string
+              : never
+            : K & string]: BindNode<
+            P[K],
+            K extends keyof S ? S[K] : unknown,
+            K & string
+          >;
+        } & {
+          [K in Exclude<keyof S, keyof P> & string]: Capture<
+            K,
+            K extends keyof S ? S[K] : never
+          >;
+        }
+      : {
+          [K in keyof P as P[K] extends (...args: any) => any
+            ? P[K] extends $
+              ? K & string
+              : never
+            : K & string]: BindNode<
+            P[K],
+            K extends keyof S ? S[K] : unknown,
+            K & string
+          >;
+        }
     : // Primitives and other types are left as-is
       P;

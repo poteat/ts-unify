@@ -46,6 +46,22 @@ Notes:
   type for the captured slice. Consumers refine `Elem` using the referenced
   sequence shape.
 
+### Object spread-$ (object patterns)
+
+In object contexts, you can spread the dollar value to concisely capture all
+properties by name: `{ ...$, foo: P }`.
+
+- `{ ...$, foo: P }` means: for every property `K` in the target shape `S`:
+  - If `K` is explicitly present in the pattern, interpret its pattern `P[K]`.
+  - Otherwise, capture the property by name as `Capture<K, S[K]>`.
+- `{ ...$ }` alone captures every top-level property by name.
+
+Notes:
+- Object spread-$ applies only at the object boundary it appears; it does not
+  affect nested objects unless also used there.
+- This is a provider-level acceptance rule; consumers like `BindCaptures`
+  define how the spread is interpreted into precise capture bags.
+
 ## Examples
 
 Object with nested captures (omitted keys allowed):
@@ -91,3 +107,9 @@ const p: Pattern<Shape> = [left, "anchor", right];
 - Pattern is intentionally permissive to support a wide range of consumers; any
   additional constraints (e.g., forbidding adjacent spreads) should be enforced
   by consumers that import and interpret patterns.
+Object with spread-$ capture (type-level acceptance):
+
+```ts
+type Shape = { id: number; user: { name: string; active: boolean } };
+const p: Pattern<Shape> = { ...$, user: { name: $ } };
+```
