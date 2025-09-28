@@ -94,7 +94,9 @@ type BindAttribute<P, S, Key extends string> =
     P extends object
     ? P extends { readonly [OBJECT_SPREAD_BRAND]: true }
       ? {
-          [K in keyof P as P[K] extends (...args: any) => any
+          [K in keyof P as K extends "parent"
+            ? never
+            : P[K] extends (...args: any) => any
             ? P[K] extends $
               ? K & string
               : never
@@ -110,7 +112,9 @@ type BindAttribute<P, S, Key extends string> =
           >;
         }
       : {
-          [K in keyof P as P[K] extends (...args: any) => any
+          [K in keyof P as K extends "parent"
+            ? never
+            : P[K] extends (...args: any) => any
             ? P[K] extends $
               ? K & string
               : never

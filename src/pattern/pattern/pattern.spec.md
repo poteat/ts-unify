@@ -113,3 +113,28 @@ Object with spread-$ capture (type-level acceptance):
 type Shape = { id: number; user: { name: string; active: boolean } };
 const p: Pattern<Shape> = { ...$, user: { name: $ } };
 ```
+
+### Parent constraint (object patterns)
+
+Object patterns may include a special `parent` property to constrain the parent
+node without introducing additional captures.
+
+- `{ parent: P }` restricts matches to nodes whose parent satisfies pattern `P`.
+- The `parent` property is enforcement-only: captures inside `P` are ignored by
+  `ExtractCaptures`, and `BindCaptures` does not add a `parent` field to the
+  bound shape.
+
+Example:
+
+```ts
+import type { Pattern } from "@/pattern";
+import type { NodeByKind, NodeKind } from "@/ast";
+
+type AnyNode = NodeByKind[NodeKind];
+type BlockShape = NodeByKind["BlockStatement"];
+
+// Matches a block whose parent is a function-like node
+const p: Pattern<BlockShape> = {
+  parent: { /* any object pattern over AnyNode, e.g., { type: ... } */ },
+};
+```
