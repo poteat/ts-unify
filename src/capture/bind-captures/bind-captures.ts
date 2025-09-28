@@ -1,5 +1,5 @@
 import type { $ } from "@/capture/dollar";
-import type { OBJECT_SPREAD_BRAND } from "@/capture/dollar";
+import type { OBJECT_SPREAD_BRAND } from "@/capture/dollar-spread/dollar-spread";
 import type { Capture } from "@/capture/capture-type";
 import type { Spread } from "@/capture/spread/spread";
 import type { TSESTree } from "@typescript-eslint/types";

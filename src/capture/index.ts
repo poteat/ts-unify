@@ -5,3 +5,4 @@ export * from "./capture-like";
 export * from "./capturable";
 export * from "./bind-captures";
 export * from "./spread/spread";
+export * from "./dollar-spread/dollar-spread";
