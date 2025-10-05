@@ -1,5 +1,6 @@
 import type { ExtractCaptures } from "@/pattern";
 import type { SingleKeyOf } from "@/type-utils/single-key-of";
+import type { HasSingleCapture } from "@/ast/capture-cardinality";
 import type { FluentNode } from "@/ast/fluent-node";
 import type { SubstituteCaptures } from "@/ast/substitute-captures";
 import type { SubstituteSingleCapture } from "@/ast/substitute-single-capture";
@@ -20,12 +21,12 @@ import type { NormalizeBag } from "@/ast/normalize-bag";
 export type NodeWithMap<Node> = Node & {
   /** Single-capture map overload (exactly one capture). */
   map<NewValue>(
-    fn: [SingleKeyOf<ExtractCaptures<Node>>] extends [never]
-      ? never
-      : (value: SingleValueOf<ExtractCaptures<Node>>) => NewValue
-  ): [SingleKeyOf<ExtractCaptures<Node>>] extends [never]
-    ? never
-    : FluentNode<SubstituteSingleCapture<Node, NewValue>>;
+    fn: [HasSingleCapture<Node>] extends [true]
+      ? (value: SingleValueOf<ExtractCaptures<Node>>) => NewValue
+      : never
+  ): [HasSingleCapture<Node>] extends [true]
+    ? FluentNode<SubstituteSingleCapture<Node, NewValue>>
+    : never;
 
   /** Bag map overload (any number of captures). */
   map<NewBag>(

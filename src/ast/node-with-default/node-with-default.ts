@@ -1,5 +1,4 @@
-import type { ExtractCaptures } from "@/pattern";
-import type { SingleKeyOf } from "@/type-utils/single-key-of";
+import type { HasSingleCapture } from "@/ast/capture-cardinality";
 import type { FluentNode } from "@/ast/fluent-node";
 import type { SubstituteSingleCapture } from "@/ast/substitute-single-capture";
 
@@ -9,10 +8,10 @@ export type NodeWithDefault<Node> = Node & {
    * Equivalent to `.map(v => v ?? expr)`.
    */
   default<Expr>(
-    expr: [SingleKeyOf<ExtractCaptures<Node>>] extends [never] ? never : Expr
-  ): [SingleKeyOf<ExtractCaptures<Node>>] extends [never]
-    ? never
-    : FluentNode<SubstituteSingleCapture<Node, Expr>>;
+    expr: [HasSingleCapture<Node>] extends [true] ? Expr : never
+  ): [HasSingleCapture<Node>] extends [true]
+    ? FluentNode<SubstituteSingleCapture<Node, Expr>>
+    : never;
 
   /** Fallback overload — unusable when there isn't exactly one capture. */
   default(expr: never): never;

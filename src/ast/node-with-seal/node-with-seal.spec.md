@@ -35,6 +35,10 @@ helpers) by aligning the inner capture name with the outer slot name.
   - After: parent sees `{ [K]: V }`
 - Multi‑capture or zero‑capture subtree:
   - Re‑keying is skipped (bag is preserved).
+  - Typing guidance: In multi‑capture contexts, calling `.seal()` yields
+    `never`, producing a type error and signaling that sealing does not apply
+    to multi‑capture subtrees. In zero/single‑capture contexts it remains a
+    parameterless method.
 - Interaction with `.when`:
   - If a single‑capture guard narrows the inner value (e.g., from `T | null` to
     `T`), sealing ensures the parent bag reflects the narrowed type at the

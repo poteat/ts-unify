@@ -12,5 +12,6 @@ export * from "./substitute-single-capture";
 export * from "./unwrap-fluent";
 export * from "./normalize-captured";
 export * from "./normalize-bag";
+export * from "./capture-cardinality";
 export * from "./sealed";
 export * from "./or";

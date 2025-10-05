@@ -1,5 +1,6 @@
 import type { SingleKeyOf } from "@/type-utils/single-key-of";
 import type { ExtractCaptures } from "@/pattern";
+import type { HasSingleCapture } from "@/ast/capture-cardinality";
 import type { FluentNode } from "@/ast/fluent-node";
 import type { SubstituteCaptures } from "@/ast/substitute-captures";
 import type { SubstituteSingleCapture } from "@/ast/substitute-single-capture";
@@ -30,12 +31,12 @@ export type NodeWithWhen<Node> = Node & {
    * @returns A node with the capture and its occurrences narrowed.
    */
   when<VNarrow extends SingleValueOf<ExtractCaptures<Node>>>(
-    guard: [SingleKeyOf<ExtractCaptures<Node>>] extends [never]
-      ? never
-      : (value: SingleValueOf<ExtractCaptures<Node>>) => value is VNarrow
-  ): [SingleKeyOf<ExtractCaptures<Node>>] extends [never]
-    ? never
-    : FluentNode<SubstituteSingleCapture<Node, VNarrow>>;
+    guard: [HasSingleCapture<Node>] extends [true]
+      ? (value: SingleValueOf<ExtractCaptures<Node>>) => value is VNarrow
+      : never
+  ): [HasSingleCapture<Node>] extends [true]
+    ? FluentNode<SubstituteSingleCapture<Node, VNarrow>>
+    : never;
 
   /**
    * Single-capture boolean predicate overload. When the node has exactly one
@@ -46,10 +47,10 @@ export type NodeWithWhen<Node> = Node & {
    * @returns The same node type (no narrowing).
    */
   when(
-    predicate: [SingleKeyOf<ExtractCaptures<Node>>] extends [never]
-      ? never
-      : (value: SingleValueOf<ExtractCaptures<Node>>) => boolean
-  ): FluentNode<Node>;
+    predicate: [HasSingleCapture<Node>] extends [true]
+      ? (value: SingleValueOf<ExtractCaptures<Node>>) => boolean
+      : never
+  ): [HasSingleCapture<Node>] extends [true] ? FluentNode<Node> : never;
 
   /**
    * Bag type guard overload. Accepts a guard over the capture bag derived from
@@ -61,12 +62,12 @@ export type NodeWithWhen<Node> = Node & {
    * @returns A node with all occurrences narrowed per the refined bag.
    */
   when<Narrow extends ExtractCaptures<Node>>(
-    guard: [SingleKeyOf<ExtractCaptures<Node>>] extends [never]
-      ? (bag: ExtractCaptures<Node>) => bag is Narrow
-      : never
-  ): [SingleKeyOf<ExtractCaptures<Node>>] extends [never]
-    ? FluentNode<SubstituteCaptures<Node, Narrow>>
-    : never;
+    guard: [HasSingleCapture<Node>] extends [true]
+      ? never
+      : (bag: ExtractCaptures<Node>) => bag is Narrow
+  ): [HasSingleCapture<Node>] extends [true]
+    ? never
+    : FluentNode<SubstituteCaptures<Node, Narrow>>;
 
   /**
    * Bag boolean predicate overload. Accepts a predicate over the capture bag
@@ -77,12 +78,10 @@ export type NodeWithWhen<Node> = Node & {
    * @returns The same node type (no narrowing).
    */
   when(
-    predicate: [SingleKeyOf<ExtractCaptures<Node>>] extends [never]
-      ? (bag: ExtractCaptures<Node>) => boolean
-      : never
-  ): [SingleKeyOf<ExtractCaptures<Node>>] extends [never]
-    ? FluentNode<Node>
-    : never;
+    predicate: [HasSingleCapture<Node>] extends [true]
+      ? never
+      : (bag: ExtractCaptures<Node>) => boolean
+  ): [HasSingleCapture<Node>] extends [true] ? never : FluentNode<Node>;
 };
 
 // Helper types for single-capture ergonomics

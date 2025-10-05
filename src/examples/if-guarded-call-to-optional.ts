@@ -20,7 +20,7 @@ const callConsequent = U.or(
       arguments: $("args"),
     }),
   })
-).seal();
+);
 
 /**
  * Transform if-guarded function calls into optional chaining
@@ -37,15 +37,14 @@ export const ifGuardedCallToOptional = U.IfStatement({
   test: $("fn"),
   consequent: callConsequent,
   alternate: null,
-})
-  .to(({ fn, args }) =>
-    U.ExpressionStatement({
-      expression: U.ChainExpression({
-        expression: U.CallExpression({
-          callee: fn,
-          arguments: args,
-          optional: true,
-        }),
+}).to(({ fn, args }) =>
+  U.ExpressionStatement({
+    expression: U.ChainExpression({
+      expression: U.CallExpression({
+        callee: fn,
+        arguments: args,
+        optional: true,
       }),
-    })
-  );
+    }),
+  })
+);
