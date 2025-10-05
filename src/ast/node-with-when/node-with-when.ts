@@ -2,6 +2,7 @@ import type { SingleKeyOf } from "@/type-utils/single-key-of";
 import type { ExtractCaptures } from "@/pattern";
 import type { FluentNode } from "@/ast/fluent-node";
 import type { SubstituteCaptures } from "@/ast/substitute-captures";
+import type { SubstituteSingleCapture } from "@/ast/substitute-single-capture";
 
 /**
  * Add a fluent `.when` method to a node value `N`.
@@ -34,9 +35,7 @@ export type NodeWithWhen<Node> = Node & {
       : (value: SingleValueOf<ExtractCaptures<Node>>) => value is VNarrow
   ): [SingleKeyOf<ExtractCaptures<Node>>] extends [never]
     ? never
-    : FluentNode<
-        SubstituteCaptures<Node, BagFromSingle<ExtractCaptures<Node>, VNarrow>>
-      >;
+    : FluentNode<SubstituteSingleCapture<Node, VNarrow>>;
 
   /**
    * Single-capture boolean predicate overload. When the node has exactly one
@@ -88,6 +87,3 @@ export type NodeWithWhen<Node> = Node & {
 
 // Helper types for single-capture ergonomics
 type SingleValueOf<T> = SingleKeyOf<T> extends infer K ? T[K & keyof T] : never;
-type BagFromSingle<T, V> = SingleKeyOf<T> extends infer K
-  ? { [P in K & keyof T]: V }
-  : never;
