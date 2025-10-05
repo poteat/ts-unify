@@ -87,7 +87,15 @@ type ExtractFromPattern<P, Key extends string = ""> =
       ? {}
       : UnionToIntersection<
           {
-            [K in keyof Items]: ExtractFromPattern<Items[K], `${K & string}`>;
+            [K in keyof Items]: Items[K] extends Spread<infer Name, infer Elem>
+              ? Name extends ""
+                ? // Anonymous spread in a sequence under object property `Key`:
+                  // Re-key the capture to the containing property's key.
+                  Key extends ""
+                  ? ExtractFromPattern<Items[K], `${K & string}`>
+                  : { [PKey in Key]: ReadonlyArray<Elem> }
+                : ExtractFromPattern<Items[K], `${K & string}`>
+              : ExtractFromPattern<Items[K], `${K & string}`>;
           }[number]
         >
     : // Handle objects

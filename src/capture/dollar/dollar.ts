@@ -6,7 +6,8 @@ import type { DollarObjectSpread } from "@/capture/dollar-spread/dollar-spread";
 export type $ = (<const Name extends string, Value = unknown>(
   name: Name
 ) => Capture<Name, Value> & Iterable<Spread<Name, Value>>) &
-  DollarObjectSpread;
+  DollarObjectSpread &
+  Iterable<Spread<"", unknown>>;
 
 /**
  * Create a capture sentinel with a literal-typed name.
@@ -22,7 +23,7 @@ export type $ = (<const Name extends string, Value = unknown>(
  * const b = $<"id", number>("id");    // Capture<"id", number>
  * // type-level implicit: type P = { id: typeof $ }
  */
-export const $ = (<const Name extends string, Value = unknown>(name: Name) =>
+const __dollar = (<const Name extends string, Value = unknown>(name: Name) =>
   Object.freeze({
     [CAPTURE_BRAND]: true,
     name,
@@ -33,5 +34,16 @@ export const $ = (<const Name extends string, Value = unknown>(name: Name) =>
       const token = { name } as unknown as Spread<Name, Value>;
       yield token;
     },
-  }) as Capture<Name, Value> & Iterable<Spread<Name, Value>>) as $ &
-  DollarObjectSpread;
+  }) as Capture<Name, Value> & Iterable<Spread<Name, Value>>) as any;
+
+// Also allow anonymous sequence spread with `...$` by making the function itself
+// iterable. The yielded spread has an empty name which is re-keyed by
+// type-level binders using the containing property key.
+(__dollar as any)[Symbol.iterator] = function* (): IterableIterator<
+  Spread<"", unknown>
+> {
+  const token = { name: "" } as unknown as Spread<"", unknown>;
+  yield token;
+};
+
+export const $ = __dollar as $;

@@ -57,14 +57,18 @@ including a `Spread<'name', Value>` token in the sequence pattern.
 // [ ...$<'rest', string>('rest') ]  ~>  [ Spread<'rest', string> ]
 ```
 
+### Anonymous sequence spread
+
+- You may also write `...$` as an anonymous sequence spread. When used as the
+  value of an object property (e.g., `{ body: [...$, other] }`), it binds to the
+  property key (e.g., `'body'`). At the type level it is treated as
+  `Spread<'', Value>` and re-keyed to the containing property by
+  `BindCaptures`/`ExtractCaptures`.
+
 Notes:
 
-- Spread form is only valid in sequences and always uses the called form
-  `$('name')` (the bare `$` placeholder is not iterable at runtime).
+- Spread form is only valid in sequences (`...$` or `...$('name')`).
 - Adjacent spreads are DC (unspecified) and may be constrained by consumers.
-- This module documents the semantics; runtime support for `...$('name')`
-  requires `$` to return a value that is iterable and yields a single spread
-  token (to be implemented by consumers).
 
 ## Type Signature
 

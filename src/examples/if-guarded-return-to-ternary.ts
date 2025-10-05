@@ -25,7 +25,7 @@ const anyReturnForm = U.maybeBlock(U.ReturnStatement({ argument: $ }))
  */
 export const ifGuardedReturnToTernary = U.BlockStatement({
   body: [
-    ...$("pre"),
+    ...$,
     U.IfStatement({
       test: $,
       consequent: anyReturnForm,
@@ -33,16 +33,12 @@ export const ifGuardedReturnToTernary = U.BlockStatement({
     }),
     U.ReturnStatement({ argument: $("alternate") }).defaultUndefined(),
   ],
-}).to(({ pre, test, consequent, alternate }) =>
+}).to(({ body, ...bag }) =>
   U.BlockStatement({
     body: [
-      ...pre,
+      ...body,
       U.ReturnStatement({
-        argument: U.ConditionalExpression({
-          test,
-          consequent,
-          alternate,
-        }),
+        argument: U.ConditionalExpression(bag),
       }),
     ],
   })

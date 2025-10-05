@@ -61,10 +61,11 @@ type PatternKeys<P extends object> = {
 type BindSequenceItem<
   Item,
   S extends readonly any[],
-  I extends keyof any
+  I extends keyof any,
+  ParentKey extends string
 > = Item extends Spread<infer Name, infer Elem>
   ? Spread<
-      Name & string,
+      (Name extends "" ? ParentKey : Name) & string,
       unknown extends Elem ? ArrayElem<S> : Extract<Elem, ArrayElem<S>>
     >
   : BindNode<Item, ElemAt<S, I>, `${I & string}`>;
@@ -100,7 +101,7 @@ type BindValue<P, S, Key extends string> =
     P extends readonly [...infer Items]
     ? S extends readonly any[]
       ? Readonly<{
-          [I in keyof Items]: BindSequenceItem<Items[I], S, I & keyof any>;
+          [I in keyof Items]: BindSequenceItem<Items[I], S, I & keyof any, Key>;
         }>
       : Readonly<{
           [I in keyof Items]: BindNode<Items[I], unknown, `${I & string}`>;

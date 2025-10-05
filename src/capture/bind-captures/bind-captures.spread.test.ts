@@ -58,4 +58,12 @@ describe("BindCaptures with Spread over arrays (type-level)", () => {
     ];
     assertType<Bound, Expected>(0);
   });
+
+  it("anonymous $ spread inside object property binds to the property key", () => {
+    type Shape = { body: ReadonlyArray<string | number> };
+    type Pattern = { body: readonly [Spread<"">, "x"] };
+    type Result = BindCaptures<Pattern, Shape>;
+    type Expected = { body: readonly [Spread<"body", string | number>, "x"] };
+    assertType<Result, Expected>(0);
+  });
 });
