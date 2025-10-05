@@ -1,10 +1,9 @@
 import type { ExtractCaptures } from "@/pattern";
 import type { SubstituteCaptures } from "@/ast/substitute-captures";
 import type { SingleKeyOf } from "@/type-utils/single-key-of";
-import type { FluentNode } from "@/ast/fluent-node";
+import type { UnwrapFluent } from "@/ast/unwrap-fluent";
 import type { TSESTree } from "@typescript-eslint/types";
 
-type UnwrapFluent<T> = T extends FluentNode<infer N> ? N : T;
 type Rehydrate<T> = T extends { type: infer Tag }
   ? Extract<TSESTree.Node, { type: Tag }>
   : T;
