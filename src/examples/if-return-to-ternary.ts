@@ -9,7 +9,7 @@ const anyReturnForm = U.or(
   }),
   U.ReturnStatement({ argument: $ })
 )
-  .default(U.Identifier({ name: "undefined" }))
+  .defaultUndefined()
   .seal();
 
 /**

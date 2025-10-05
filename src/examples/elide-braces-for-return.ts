@@ -14,9 +14,5 @@ declare const U: BuilderMap;
  */
 export const elideBracesForReturn = U.BlockStatement({
   parent: U.ArrowFunctionExpression(),
-  body: [
-    U.ReturnStatement({ argument: $ }).default(
-      U.Identifier({ name: "undefined" })
-    ),
-  ],
+  body: [U.ReturnStatement({ argument: $ }).defaultUndefined()],
 }).to(({ argument }) => argument);

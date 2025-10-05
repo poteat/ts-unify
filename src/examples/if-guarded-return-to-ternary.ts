@@ -3,9 +3,7 @@ import { $ } from "@/capture";
 
 declare const U: BuilderMap;
 
-const returnArg = U.ReturnStatement({ argument: $ }).default(
-  U.Identifier({ name: "undefined" })
-);
+const returnArg = U.ReturnStatement({ argument: $ }).defaultUndefined();
 
 const guardedReturn = U.or(
   U.BlockStatement({
@@ -38,9 +36,7 @@ export const ifGuardedReturnToTernary = U.BlockStatement({
       consequent: guardedReturn,
       alternate: null,
     }),
-    U.ReturnStatement({ argument: $("alternate") }).default(
-      U.Identifier({ name: "undefined" })
-    ),
+    U.ReturnStatement({ argument: $("alternate") }).defaultUndefined(),
   ],
 }).to(({ pre, test, consequent, alternate }) =>
   U.BlockStatement({
