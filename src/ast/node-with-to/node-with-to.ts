@@ -7,6 +7,9 @@ import type {
 } from "@/ast/pattern-builder";
 import type { NodeKind } from "@/ast/node-kind";
 import type { NodeByKind } from "@/ast/node-by-kind";
+import type { HasSingleCapture } from "@/ast/capture-cardinality";
+import type { SingleKeyOf } from "@/type-utils/single-key-of";
+import type { NormalizeCaptured } from "@/ast/normalize-captured";
 
 /**
  * Add a terminal `.to` method to a node value `N`.
@@ -18,6 +21,14 @@ import type { NodeByKind } from "@/ast/node-by-kind";
  */
 
 export type NodeWithTo<Node> = {
+  /**
+   * Zero-arg sugar: finalize by returning the single capture value as output.
+   * Enabled only when the capture bag has exactly one key.
+   */
+  to(
+    ..._enforce: [HasSingleCapture<Node>] extends [true] ? [] : [never]
+  ): AstTransform<Node, NormalizeCaptured<SingleValueOf<ExtractCaptures<Node>>>>;
+
   /**
    * Finalize the node by directly providing a builder for the output kind.
    * Accepts a `PatternBuilder<K>` and uses the concrete node shape for `K` as
@@ -48,3 +59,6 @@ export type NodeWithTo<Node> = {
     }
   ): AstTransform<Node, Result>;
 };
+
+// Helper types for single-capture ergonomics
+type SingleValueOf<T> = SingleKeyOf<T> extends infer K ? T[K & keyof T] : never;

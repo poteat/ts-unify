@@ -20,6 +20,13 @@ another builder‑produced node). The result is an `AstTransform` with `from` an
 - Terminalization: `.to` returns `AstTransform<In, Out>`, ensuring that
   finalized nodes are not accepted where a `Pattern` is expected.
 
+### Zero-arg Sugar (Single Capture)
+
+- When the capture bag has exactly one entry, a zero-arg `.to()` is available
+  and returns that capture value as the output type (after `NormalizeCaptured`).
+- In zero- or multi-capture contexts, the zero-arg overload is disabled and
+  resolves to `never`, producing a clear type error.
+
 ## Semantics
 
 - The `bag` parameter reflects `ExtractCaptures<N>` and includes any narrowing
@@ -44,4 +51,9 @@ const p = U.ReturnStatement({ argument: $("arg") })
   .when((arg): arg is string => true)
   .to(({ arg }) => U.ReturnStatement({ argument: arg }));
 // `p` is an `AstTransform<In, Out>`: { from: In; to: (bag) => Out }
+
+// Zero-arg sugar: when there is exactly one capture in the bag, return it
+// directly as the output.
+const q = U.ReturnStatement({ argument: $("expr") }).to();
+// `q` is `AstTransform<In, Expression>`
 ```
