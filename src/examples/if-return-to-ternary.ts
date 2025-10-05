@@ -3,12 +3,7 @@ import { $ } from "@/capture";
 
 declare const U: BuilderMap;
 
-const anyReturnForm = U.or(
-  U.BlockStatement({
-    body: [U.ReturnStatement({ argument: $ })],
-  }),
-  U.ReturnStatement({ argument: $ })
-)
+const anyReturnForm = U.maybeBlock(U.ReturnStatement({ argument: $ }))
   .defaultUndefined()
   .seal();
 

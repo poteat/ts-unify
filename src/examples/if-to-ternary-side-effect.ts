@@ -3,10 +3,7 @@ import { $ } from "@/capture";
 
 declare const U: BuilderMap;
 
-const anyExprForm = U.or(
-  U.BlockStatement({
-    body: [U.ExpressionStatement({ expression: $ })],
-  }),
+const anyExprForm = U.maybeBlock(
   U.ExpressionStatement({ expression: $ })
 ).seal();
 

@@ -3,14 +3,9 @@ import { $ } from "@/capture";
 
 declare const U: BuilderMap;
 
-const returnArg = U.ReturnStatement({ argument: $ }).defaultUndefined();
-
-const guardedReturn = U.or(
-  U.BlockStatement({
-    body: [returnArg],
-  }),
-  returnArg
-).seal();
+const anyReturnForm = U.maybeBlock(U.ReturnStatement({ argument: $ }))
+  .defaultUndefined()
+  .seal();
 
 /**
  * Collapse if-guarded return patterns into ternary expressions
@@ -33,7 +28,7 @@ export const ifGuardedReturnToTernary = U.BlockStatement({
     ...$("pre"),
     U.IfStatement({
       test: $,
-      consequent: guardedReturn,
+      consequent: anyReturnForm,
       alternate: null,
     }),
     U.ReturnStatement({ argument: $("alternate") }).defaultUndefined(),

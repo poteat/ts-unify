@@ -1,5 +1,6 @@
 import type { TruthyGuard } from "@/ast/builder-helpers";
 import type { OrCombinator } from "@/ast/or";
+import type { MaybeBlockCombinator } from "@/ast/maybe-block";
 
 /**
  * BuilderUtilities
@@ -11,4 +12,5 @@ import type { OrCombinator } from "@/ast/or";
 export type BuilderUtilities = {
   truthy: TruthyGuard;
   or: OrCombinator;
+  maybeBlock: MaybeBlockCombinator;
 };

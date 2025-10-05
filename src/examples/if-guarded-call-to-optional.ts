@@ -3,17 +3,7 @@ import { $ } from "@/capture";
 
 declare const U: BuilderMap;
 
-const callConsequent = U.or(
-  U.BlockStatement({
-    body: [
-      U.ExpressionStatement({
-        expression: U.CallExpression({
-          callee: $,
-          arguments: $("args"),
-        }),
-      }),
-    ],
-  }),
+const callConsequent = U.maybeBlock(
   U.ExpressionStatement({
     expression: U.CallExpression({
       callee: $,
