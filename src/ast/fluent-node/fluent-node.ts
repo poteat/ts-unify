@@ -2,6 +2,7 @@ import type { NodeWithWhen } from "@/ast/node-with-when";
 import type { NodeWithTo } from "@/ast/node-with-to";
 import type { NodeWithSeal } from "@/ast/node-with-seal";
 import type { NodeWithMap } from "@/ast/node-with-map";
+import type { NodeWithDefault } from "@/ast/node-with-default";
 
 /**
  * FluentNode<N>
@@ -12,5 +13,6 @@ import type { NodeWithMap } from "@/ast/node-with-map";
  */
 export type FluentNode<N> = NodeWithWhen<N> &
   NodeWithMap<N> &
+  NodeWithDefault<N> &
   NodeWithSeal<N> &
   NodeWithTo<N>;
