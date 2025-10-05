@@ -2,7 +2,10 @@ import type { ExtractCaptures } from "@/pattern";
 import type { SingleKeyOf } from "@/type-utils/single-key-of";
 import type { FluentNode } from "@/ast/fluent-node";
 import type { SubstituteCaptures } from "@/ast/substitute-captures";
-import type { TSESTree } from "@typescript-eslint/types";
+import type {
+  NormalizeBag,
+  SubstituteSingleCapture,
+} from "@/ast/substitute-single-capture";
 
 /**
  * Add a fluent `.map` method to a node value `N`.
@@ -24,12 +27,7 @@ export type NodeWithMap<Node> = Node & {
       : (value: SingleValueOf<ExtractCaptures<Node>>) => NewValue
   ): [SingleKeyOf<ExtractCaptures<Node>>] extends [never]
     ? never
-    : FluentNode<
-        SubstituteCaptures<
-          Node,
-          BagFromSingle<ExtractCaptures<Node>, NormalizeCaptured<NewValue>>
-        >
-      >;
+    : FluentNode<SubstituteSingleCapture<Node, NewValue>>;
 
   /** Bag map overload (any number of captures). */
   map<NewBag>(
@@ -39,29 +37,3 @@ export type NodeWithMap<Node> = Node & {
 
 // Helper types for single-capture ergonomics
 type SingleValueOf<T> = SingleKeyOf<T> extends infer K ? T[K & keyof T] : never;
-type BagFromSingle<T, V> = SingleKeyOf<T> extends infer K
-  ? { [P in K & keyof T]: V }
-  : never;
-
-/**
- * Apply a mapped capture bag `B` to the node shape `N` by structurally
- * refining embedded capture/spread tokens.
- *
- * - Capture<'name', _> → Capture<'name', B['name']> (if present in B)
- * - Spread<'name', Elem> → Spread<'name', ElemN> when B['name'] is
- *   ReadonlyArray<ElemN>
- * - Recurse through tuples, arrays, and objects.
- */
-type UnwrapFluent<T> = T extends FluentNode<infer N> ? N : T;
-type Rehydrate<T> = T extends { type: infer Tag }
-  ? Extract<TSESTree.Node, { type: Tag }>
-  : T;
-type CollapseCategories<T> = [T] extends [TSESTree.Expression]
-  ? TSESTree.Expression
-  : [T] extends [TSESTree.Statement]
-  ? TSESTree.Statement
-  : T;
-type NormalizeCaptured<V> = CollapseCategories<Rehydrate<UnwrapFluent<V>>>;
-type NormalizeBag<B> = {
-  [K in keyof B]: CollapseCategories<Rehydrate<UnwrapFluent<B[K]>>>;
-};
