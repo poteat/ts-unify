@@ -51,8 +51,8 @@ const returnOfValue = U.or(
  * ```
  */
 export const collapseNullGuard = U.BlockStatement({
-  body: [...$("pre"), nullCheck, returnOfValue],
-}).to(({ pre, value: left, fallback: right, typeAnnotation }) => {
+  body: [...$, nullCheck, returnOfValue],
+}).to(({ body, value: left, fallback: right, typeAnnotation }) => {
   const coalesce = U.LogicalExpression({
     operator: "??",
     left,
@@ -65,7 +65,7 @@ export const collapseNullGuard = U.BlockStatement({
 
   return U.BlockStatement({
     body: [
-      ...pre,
+      ...body,
       U.ReturnStatement({
         argument,
       }),
