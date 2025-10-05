@@ -22,6 +22,6 @@ const functionParent = U.or(
 export const addReturnToBlock = U.BlockStatement({
   parent: functionParent,
   body: [U.ExpressionStatement({ expression: $ })],
-}).to(({ expression }) =>
-  U.BlockStatement({ body: [U.ReturnStatement({ argument: expression })] })
+}).to(({ expression: argument }) =>
+  U.BlockStatement({ body: [U.ReturnStatement({ argument })] })
 );
