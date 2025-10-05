@@ -1,5 +1,5 @@
 import type { ExtractCaptures } from "@/pattern";
-import type { SingleKeyOf } from "@/type-utils/single-key-of";
+import type { SingleValueOf } from "@/type-utils/single-value-of";
 import type { HasSingleCapture } from "@/ast/capture-cardinality";
 import type { FluentNode } from "@/ast/fluent-node";
 import type { SubstituteCaptures } from "@/ast/substitute-captures";
@@ -33,6 +33,3 @@ export type NodeWithMap<Node> = Node & {
     fn: (bag: ExtractCaptures<Node>) => NewBag
   ): FluentNode<SubstituteCaptures<Node, NormalizeBag<NewBag>>>;
 };
-
-// Helper types for single-capture ergonomics
-type SingleValueOf<T> = SingleKeyOf<T> extends infer K ? T[K & keyof T] : never;

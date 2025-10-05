@@ -1,9 +1,9 @@
-import type { SingleKeyOf } from "@/type-utils/single-key-of";
 import type { ExtractCaptures } from "@/pattern";
 import type { HasSingleCapture } from "@/ast/capture-cardinality";
 import type { FluentNode } from "@/ast/fluent-node";
 import type { SubstituteCaptures } from "@/ast/substitute-captures";
 import type { SubstituteSingleCapture } from "@/ast/substitute-single-capture";
+import type { SingleValueOf } from "@/type-utils/single-value-of";
 
 /**
  * Add a fluent `.when` method to a node value `N`.
@@ -83,6 +83,3 @@ export type NodeWithWhen<Node> = Node & {
       : (bag: ExtractCaptures<Node>) => boolean
   ): [HasSingleCapture<Node>] extends [true] ? never : FluentNode<Node>;
 };
-
-// Helper types for single-capture ergonomics
-type SingleValueOf<T> = SingleKeyOf<T> extends infer K ? T[K & keyof T] : never;
