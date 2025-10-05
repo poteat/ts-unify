@@ -1,22 +1,7 @@
 import type { ExtractCaptures } from "@/pattern";
 import type { SubstituteCaptures } from "@/ast/substitute-captures";
 import type { SingleKeyOf } from "@/type-utils/single-key-of";
-import type { UnwrapFluent } from "@/ast/unwrap-fluent";
-import type { TSESTree } from "@typescript-eslint/types";
-
-type Rehydrate<T> = T extends { type: infer Tag }
-  ? Extract<TSESTree.Node, { type: Tag }>
-  : T;
-type CollapseCategories<T> = [T] extends [TSESTree.Expression]
-  ? TSESTree.Expression
-  : [T] extends [TSESTree.Statement]
-  ? TSESTree.Statement
-  : T;
-type NormalizeCaptured<V> = CollapseCategories<Rehydrate<UnwrapFluent<V>>>;
-
-export type NormalizeBag<B> = {
-  [K in keyof B]: NormalizeCaptured<B[K]>;
-};
+import type { NormalizeCaptured } from "@/ast/normalize-captured";
 
 /**
  * Convenience alias for substituting exactly one capture's value in `Node`

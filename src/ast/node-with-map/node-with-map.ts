@@ -2,10 +2,8 @@ import type { ExtractCaptures } from "@/pattern";
 import type { SingleKeyOf } from "@/type-utils/single-key-of";
 import type { FluentNode } from "@/ast/fluent-node";
 import type { SubstituteCaptures } from "@/ast/substitute-captures";
-import type {
-  NormalizeBag,
-  SubstituteSingleCapture,
-} from "@/ast/substitute-single-capture";
+import type { SubstituteSingleCapture } from "@/ast/substitute-single-capture";
+import type { NormalizeBag } from "@/ast/normalize-bag";
 
 /**
  * Add a fluent `.map` method to a node value `N`.

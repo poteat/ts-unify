@@ -1,20 +1,27 @@
 # UnwrapFluent
 
-Type helper that removes the fluent wrapper from a node type.
+Erase the fluent “helper veneer” to reveal the underlying node shape.
 
-## Definition
+## What and Why
+
+- What: a tiny type that turns `FluentNode<N>` into `N` and leaves anything else
+  unchanged.
+- Why: lets provider helpers accept values that may or may not be fluent
+  without having to carry that distinction in their local logic.
+
+## Role in the System
+
+- A foundational normalizer used by `NormalizeCaptured` (and indirectly by
+  helpers like `.map`/`.default`). It keeps those helpers focused on their
+  semantics instead of on plumbing away fluent wrappers.
+
+## Definition (for reference)
 
 ```
 type UnwrapFluent<T> = T extends FluentNode<infer N> ? N : T;
 ```
 
-## Purpose
-
-- Used by other helpers (e.g., `NormalizeCaptured`) to accept either plain node
-  shapes or fluent nodes and work uniformly.
-- Keeps local helpers focused by factoring the fluent unwrapping into a single
-  place.
-
 ## Notes
 
-- If `T` is not a `FluentNode<…>`, it is returned unchanged.
+- Purely a type‑level concept; no runtime effect.
+- Does not recurse — it only removes the outermost fluent wrapper.

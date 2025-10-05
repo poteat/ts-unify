@@ -1,28 +1,30 @@
 # SubstituteSingleCapture
 
-Convenience alias for substituting exactly one capture's value type in a node
-shape with the normalized type of an expression.
+A small but important building block: “replace the one captured value in this
+node with the (normalized) type of Expr.” It captures the intent of
+single‑capture refinement in a name that’s easy to reach for, and keeps more
+expressive fluent helpers focused.
 
-## Definition
+## What and Why
 
-```
-type SubstituteSingleCapture<Node, Expr> = SubstituteCaptures<
-  Node,
-  {
-    [K in SingleKeyOf<ExtractCaptures<Node>> & keyof ExtractCaptures<Node>]: NormalizeCaptured<Expr>
-  }
->;
-```
+- What: a type alias that applies `SubstituteCaptures` with a one‑key bag,
+  where that key is the node’s single capture key and the value is the
+  normalized expression type.
+- Why: de‑duplicates boilerplate across `.default` and the single‑capture `.map`
+  overload, and lets their specs talk in terms of this concept rather than the
+  raw mechanics.
 
-- `NormalizeCaptured<V>` unwraps `FluentNode`, rehydrates `{ type: … }` to the
-  concrete `TSESTree.Node` interface for that tag, and collapses category unions
-  to `TSESTree.Expression`/`TSESTree.Statement`.
-- Gate usage at the call site (e.g., with `SingleKeyOf`) to ensure there is
-  exactly one capture; the alias itself does not enforce this.
+## Semantics
 
-## Rationale
+- Uses `SingleKeyOf<ExtractCaptures<Node>>` to identify the single capture key
+  (call sites should already be gating on the single‑capture condition).
+- Normalizes `Expr` with `NormalizeCaptured` to avoid overly specific unions and
+  to accept either fluent nodes or `{ type: … }` shapes.
+- Leaves structure outside the capture intact; only re‑types the captured value
+  at that one capture key.
 
-- Centralizes normalization logic previously duplicated across fluent helpers.
-- Keeps single‑capture refinement readable where used (e.g., `.default`,
-  single‑capture `.map`).
+## Relationship to Other Concepts
 
+- Built on top of `SubstituteCaptures` (structural rewrite) and
+  `NormalizeCaptured` (type stabilization for Expr).
+- Used by `NodeWithDefault` and single‑capture `NodeWithMap`.
