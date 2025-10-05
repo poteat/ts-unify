@@ -8,7 +8,7 @@ const callConsequent = U.or(
     body: [
       U.ExpressionStatement({
         expression: U.CallExpression({
-          callee: $("fn"),
+          callee: $,
           arguments: $("args"),
         }),
       }),
@@ -16,7 +16,7 @@ const callConsequent = U.or(
   }),
   U.ExpressionStatement({
     expression: U.CallExpression({
-      callee: $("fn"),
+      callee: $,
       arguments: $("args"),
     }),
   })
@@ -34,14 +34,14 @@ const callConsequent = U.or(
  *   func?.(arg1, arg2);
  */
 export const ifGuardedCallToOptional = U.IfStatement({
-  test: $("fn"),
+  test: $("callee"),
   consequent: callConsequent,
   alternate: null,
-}).to(({ fn, args }) =>
+}).to(({ callee, args }) =>
   U.ExpressionStatement({
     expression: U.ChainExpression({
       expression: U.CallExpression({
-        callee: fn,
+        callee,
         arguments: args,
         optional: true,
       }),

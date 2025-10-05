@@ -9,7 +9,7 @@ const anyReturnForm = U.or(
   }),
   U.ReturnStatement({ argument: $ })
 )
-  .map((x) => x ?? U.Identifier({ name: "undefined" }))
+  .default(U.Identifier({ name: "undefined" }))
   .seal();
 
 /**
