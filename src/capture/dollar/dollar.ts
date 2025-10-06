@@ -2,11 +2,12 @@ import type { Capture } from "@/capture/capture-type";
 import { CAPTURE_BRAND } from "@/capture/capture-type";
 import type { Spread } from "@/capture/spread/spread";
 import type { DollarObjectSpread } from "@/capture/dollar-spread/dollar-spread";
+import type { FluentCapture } from "@/capture/fluent-capture";
 
-export type $ = (<const Name extends string, Value = unknown>(
-  name: Name
-) => Capture<Name, Value> & Iterable<Spread<Name, Value>>) &
-  DollarObjectSpread &
+export type $ = {
+  <const Name extends string>(name: Name): FluentCapture<Name, unknown>;
+  <const Name extends string, Value>(name: Name): FluentCapture<Name, Value>;
+} & DollarObjectSpread &
   Iterable<Spread<"", unknown>>;
 
 /**

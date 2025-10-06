@@ -5,6 +5,8 @@ import type { Spread } from "@/capture/spread/spread";
 import type { TSESTree } from "@typescript-eslint/types";
 import type { Sealed } from "@/ast/sealed";
 import type { OR_BRAND } from "@/ast/or";
+import type { CAPTURE_MODS_BRAND } from "@/capture/capture-mods/capture-mods";
+import type { Truthy } from "@/ast/builder-helpers";
 
 /**
  * Bind capture names and value types in a pattern `P` using a reference `Shape`.
@@ -71,6 +73,30 @@ type BindSequenceItem<
   : BindNode<Item, ElemAt<S, I>, `${I & string}`>;
 
 // ————— Value binder (leaves concrete nodes untouched) —————
+type ExtractMods<P> = P extends { readonly [CAPTURE_MODS_BRAND]: infer M }
+  ? M
+  : {};
+
+type ApplyMods<Base, Mods> = Mods extends infer M
+  ? // Default substitution takes precedence
+    (
+      M extends { default: infer D }
+        ? D
+        : // Map substitution next
+        M extends { map: infer New }
+        ? New
+        : Base
+    ) extends infer V0
+    ? // When guard narrowing
+      (M extends { when: infer Narrow } ? Narrow : V0) extends infer V1
+      ? // Truthy narrowing last
+        M extends { truthy: true }
+        ? Truthy<V1>
+        : V1
+      : never
+    : never
+  : Base;
+
 type BindValue<P, S, Key extends string> =
   // Short-circuit: don't recurse into concrete AST nodes
   P extends TSESTree.Node
@@ -88,7 +114,10 @@ type BindValue<P, S, Key extends string> =
       : Capture<Key, S>
     : // Explicit capture: upgrade unknown value type to the shape at position
     P extends Capture<infer Name, infer V>
-    ? Capture<Name & string, unknown extends V ? S : V>
+    ? Capture<
+        Name & string,
+        ApplyMods<unknown extends V ? S : V, ExtractMods<P>>
+      >
     : // Spread in sequences: refine element using array element type
     P extends Spread<infer Name, infer Elem>
     ? S extends readonly any[]
