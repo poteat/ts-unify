@@ -111,7 +111,7 @@ type BindValue<P, S, Key extends string> =
         : S extends object
         ? { [K in keyof S]: Capture<K & string, S[K]> }
         : never
-      : Capture<Key, S>
+      : Capture<Key, ApplyMods<S, ExtractMods<P>>>
     : // Explicit capture: upgrade unknown value type to the shape at position
     P extends Capture<infer Name, infer V>
     ? Capture<
