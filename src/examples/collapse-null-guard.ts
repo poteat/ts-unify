@@ -16,7 +16,7 @@ const nullCheck = U.IfStatement({
       body: [returnFallback],
     }),
     returnFallback
-  ).when(U.truthy),
+  ).truthy(),
   alternate: null,
 });
 

@@ -4,6 +4,7 @@ import type { NodeWithSeal } from "@/ast/node-with-seal";
 import type { NodeWithMap } from "@/ast/node-with-map";
 import type { NodeWithDefault } from "@/ast/node-with-default";
 import type { NodeWithDefaultUndefined } from "@/ast/node-with-default-undefined";
+import type { NodeWithTruthy } from "@/ast/node-with-truthy";
 
 /**
  * FluentNode<N>
@@ -16,5 +17,6 @@ export type FluentNode<N> = NodeWithWhen<N> &
   NodeWithMap<N> &
   NodeWithDefault<N> &
   NodeWithDefaultUndefined<N> &
+  NodeWithTruthy<N> &
   NodeWithSeal<N> &
   NodeWithTo<N>;

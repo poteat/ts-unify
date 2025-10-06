@@ -9,6 +9,7 @@ export * from "./ast-transform";
 export * from "./node-with-seal";
 export * from "./node-with-default";
 export * from "./node-with-default-undefined";
+export * from "./node-with-truthy";
 export * from "./substitute-single-capture";
 export * from "./unwrap-fluent";
 export * from "./normalize-captured";
