@@ -6,7 +6,7 @@ import type { TSESTree } from "@typescript-eslint/types";
 import type { Sealed } from "@/ast/sealed";
 import type { OR_BRAND } from "@/ast/or";
 import type { CAPTURE_MODS_BRAND } from "@/capture/capture-mods/capture-mods";
-import type { Truthy } from "@/ast/builder-helpers";
+import type { Falsy, Truthy } from "@/ast/builder-helpers";
 
 /**
  * Bind capture names and value types in a pattern `P` using a reference `Shape`.
@@ -81,7 +81,7 @@ type ApplyMods<Base, Mods> = Mods extends infer M
   ? // Default substitution takes precedence
     (
       M extends { default: infer D }
-        ? D
+        ? Exclude<Base, Falsy> | D
         : // Map substitution next
         M extends { map: infer New }
         ? New

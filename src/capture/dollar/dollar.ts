@@ -2,48 +2,21 @@ import type { Capture } from "@/capture/capture-type";
 import { CAPTURE_BRAND } from "@/capture/capture-type";
 import type { Spread } from "@/capture/spread/spread";
 import type { DollarObjectSpread } from "@/capture/dollar-spread/dollar-spread";
-import type { FluentCapture } from "@/capture/fluent-capture";
-import type { CaptureMods } from "@/capture/capture-mods/capture-mods";
-import type {
-  ModMap,
-  ModDefault,
-  ModTruthy,
-  ModWhen,
-} from "@/capture/capture-mods/capture-mods";
-import type { NormalizeCaptured } from "@/ast/normalize-captured";
-import type { TSESTree } from "@typescript-eslint/types";
+import type { FluentCapture, FluentOps } from "@/capture/fluent-capture";
 
-type AnonymousFluent = {
-  map<New>(
-    fn: (value: unknown) => New
-  ): $ & CaptureMods<ModMap<NormalizeCaptured<New>>>;
-  default<Expr>(
-    expr: Expr
-  ): $ & CaptureMods<ModDefault<NormalizeCaptured<Expr>>>;
-  defaultUndefined(): $ & CaptureMods<ModDefault<TSESTree.Identifier>>;
-  truthy(): $ & CaptureMods<ModTruthy>;
-  when<Narrow>(
-    guard: (value: unknown) => value is Narrow
-  ): $ & CaptureMods<ModWhen<Narrow>>;
-  when(predicate: (value: unknown) => boolean): $;
-};
-
-export type $ = {
-  <const Name extends string>(
-    name: Name
-  ): Capture<Name, unknown> &
+export interface $
+  extends DollarObjectSpread,
+    Iterable<Spread<"", unknown>>,
+    FluentOps<$, unknown> {
+  <const Name extends string>(name: Name): Capture<Name, unknown> &
     Iterable<Spread<Name, unknown>> &
     DollarObjectSpread &
     FluentCapture<Name, unknown>;
-  <const Name extends string, Value>(
-    name: Name
-  ): Capture<Name, Value> &
+  <const Name extends string, Value>(name: Name): Capture<Name, Value> &
     Iterable<Spread<Name, Value>> &
     DollarObjectSpread &
     FluentCapture<Name, Value>;
-} & DollarObjectSpread &
-  Iterable<Spread<"", unknown>> &
-  AnonymousFluent;
+}
 
 /**
  * Create a capture sentinel with a literal-typed name.
