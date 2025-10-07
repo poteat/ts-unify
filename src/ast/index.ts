@@ -17,3 +17,4 @@ export * from "./normalize-bag";
 export * from "./capture-cardinality";
 export * from "./sealed";
 export * from "./or";
+export * from "./from-node";

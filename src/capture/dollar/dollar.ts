@@ -32,27 +32,39 @@ export interface $
  * const b = $<"id", number>("id");    // Capture<"id", number>
  * // type-level implicit: type P = { id: typeof $ }
  */
-const __dollar = (<const Name extends string, Value = unknown>(name: Name) =>
-  Object.freeze({
+const __dollar = (<const Name extends string, Value = unknown>(name: Name) => {
+  // Create capture token object
+  const obj = ({
     [CAPTURE_BRAND]: true,
     name,
-    [Symbol.iterator]: function* (): IterableIterator<Spread<Name, Value>> {
+  } as unknown) as Capture<Name, Value> & Iterable<Spread<Name, Value>>;
+  // Define iterator as non-enumerable so `{ ...$ }` spreads nothing
+  Object.defineProperty(obj as object, Symbol.iterator, {
+    enumerable: false,
+    configurable: false,
+    writable: false,
+    value: function* (): IterableIterator<Spread<Name, Value>> {
       // Yield a single spread token for sequence spread sugar `...$('name')`.
       // The spread token is a type-level marker; runtime consumers may inspect
       // the brand and name when interpreting sequence patterns.
       const token = { name } as unknown as Spread<Name, Value>;
       yield token;
     },
-  }) as Capture<Name, Value> & Iterable<Spread<Name, Value>>) as any;
+  });
+  return Object.freeze(obj) as Capture<Name, Value> & Iterable<Spread<Name, Value>>;
+}) as any;
 
 // Also allow anonymous sequence spread with `...$` by making the function itself
 // iterable. The yielded spread has an empty name which is re-keyed by
 // type-level binders using the containing property key.
-(__dollar as any)[Symbol.iterator] = function* (): IterableIterator<
-  Spread<"", unknown>
-> {
-  const token = { name: "" } as unknown as Spread<"", unknown>;
-  yield token;
-};
+Object.defineProperty(__dollar as any, Symbol.iterator, {
+  enumerable: false,
+  configurable: false,
+  writable: false,
+  value: function* (): IterableIterator<Spread<"", unknown>> {
+    const token = { name: "" } as unknown as Spread<"", unknown>;
+    yield token;
+  },
+});
 
 export const $ = __dollar as $;

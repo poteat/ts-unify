@@ -13,23 +13,26 @@ describe("Capture-local fluent on $(name)", () => {
     void check;
   });
 
-  it("default substitutes to the fallback type (not a union)", () => {
+  it("default coalesces falsy to fallback (union with base)", () => {
     function check(capture: FluentCapture<"y", string>) {
       const c = capture.default(123 as const);
       type Bound = import("@/capture").BindCaptures<typeof c, string>;
       type V = Bound extends { value?: infer T } ? T : never;
-      assertType<V, 123>(0);
+      assertType<V, string | 123>(0);
     }
     void check;
   });
 
-  it("defaultUndefined substitutes to Identifier type after binding", () => {
+  it("defaultUndefined adds Identifier to the value type after binding", () => {
     function check(capture: FluentCapture<"z", string>) {
       const c = capture.defaultUndefined();
       type Bound = import("@/capture").BindCaptures<typeof c, string>;
       type V = Bound extends { value?: infer T } ? T : never;
-      // Using Identifier("undefined") sugar → value type is Identifier
-      assertType<V, import("@typescript-eslint/types").TSESTree.Identifier>(0);
+      // Using Identifier("undefined") sugar adds Identifier (union with base)
+      assertType<
+        V,
+        string | import("@typescript-eslint/types").TSESTree.Identifier
+      >(0);
     }
     void check;
   });

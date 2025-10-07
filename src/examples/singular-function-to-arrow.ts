@@ -1,5 +1,6 @@
 import type { BuilderMap } from "@/ast";
 import { $ } from "@/capture";
+import { AST_NODE_TYPES } from "@typescript-eslint/types";
 
 declare const U: BuilderMap;
 
@@ -9,7 +10,13 @@ const returnBlock = U.BlockStatement({
 
 const exprBlock = U.BlockStatement({
   body: [U.ExpressionStatement({ expression: $ })],
-});
+})
+  .map((expression) =>
+    U.BlockStatement({
+      body: [U.ExpressionStatement({ expression })],
+    })
+  )
+  .seal();
 
 /**
  * Convert function declarations and expressions with single-statement bodies to arrow functions
@@ -32,34 +39,17 @@ const exprBlock = U.BlockStatement({
  * may break after this transformation. It also changes hoisting behavior for
  * function declarations (const assignments are not hoisted like declarations).
  */
-
-// ——— Named FunctionDeclaration with a single `return` → const name = (...params) => expr
-export const functionDeclReturnToArrow = U.FunctionDeclaration({
+export const functionDeclReturnToArrow = U.fromNode({
+  type: U.or(
+    AST_NODE_TYPES.FunctionDeclaration,
+    AST_NODE_TYPES.FunctionExpression
+  ),
   id: $.truthy(),
   params: $,
   async: $,
-  body: returnBlock,
+  body: U.or(returnBlock, exprBlock),
   generator: false,
 }).to(({ id, params, async, body }) =>
-  U.VariableDeclaration({
-    kind: "const",
-    declarations: [
-      U.VariableDeclarator({
-        id,
-        init: U.ArrowFunctionExpression({ async, params, body }),
-      }),
-    ],
-  })
-);
-
-// ——— Named FunctionDeclaration with a single expression statement → const name = (...params) => { expr; }
-export const functionDeclExprToArrow = U.FunctionDeclaration({
-  id: $.truthy(),
-  params: $,
-  async: $,
-  body: exprBlock,
-  generator: false as const,
-}).to(({ id, params, async, expression }) =>
   U.VariableDeclaration({
     kind: "const",
     declarations: [
@@ -68,37 +58,9 @@ export const functionDeclExprToArrow = U.FunctionDeclaration({
         init: U.ArrowFunctionExpression({
           async,
           params,
-          body: U.BlockStatement({
-            body: [U.ExpressionStatement({ expression })],
-          }),
+          body,
         }),
       }),
     ],
-  })
-);
-
-// ——— FunctionExpression with a single `return` → (...params) => expr
-export const functionExprReturnToArrow = U.FunctionExpression({
-  id: null,
-  params: $,
-  async: $,
-  body: returnBlock,
-  generator: false,
-}).to(({ params, async, body }) =>
-  U.ArrowFunctionExpression({ async, params, body })
-);
-
-// ——— FunctionExpression with a single expression statement → (...params) => { expr; }
-export const functionExprExprToArrow = U.FunctionExpression({
-  id: null,
-  params: $,
-  async: $("async"),
-  body: exprBlock,
-  generator: false,
-}).to(({ params, async, expression }) =>
-  U.ArrowFunctionExpression({
-    async,
-    params,
-    body: U.BlockStatement({ body: [U.ExpressionStatement({ expression })] }),
   })
 );

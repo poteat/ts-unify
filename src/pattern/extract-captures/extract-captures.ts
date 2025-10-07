@@ -12,10 +12,7 @@ import type { Sealed } from "@/ast/sealed";
 import type { OR_BRAND } from "@/ast/or";
 import type { TSESTree } from "@typescript-eslint/types";
 
-type ExtractFromPropertyValue<
-  T,
-  Key extends string
-> = T extends TSESTree.Expression
+type ExtractFromPropertyValue<T, Key extends string> = T extends TSESTree.Node
   ? {}
   : // Check if type contains a Capture (works with unions)
   T extends Capture
