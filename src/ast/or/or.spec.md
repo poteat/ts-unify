@@ -17,10 +17,14 @@ shapes, and whose capture bag reflects a union of the branches’ capture bags.
 
 ## Design
 
-- Input: `U.or(b1, b2, ..., bn)` where each `bi` is a `FluentNode<Ni>`.
-- Output: `FluentNode<N1 | N2 | ... | Nn>`.
+- Inputs/Outputs:
+  - Literals-only: `U.or(v1, v2, ..., vn)` where every `vi` is a primitive
+    literal (string, number, boolean, bigint, symbol, null, undefined) → returns
+    the plain union `v1 | v2 | ... | vn`.
+  - Fluent: When all branches are `FluentNode<Ni>` → returns
+    `FluentNode<N1 | N2 | ... | Nk | V1 | ... | Vm>`.
 - Capture bag for `.when`/`.to` derives from the union:
-  `ExtractCaptures<N1 | ... | Nn>`. This distributes over branches.
+  `ExtractCaptures<N1 | ... | Nk | V1 | ... | Vm>`.
 
 ## Semantics
 
