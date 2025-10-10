@@ -44,23 +44,29 @@ export const functionDeclReturnToArrow = U.fromNode({
     AST_NODE_TYPES.FunctionDeclaration,
     AST_NODE_TYPES.FunctionExpression
   ),
-  id: $.truthy(),
+  id: $,
   params: $,
   async: $,
   body: U.or(returnBlock, exprBlock),
   generator: false,
-}).to(({ id, params, async, body }) =>
-  U.VariableDeclaration({
-    kind: "const",
-    declarations: [
-      U.VariableDeclarator({
-        id,
-        init: U.ArrowFunctionExpression({
-          async,
-          params,
-          body,
-        }),
-      }),
-    ],
-  })
-);
+})
+  .with(({ async, params, body }) => ({
+    init: U.ArrowFunctionExpression({
+      async,
+      params,
+      body,
+    }),
+  }))
+  .to(({ id, init }) =>
+    id
+      ? U.VariableDeclaration({
+          kind: "const",
+          declarations: [
+            U.VariableDeclarator({
+              id,
+              init,
+            }),
+          ],
+        })
+      : init
+  );

@@ -29,6 +29,10 @@ type StripSeal<T> = T extends Sealed<infer Inner> ? Inner : T;
 type StripOr<T> = T extends { readonly [OR_BRAND]: true }
   ? Omit<T, typeof OR_BRAND>
   : T;
+type StripWith<T> = T extends { readonly __with: any }
+  ? Omit<T, "__with">
+  : T;
+type Overwrite<Left, Right> = Omit<Left, keyof Right> & Right;
 
 type ReKeyIfSingle<Bag, K extends string> = [SingleKeyOf<Bag>] extends [never]
   ? Bag
@@ -60,6 +64,9 @@ type ExtractFromPattern<P, Key extends string = ""> =
         ? ExtractFromPattern<U, Key>
         : never
       : never
+    : // Merge in branded bag additions from `.with(...)` if present
+    P extends { readonly __with: infer WB }
+    ? Overwrite<ExtractFromPattern<StripWith<P>, Key>, WB & {}>
     : // Short circuit: don't recurse into generic nodes
     P extends TSESTree.Node
     ? {}

@@ -18,3 +18,4 @@ export * from "./capture-cardinality";
 export * from "./sealed";
 export * from "./or";
 export * from "./from-node";
+export * from "./node-with-with";
