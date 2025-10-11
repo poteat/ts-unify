@@ -145,7 +145,7 @@ type BindValue<P, S, Key extends string> =
         >;
       } & (P extends { readonly [OBJECT_SPREAD_BRAND]: true }
         ? {
-            [K in Exclude<keyof S, keyof P> & string]: Capture<
+            [K in Exclude<keyof S, keyof P | "type"> & string]: Capture<
               K,
               K extends keyof S ? S[K] : never
             >;

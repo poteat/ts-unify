@@ -12,6 +12,13 @@ describe("BindCaptures with object spread-$ (type-level)", () => {
     assertType<Bound, Expected>(0);
   });
 
-  // Additional cases (e.g., all-explicit alongside spread) are equivalent
-  // and covered by the omitted-keys case above.
+  it("does not capture 'type' from shape extras", () => {
+    type Shape = { type: "ReturnStatement"; a: number; b: string };
+    type Pattern = { a: Capture<"a", number> } & DollarObjectSpread;
+    type Bound = BindCaptures<Pattern, Shape>;
+    type Expected = { a: Capture<"a", number> } & {
+      b: Capture<"b", string>;
+    };
+    assertType<Bound, Expected>(0);
+  });
 });

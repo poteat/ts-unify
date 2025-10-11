@@ -19,6 +19,10 @@ capture properties by name.
     - Otherwise, produce `Capture<K, S[K]>`.
 - `{ ...$ }` alone captures every top-level property by name.
 
+Note (AST builder context): When binding against ESTree nodes via builders,
+the discriminant property `type` is not captured by the spread extras. Explicit
+`type` constraints in `P` still apply; the spread only fills non-`type` keys.
+
 ## Runtime
 
 - `$` has no enumerable properties. Spreading it into an object literal is a
