@@ -19,7 +19,8 @@ const exprBlock = U.BlockStatement({
   .seal();
 
 /**
- * Convert function declarations and expressions with single-statement bodies to arrow functions
+ * Convert function declarations and expressions with single-statement bodies to
+ * arrow functions
  *
  * Transforms:
  *   function foo(x) {
