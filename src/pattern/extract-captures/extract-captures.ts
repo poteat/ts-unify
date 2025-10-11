@@ -9,6 +9,7 @@ import type {
 } from "@/type-utils";
 import type { SingleKeyOf } from "@/type-utils/single-key-of";
 import type { Sealed } from "@/ast/sealed";
+import type { Overwrite } from "@/type-utils";
 import type { OR_BRAND } from "@/ast/or";
 import type { TSESTree } from "@typescript-eslint/types";
 
@@ -29,10 +30,7 @@ type StripSeal<T> = T extends Sealed<infer Inner> ? Inner : T;
 type StripOr<T> = T extends { readonly [OR_BRAND]: true }
   ? Omit<T, typeof OR_BRAND>
   : T;
-type StripWith<T> = T extends { readonly __with: any }
-  ? Omit<T, "__with">
-  : T;
-type Overwrite<Left, Right> = Omit<Left, keyof Right> & Right;
+type StripWith<T> = T extends { readonly __with: any } ? Omit<T, "__with"> : T;
 
 type ReKeyIfSingle<Bag, K extends string> = [SingleKeyOf<Bag>] extends [never]
   ? Bag

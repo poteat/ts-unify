@@ -44,11 +44,9 @@ export const functionDeclReturnToArrow = U.fromNode({
     AST_NODE_TYPES.FunctionDeclaration,
     AST_NODE_TYPES.FunctionExpression
   ),
-  id: $,
-  params: $,
-  async: $,
   body: U.or(returnBlock, exprBlock),
   generator: false,
+  ...$,
 })
   .with(({ async, params, body }) => ({
     init: U.ArrowFunctionExpression({

@@ -9,3 +9,4 @@ export * from "./without-internal-ast-fields";
 export * from "./single-key-of";
 export * from "./keys-of-union";
 export * from "./single-value-of";
+export * from "./overwrite";
