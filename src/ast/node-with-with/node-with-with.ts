@@ -10,14 +10,14 @@ import type { Overwrite } from "@/type-utils";
  * - Adds new keys (carried via brand so downstream `.to` sees them)
  */
 export type NodeWithWith<Node> = Node & {
-  with<NewBag>(
-    fn: (bag: ExtractCaptures<Node>) => NewBag
-  ): FluentNode<
+  with<NewBag>(fn: (bag: ExtractCaptures<Node>) => NewBag): FluentNode<
     SubstituteCaptures<
-      Node,
+      Omit<Node, "__with">,
       Overwrite<ExtractCaptures<Node>, NormalizeBag<NewBag>>
     > & {
-      readonly __with: Overwrite<ExtractCaptures<Node>, NormalizeBag<NewBag>>;
+      readonly __with: Node extends { readonly __with: infer WB }
+        ? Overwrite<WB, NormalizeBag<NewBag>>
+        : Overwrite<ExtractCaptures<Node>, NormalizeBag<NewBag>>;
     }
   >;
 };
