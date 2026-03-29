@@ -1,26 +1,6 @@
 import { $ } from "@/capture";
 import { U } from "@/ast";
 
-/**
- * Transform guarded for-loops with push into filter().map() chains
- *
- * @example
- * ```ts
- * // Before
- * const result: T = [];
- * for (const item of items) {
- *   if (condition(item)) {
- *     result.push(transform(item));
- *   }
- * }
- *
- * // After
- * const result = items
- *   .filter(item => condition(item))
- *   .map(item => transform(item));
- * ```
- */
-
 // `result.push(value)` as a statement (allow block or bare via maybeBlock)
 const pushStatement = U.maybeBlock(
   U.ExpressionStatement({
@@ -61,6 +41,25 @@ const emptyArrayDecl = U.VariableDeclaration({
   ],
 });
 
+/**
+ * Transform guarded for-loops with push into filter().map() chains
+ *
+ * @example
+ * ```ts
+ * // Before
+ * const result: T = [];
+ * for (const item of items) {
+ *   if (condition(item)) {
+ *     result.push(transform(item));
+ *   }
+ * }
+ *
+ * // After
+ * const result = items
+ *   .filter(item => condition(item))
+ *   .map(item => transform(item));
+ * ```
+ */
 export const guardedForPushToFilterMap = U.BlockStatement({
   body: [...$("before"), emptyArrayDecl, guardedFor, ...$("after")],
 }).to(({ before, after, arrayId, loopVar, source, condition, pushValue }) => {
