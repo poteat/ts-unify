@@ -1,0 +1,17 @@
+{
+  "name": "@ts-unify/eslint-rules-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "test": "jest",
+    "test:coverage": "jest --coverage"
+  },
+  "dependencies": {
+    "@ts-unify/core": "0.0.1",
+    "@ts-unify/eslint": "0.0.1",
+    "@ts-unify/rules": "0.0.1",
+    "@typescript-eslint/parser": "^8.43.0",
+    "@typescript-eslint/rule-tester": "^8.43.0",
+    "eslint": "^9.35.0"
+  }
+}

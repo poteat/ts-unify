@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "baseUrl": "../core/src",
+    "paths": {
+      "@ts-unify/core": ["index.ts"],
+      "@ts-unify/eslint": ["../../eslint/src/index.ts"],
+      "@ts-unify/rules": ["../../rules/src/index.ts"],
+      "@/*": ["*"],
+      "@": ["index.ts"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}

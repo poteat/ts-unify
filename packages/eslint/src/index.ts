@@ -44,7 +44,7 @@ export function createRule(
  * Match an AST node against a pattern object, extracting captures.
  * Returns the capture bag on match, or null on mismatch.
  */
-function match(
+export function match(
   node: any,
   pattern: any
 ): Record<string, any> | null {
@@ -59,8 +59,13 @@ function match(
     }
 
     if (isProxyNode(expected)) {
+      const inner: ProxyNode = (expected as any)[NODE];
+      if (inner.tag === "or") {
+        // U.or(a, b, ...) — match if actual equals any arg
+        if (!inner.args.some((arg) => matchValue(actual, arg) !== null)) return null;
+        continue;
+      }
       // Nested builder pattern: U.UnaryExpression({ operator: "!" })
-      const inner = expected as ProxyNode;
       if (actual?.type !== inner.tag) return null;
       const innerPattern = inner.args[0] ?? {};
       const innerBag = match(actual, innerPattern);
@@ -104,7 +109,14 @@ function matchValue(
     return { [expected.name]: actual };
   }
   if (isProxyNode(expected)) {
-    const inner = expected as ProxyNode;
+    const inner: ProxyNode = (expected as any)[NODE];
+    if (inner.tag === "or") {
+      for (const arg of inner.args) {
+        const result = matchValue(actual, arg);
+        if (result) return result;
+      }
+      return null;
+    }
     if (actual?.type !== inner.tag) return null;
     return match(actual, inner.args[0] ?? {});
   }
@@ -112,6 +124,16 @@ function matchValue(
     return match(actual, expected);
   }
   return actual === expected ? {} : null;
+}
+
+/** Extract the entry node type and pattern from a rule's proxy trace. */
+export function extractPattern(rule: any): {
+  tag: string;
+  pattern: any;
+} | null {
+  const proxyNode: ProxyNode | undefined = rule[NODE];
+  if (!proxyNode?.tag) return null;
+  return { tag: proxyNode.tag, pattern: proxyNode.args[0] ?? {} };
 }
 
 function isCapture(v: any): v is { name: string } {
