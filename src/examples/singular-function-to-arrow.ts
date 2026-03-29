@@ -20,7 +20,7 @@ const returnBlock = U.BlockStatement({
 
 const exprBlock = U.BlockStatement({
   body: [U.ExpressionStatement({ expression: $ })],
-}).bind("body");
+}).bind();
 
 /**
  * Convert function declarations and expressions with single-statement bodies to
