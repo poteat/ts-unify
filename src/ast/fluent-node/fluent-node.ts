@@ -1,7 +1,6 @@
 import type { NodeWithWhen } from "@/ast/node-with-when";
 import type { NodeWithTo } from "@/ast/node-with-to";
 import type { NodeWithSeal } from "@/ast/node-with-seal";
-import type { NodeWithMap } from "@/ast/node-with-map";
 import type { NodeWithDefault } from "@/ast/node-with-default";
 import type { NodeWithDefaultUndefined } from "@/ast/node-with-default-undefined";
 import type { NodeWithTruthy } from "@/ast/node-with-truthy";
@@ -19,7 +18,6 @@ export declare const FLUENT_INNER: unique symbol;
 
 export type FluentNode<N> = { readonly [FLUENT_INNER]: N } &
   NodeWithWhen<N> &
-  NodeWithMap<N> &
   NodeWithDefault<N> &
   NodeWithDefaultUndefined<N> &
   NodeWithTruthy<N> &
