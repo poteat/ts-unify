@@ -65,6 +65,28 @@ export function match(
   node: any,
   pattern: any
 ): Record<string, any> | null {
+  const namedBindings: { name: string; value: any }[] = [];
+  const bag = matchInner(node, pattern, namedBindings);
+  if (!bag) return null;
+
+  // Validate duplicate named captures have equal values
+  const seen: Record<string, any> = {};
+  for (const { name, value } of namedBindings) {
+    if (name in seen) {
+      if (!deepEqual(seen[name], value)) return null;
+    } else {
+      seen[name] = value;
+    }
+  }
+
+  return bag;
+}
+
+function matchInner(
+  node: any,
+  pattern: any,
+  namedBindings: { name: string; value: any }[]
+): Record<string, any> | null {
   const bag: Record<string, any> = {};
 
   for (const [key, expected] of Object.entries(pattern)) {
@@ -77,33 +99,34 @@ export function match(
 
     if (isCapture(expected)) {
       bag[expected.name] = actual;
+      namedBindings.push({ name: expected.name, value: actual });
       continue;
     }
 
     if (isProxyNode(expected)) {
       const inner: ProxyNode = (expected as any)[NODE];
       if (inner.tag === "or") {
-        const orBag = matchOr(actual, inner.args);
+        const orBag = matchOrInner(actual, inner.args, namedBindings);
         if (!orBag) return null;
         Object.assign(bag, orBag);
         continue;
       }
       if (inner.tag === "maybeBlock") {
-        const maybeBlockBag = matchMaybeBlock(actual, inner.args[0]);
+        const maybeBlockBag = matchMaybeBlockInner(actual, inner.args[0], namedBindings);
         if (!maybeBlockBag) return null;
         Object.assign(bag, maybeBlockBag);
         continue;
       }
       if (actual?.type !== inner.tag) return null;
       const innerPattern = inner.args[0] ?? {};
-      const innerBag = match(actual, innerPattern);
+      const innerBag = matchInner(actual, innerPattern, namedBindings);
       if (!innerBag) return null;
       Object.assign(bag, innerBag);
       continue;
     }
 
     if (typeof expected === "object" && expected !== null && !Array.isArray(expected)) {
-      const innerBag = match(actual, expected);
+      const innerBag = matchInner(actual, expected, namedBindings);
       if (!innerBag) return null;
       Object.assign(bag, innerBag);
       continue;
@@ -111,7 +134,7 @@ export function match(
 
     if (Array.isArray(expected)) {
       if (!Array.isArray(actual)) return null;
-      const arrayBag = matchArray(actual, expected, key);
+      const arrayBag = matchArrayInner(actual, expected, key, namedBindings);
       if (!arrayBag) return null;
       Object.assign(bag, arrayBag);
       continue;
@@ -167,43 +190,49 @@ export function extractPatterns(rule: any): {
   return [{ tag: proxyNode.tag, pattern: proxyNode.args[0] ?? {} }];
 }
 
-function matchValue(
+function matchValueInner(
   actual: any,
   expected: any,
+  namedBindings: { name: string; value: any }[],
   key?: string
 ): Record<string, any> | null {
   if (expected === dollarSentinel) {
     return key ? { [key]: actual } : { _: actual };
   }
   if (isCapture(expected)) {
+    namedBindings.push({ name: expected.name, value: actual });
     return { [expected.name]: actual };
   }
   if (isProxyNode(expected)) {
     const inner: ProxyNode = (expected as any)[NODE];
     if (inner.tag === "or") {
-      return matchOr(actual, inner.args);
+      return matchOrInner(actual, inner.args, namedBindings);
     }
     if (inner.tag === "maybeBlock") {
-      return matchMaybeBlock(actual, inner.args[0]);
+      return matchMaybeBlockInner(actual, inner.args[0], namedBindings);
     }
     if (actual?.type !== inner.tag) return null;
-    return match(actual, inner.args[0] ?? {});
+    return matchInner(actual, inner.args[0] ?? {}, namedBindings);
   }
   if (typeof expected === "object" && expected !== null) {
-    return match(actual, expected);
+    return matchInner(actual, expected, namedBindings);
   }
   return actual === expected ? {} : null;
 }
+
 
 function isSpread(v: any): v is { name: string } {
   return v && typeof v === "object" && v[SPREAD_BRAND] === true;
 }
 
-function matchArray(
+function matchArrayInner(
   actual: any[],
   expected: any[],
-  parentKey: string
+  parentKey: string,
+  namedBindings: { name: string; value: any }[]
 ): Record<string, any> | null {
+  const mv = (a: any, e: any, k?: string) => matchValueInner(a, e, namedBindings, k);
+
   const spreadIndices: number[] = [];
   for (let i = 0; i < expected.length; i++) {
     if (isSpread(expected[i])) spreadIndices.push(i);
@@ -213,7 +242,7 @@ function matchArray(
     if (actual.length !== expected.length) return null;
     const bag: Record<string, any> = {};
     for (let i = 0; i < expected.length; i++) {
-      const elemBag = matchValue(actual[i], expected[i], `${i}`);
+      const elemBag = mv(actual[i], expected[i], `${i}`);
       if (!elemBag) return null;
       Object.assign(bag, elemBag);
     }
@@ -224,30 +253,23 @@ function matchArray(
     const si = spreadIndices[0];
     const before = expected.slice(0, si);
     const after = expected.slice(si + 1);
-    const minLen = before.length + after.length;
-    if (actual.length < minLen) return null;
+    if (actual.length < before.length + after.length) return null;
 
     const bag: Record<string, any> = {};
-
     for (let i = 0; i < before.length; i++) {
-      const elemBag = matchValue(actual[i], before[i], `${i}`);
+      const elemBag = mv(actual[i], before[i], `${i}`);
       if (!elemBag) return null;
       Object.assign(bag, elemBag);
     }
-
     for (let i = 0; i < after.length; i++) {
-      const actualIdx = actual.length - after.length + i;
-      const elemBag = matchValue(actual[actualIdx], after[i], `${actualIdx}`);
+      const idx = actual.length - after.length + i;
+      const elemBag = mv(actual[idx], after[i], `${idx}`);
       if (!elemBag) return null;
       Object.assign(bag, elemBag);
     }
-
     const spread = expected[si];
-    const spreadName = spread.name || parentKey;
-    if (spreadName) {
-      bag[spreadName] = actual.slice(before.length, actual.length - after.length);
-    }
-
+    const name = spread.name || parentKey;
+    if (name) bag[name] = actual.slice(before.length, actual.length - after.length);
     return bag;
   }
 
@@ -256,43 +278,37 @@ function matchArray(
     const before = expected.slice(0, si1);
     const middle = expected.slice(si1 + 1, si2);
     const after = expected.slice(si2 + 1);
-    const fixedLen = before.length + middle.length + after.length;
-    if (actual.length < fixedLen) return null;
+    if (actual.length < before.length + middle.length + after.length) return null;
 
     const bag: Record<string, any> = {};
-
     for (let i = 0; i < before.length; i++) {
-      const elemBag = matchValue(actual[i], before[i], `${i}`);
+      const elemBag = mv(actual[i], before[i], `${i}`);
       if (!elemBag) return null;
       Object.assign(bag, elemBag);
     }
-
     for (let i = 0; i < after.length; i++) {
-      const actualIdx = actual.length - after.length + i;
-      const elemBag = matchValue(actual[actualIdx], after[i], `${actualIdx}`);
+      const idx = actual.length - after.length + i;
+      const elemBag = mv(actual[idx], after[i], `${idx}`);
       if (!elemBag) return null;
       Object.assign(bag, elemBag);
     }
-
-    const middleStart = before.length;
-    const middleEnd = actual.length - after.length;
-    const range = middleEnd - middleStart;
-
-    for (let offset = 0; offset <= range - middle.length; offset++) {
-      const pos = middleStart + offset;
-      let middleBag: Record<string, any> | null = {};
+    const mStart = before.length;
+    const mEnd = actual.length - after.length;
+    for (let off = 0; off <= mEnd - mStart - middle.length; off++) {
+      const pos = mStart + off;
+      const mBag: Record<string, any> = {};
       let ok = true;
       for (let i = 0; i < middle.length; i++) {
-        const elemBag = matchValue(actual[pos + i], middle[i], `${pos + i}`);
+        const elemBag = mv(actual[pos + i], middle[i], `${pos + i}`);
         if (!elemBag) { ok = false; break; }
-        Object.assign(middleBag, elemBag);
+        Object.assign(mBag, elemBag);
       }
-      if (ok && middleBag) {
-        Object.assign(bag, middleBag);
+      if (ok) {
+        Object.assign(bag, mBag);
         const s1 = expected[si1];
         const s2 = expected[si2];
         if (s1.name || parentKey) bag[s1.name || parentKey] = actual.slice(before.length, pos);
-        if (s2.name) bag[s2.name] = actual.slice(pos + middle.length, middleEnd);
+        if (s2.name) bag[s2.name] = actual.slice(pos + middle.length, mEnd);
         return bag;
       }
     }
@@ -302,23 +318,43 @@ function matchArray(
   return null;
 }
 
-function matchOr(actual: any, args: any[]): Record<string, any> | null {
+
+function matchOrInner(actual: any, args: any[], namedBindings: { name: string; value: any }[]): Record<string, any> | null {
   for (const arg of args) {
-    const result = matchValue(actual, arg);
+    const result = matchValueInner(actual, arg, namedBindings);
     if (result) return result;
   }
   return null;
 }
 
-function matchMaybeBlock(
+function matchMaybeBlockInner(
   actual: any,
-  stmtPattern: any
+  stmtPattern: any,
+  namedBindings: { name: string; value: any }[]
 ): Record<string, any> | null {
   if (actual?.type === "BlockStatement" && Array.isArray(actual.body) && actual.body.length === 1) {
-    const result = matchValue(actual.body[0], stmtPattern);
+    const result = matchValueInner(actual.body[0], stmtPattern, namedBindings);
     if (result) return result;
   }
-  return matchValue(actual, stmtPattern);
+  return matchValueInner(actual, stmtPattern, namedBindings);
+}
+
+const SKIP_KEYS = new Set(["parent", "loc", "range"]);
+
+function deepEqual(a: any, b: any): boolean {
+  if (a === b) return true;
+  if (a == null || b == null) return false;
+  if (typeof a !== typeof b) return false;
+  if (typeof a !== "object") return false;
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  if (Array.isArray(a)) {
+    if (a.length !== b.length) return false;
+    return a.every((v: any, i: number) => deepEqual(v, b[i]));
+  }
+  const keysA = Object.keys(a).filter((k) => !SKIP_KEYS.has(k));
+  const keysB = Object.keys(b).filter((k) => !SKIP_KEYS.has(k));
+  if (keysA.length !== keysB.length) return false;
+  return keysA.every((k) => deepEqual(a[k], b[k]));
 }
 
 function isCapture(v: any): v is { name: string } {

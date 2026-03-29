@@ -65,7 +65,7 @@ tester.run(
     valid: [
       "obj?.prop;",
       "obj || obj.prop;",
-      // TODO: "obj && other.prop;" should be valid (duplicate capture equality not enforced yet)
+      "obj && other.prop;",
     ],
     invalid: [
       {
