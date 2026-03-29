@@ -9,4 +9,6 @@ import type { ExtractCaptures } from "@/pattern";
 export type AstTransform<In, Out> = {
   readonly from: In;
   readonly to: (bag: ExtractCaptures<In>) => Out;
+  readonly importMap?: Record<string, string>;
+  imports(map: Record<string, string>): AstTransform<In, Out>;
 };
