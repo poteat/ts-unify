@@ -1,6 +1,16 @@
 import type { ExtractCaptures } from "@/pattern";
-import type { ExtractConfig } from "@/config/extract-config";
-import type { Prettify } from "@/type-utils";
+import type { ConfigSlot } from "@/config/config-type";
+
+type ImportMap = Record<string, string | ConfigSlot>;
+
+type ExtractConfigFromImports<M> = {
+  [K in keyof M as M[K] extends ConfigSlot<infer N, any> ? N : never]: M[K] extends ConfigSlot<
+    any,
+    infer V
+  >
+    ? V
+    : never;
+};
 
 /**
  * AstTransform<In, Out, Cfg>
@@ -12,9 +22,9 @@ import type { Prettify } from "@/type-utils";
 export type AstTransform<In, Out, Cfg extends Record<string, unknown> = {}> = {
   readonly from: In;
   readonly to: (bag: ExtractCaptures<In>) => Out;
-  readonly importMap?: Record<string, string>;
-  imports(map: Record<string, string>): AstTransform<In, Out, Cfg>;
-  config<D extends Prettify<Cfg & ExtractConfig<In> & ExtractConfig<Out>>>(
-    defaults: D
-  ): AstTransform<In, Out, D>;
+  readonly importMap?: ImportMap;
+  imports<M extends ImportMap>(
+    map: M
+  ): AstTransform<In, Out, Cfg & ExtractConfigFromImports<M>>;
+  config<D extends Cfg>(defaults: D): AstTransform<In, Out, D>;
 };

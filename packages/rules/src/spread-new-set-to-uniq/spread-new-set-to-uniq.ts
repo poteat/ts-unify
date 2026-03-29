@@ -1,4 +1,5 @@
 import { $ } from "@/capture";
+import { C } from "@/config";
 import { U } from "@/ast";
 
 /**
@@ -29,4 +30,5 @@ export const spreadNewSetToUniq = U.ArrayExpression({
       arguments: [array],
     })
   )
-  .imports({ uniq: "my-utils/uniq" });
+  .imports({ uniq: C("from") })
+  .config({ from: "lodash/uniq" });
