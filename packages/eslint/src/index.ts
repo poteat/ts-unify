@@ -146,9 +146,46 @@ export function extractPattern(rule: any): {
   tag: string;
   pattern: any;
 } | null {
+  const patterns = extractPatterns(rule);
+  return patterns[0] ?? null;
+}
+
+/** Extract all entry patterns (handles top-level U.or). */
+export function extractPatterns(rule: any): {
+  tag: string;
+  pattern: any;
+}[] {
   const proxyNode: ProxyNode | undefined = rule[NODE];
-  if (!proxyNode?.tag) return null;
-  return { tag: proxyNode.tag, pattern: proxyNode.args[0] ?? {} };
+  if (!proxyNode?.tag) return [];
+  if (proxyNode.tag === "or") {
+    return proxyNode.args.flatMap((arg: any) => {
+      if (typeof arg === "function" && arg[NODE]) {
+        const inner: ProxyNode = arg[NODE];
+        return [{ tag: inner.tag, pattern: inner.args[0] ?? {} }];
+      }
+      return [];
+    });
+  }
+  if (proxyNode.tag === "fromNode") {
+    // U.fromNode({ type: U.or("A", "B"), ...pattern })
+    // Extract type tags from the pattern's type field
+    const pattern = proxyNode.args[0] ?? {};
+    const typeField = pattern.type;
+    if (typeof typeField === "function" && typeField[NODE]) {
+      const typeNode: ProxyNode = typeField[NODE];
+      if (typeNode.tag === "or") {
+        // Multiple types — create a pattern for each, excluding the type field
+        const { type: _type, ...rest } = pattern;
+        return typeNode.args.map((t: string) => ({ tag: t, pattern: rest }));
+      }
+    }
+    if (typeof typeField === "string") {
+      const { type: _type, ...rest } = pattern;
+      return [{ tag: typeField, pattern: rest }];
+    }
+    return [];
+  }
+  return [{ tag: proxyNode.tag, pattern: proxyNode.args[0] ?? {} }];
 }
 
 function isSpread(v: any): v is { name: string } {

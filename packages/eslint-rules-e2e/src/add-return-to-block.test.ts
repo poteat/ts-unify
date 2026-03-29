@@ -8,12 +8,53 @@ describe("addReturnToBlock matching", () => {
     expect(rule.tag).toBe("BlockStatement");
   });
 
-  // Positive matching is skipped because the pattern uses bare $ (the
-  // capture function itself rather than $("name")) for the expression
-  // capture, and the parent field references a virtual property not present
-  // on plain AST objects. The current match() implementation falls through to
-  // literal comparison for bare $ which always fails.
-  it.skip("matches function() { expr(); } (requires bare-$ and parent support)", () => {});
+  it("matches function() { expr(); }", () => {
+    const ast = {
+      type: "BlockStatement",
+      parent: { type: "FunctionDeclaration" },
+      body: [
+        {
+          type: "ExpressionStatement",
+          expression: { type: "CallExpression", callee: { type: "Identifier", name: "fn" }, arguments: [] },
+        },
+      ],
+    };
+
+    const bag = match(ast, rule.pattern);
+    expect(bag).not.toBeNull();
+    expect(bag!.expression).toEqual(ast.body[0].expression);
+  });
+
+  it("matches arrow function body", () => {
+    const ast = {
+      type: "BlockStatement",
+      parent: { type: "ArrowFunctionExpression" },
+      body: [
+        {
+          type: "ExpressionStatement",
+          expression: { type: "Identifier", name: "x" },
+        },
+      ],
+    };
+
+    const bag = match(ast, rule.pattern);
+    expect(bag).not.toBeNull();
+  });
+
+  it("rejects when parent is not a function", () => {
+    const ast = {
+      type: "BlockStatement",
+      parent: { type: "IfStatement" },
+      body: [
+        {
+          type: "ExpressionStatement",
+          expression: { type: "Identifier", name: "x" },
+        },
+      ],
+    };
+
+    expect(match(ast, rule.pattern)).toBeNull();
+  });
 
   it("rejects a node whose body has wrong length", () => {
     const ast = {

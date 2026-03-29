@@ -1,25 +1,57 @@
-import { extractPattern } from "@ts-unify/eslint";
+import { match, extractPatterns } from "@ts-unify/eslint";
 import { normalizeTernaryOrder } from "@ts-unify/rules";
 
 describe("normalizeTernaryOrder matching", () => {
-  const rule = extractPattern(normalizeTernaryOrder)!;
+  const patterns = extractPatterns(normalizeTernaryOrder);
 
-  it("extracts with tag 'or' (top-level U.or combinator)", () => {
-    expect(rule.tag).toBe("or");
+  it("extracts two ConditionalExpression branches", () => {
+    expect(patterns).toHaveLength(2);
+    expect(patterns[0].tag).toBe("ConditionalExpression");
+    expect(patterns[1].tag).toBe("ConditionalExpression");
   });
 
-  // The pattern is a U.or() at the top level, so extractPattern returns
-  // tag="or" and pattern=first_or_arg (a ProxyNode). The match() function
-  // receives a proxy function as the pattern, and Object.entries() of a proxy
-  // function yields [], causing a vacuous match on any input. This means the
-  // pattern cannot be meaningfully tested without dedicated U.or top-level
-  // support in extractPattern/match.
-  it.skip("matches !cond ? a : b (requires top-level U.or support in extractPattern)", () => {});
+  it("branch 1 matches !cond ? a : b", () => {
+    const ast = {
+      type: "ConditionalExpression",
+      test: {
+        type: "UnaryExpression",
+        operator: "!",
+        argument: { type: "Identifier", name: "cond" },
+      },
+      consequent: { type: "Literal", value: 1 },
+      alternate: { type: "Literal", value: 2 },
+    };
 
-  it("has first or-branch targeting ConditionalExpression with negated test", () => {
-    // We can at least verify that extractPattern produces a non-null result
-    // and the tag reflects the or-combinator structure
-    expect(rule).not.toBeNull();
-    expect(rule.tag).toBe("or");
+    const bag = match(ast, patterns[0].pattern);
+    expect(bag).not.toBeNull();
+    expect(bag!.condition).toEqual({ type: "Identifier", name: "cond" });
+  });
+
+  it("branch 2 matches x !== y ? a : b", () => {
+    const ast = {
+      type: "ConditionalExpression",
+      test: {
+        type: "BinaryExpression",
+        operator: "!==",
+        left: { type: "Identifier", name: "x" },
+        right: { type: "Identifier", name: "y" },
+      },
+      consequent: { type: "Literal", value: 1 },
+      alternate: { type: "Literal", value: 2 },
+    };
+
+    const bag = match(ast, patterns[1].pattern);
+    expect(bag).not.toBeNull();
+  });
+
+  it("branch 1 rejects cond ? a : b (no negation)", () => {
+    const ast = {
+      type: "ConditionalExpression",
+      test: { type: "Identifier", name: "cond" },
+      consequent: { type: "Literal", value: 1 },
+      alternate: { type: "Literal", value: 2 },
+    };
+
+    expect(match(ast, patterns[0].pattern)).toBeNull();
   });
 });

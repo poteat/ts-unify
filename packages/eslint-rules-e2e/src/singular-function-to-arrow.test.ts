@@ -1,23 +1,54 @@
-import { match, extractPattern } from "@ts-unify/eslint";
+import { match, extractPatterns } from "@ts-unify/eslint";
 import { functionDeclReturnToArrow } from "@ts-unify/rules";
 
 describe("functionDeclReturnToArrow matching", () => {
-  const rule = extractPattern(functionDeclReturnToArrow)!;
+  const patterns = extractPatterns(functionDeclReturnToArrow);
 
-  it("extracts with tag 'fromNode' (U.fromNode combinator)", () => {
-    expect(rule.tag).toBe("fromNode");
+  it("extracts two branches: FunctionDeclaration and FunctionExpression", () => {
+    expect(patterns).toHaveLength(2);
+    expect(patterns[0].tag).toBe("FunctionDeclaration");
+    expect(patterns[1].tag).toBe("FunctionExpression");
   });
 
-  // The pattern uses U.fromNode which produces tag="fromNode". The match()
-  // function does not use the tag when matching -- it only checks properties
-  // in the pattern object. The pattern contains:
-  //   type: U.or("FunctionDeclaration", "FunctionExpression")
-  //   body: U.or(returnBlock, exprBlock)  -- both have bare $ inside
-  //   generator: false
-  // We can test the type and generator fields but the body or-branches both
-  // contain bare $ which causes match failure.
+  it("matches function foo(x) { return x + 1; }", () => {
+    const ast = {
+      type: "FunctionDeclaration",
+      body: {
+        type: "BlockStatement",
+        body: [
+          { type: "ReturnStatement", argument: { type: "Identifier", name: "x" } },
+        ],
+      },
+      generator: false,
+      id: { type: "Identifier", name: "foo" },
+      params: [{ type: "Identifier", name: "x" }],
+      async: false,
+    };
 
-  it("rejects a generator function (generator: true)", () => {
+    const bag = match(ast, patterns[0].pattern);
+    expect(bag).not.toBeNull();
+  });
+
+  it("matches function expression", () => {
+    const ast = {
+      type: "FunctionExpression",
+      body: {
+        type: "BlockStatement",
+        body: [
+          { type: "ReturnStatement", argument: { type: "Literal", value: 42 } },
+        ],
+      },
+      generator: false,
+      id: null,
+      params: [],
+      async: false,
+    };
+
+    const bag = match(ast, patterns[1].pattern);
+    expect(bag).not.toBeNull();
+  });
+
+  it("rejects a generator function", () => {
     const ast = {
       type: "FunctionDeclaration",
       body: {
@@ -32,44 +63,25 @@ describe("functionDeclReturnToArrow matching", () => {
       async: false,
     };
 
-    expect(match(ast, rule.pattern)).toBeNull();
+    expect(match(ast, patterns[0].pattern)).toBeNull();
   });
 
-  it("rejects an ArrowFunctionExpression (wrong type)", () => {
+  it("rejects when body is not a block with single return", () => {
     const ast = {
-      type: "ArrowFunctionExpression",
+      type: "FunctionDeclaration",
       body: {
         type: "BlockStatement",
         body: [
-          { type: "ReturnStatement", argument: { type: "Literal", value: 1 } },
+          { type: "ExpressionStatement", expression: { type: "Identifier", name: "a" } },
+          { type: "ReturnStatement", argument: { type: "Identifier", name: "b" } },
         ],
       },
-      generator: false,
-      params: [],
-      async: false,
-    };
-
-    expect(match(ast, rule.pattern)).toBeNull();
-  });
-
-  it("rejects a FunctionDeclaration with non-BlockStatement body", () => {
-    // Arrow functions can have expression bodies, but FunctionDeclarations
-    // always have BlockStatement bodies in real ASTs. We use a contrived
-    // non-BlockStatement body to verify the body or-branch rejects it.
-    const ast = {
-      type: "FunctionDeclaration",
-      body: { type: "Literal", value: 42 },
       generator: false,
       id: { type: "Identifier", name: "foo" },
       params: [],
       async: false,
     };
 
-    expect(match(ast, rule.pattern)).toBeNull();
+    expect(match(ast, patterns[0].pattern)).toBeNull();
   });
-
-  // Positive test is skipped because both or-branches for body contain
-  // bare $ (the function itself, not $("name")) for the return argument /
-  // expression capture, which the matcher cannot handle.
-  it.skip("matches function foo(x) { return x + 1; } (requires bare-$ support)", () => {});
 });
