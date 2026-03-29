@@ -2,19 +2,13 @@ import type { ExtractCaptures } from "@/pattern";
 import type { ConfigSlot } from "@/config/config-type";
 
 /**
- * Import specifier key format:
+ * Import specifier map. Keys follow a convention:
  * - `"foo"`            → `import { foo } from "..."`
  * - `"foo as Bar"`     → `import { foo as Bar } from "..."`
  * - `"default as foo"` → `import foo from "..."`
  * - `"* as foo"`       → `import * as foo from "..."`
  */
-type ImportSpecifier =
-  | `${string}`
-  | `${string} as ${string}`
-  | `default as ${string}`
-  | `* as ${string}`;
-
-type ImportMap = Record<ImportSpecifier, string | ConfigSlot>;
+type ImportMap = Record<string, string | ConfigSlot>;
 
 type ExtractConfigFromImports<M> = {
   [K in keyof M as M[K] extends ConfigSlot<infer N, any> ? N : never]: string;
