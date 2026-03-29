@@ -28,7 +28,7 @@ export const spreadNewSetToUniq = U.ArrayExpression({
     U.CallExpression({
       callee: U.Identifier({ name: "uniq" }),
       arguments: [array],
-    })
+    }),
   )
   .imports({ uniq: C("from") })
-  .config({ from: "lodash/uniq" });
+  .config({ from: "lodash" });
