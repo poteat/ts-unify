@@ -11,27 +11,26 @@ const anyReturnForm = U.maybeBlock(U.ReturnStatement({ argument: $ }))
  *
  * @example
  * ```ts
+ * // Before
  * if (cond) {
  *   return expr1;
  * } else {
  *   return expr2;
  * }
- * ```
  *
- * becomes
- *
- * ```ts
+ * // After
  * return cond ? expr1 : expr2;
  * ```
  *
- * Also works with blockless returns:
- *
+ * @example
  * ```ts
+ * // Before
  * if (cond) return expr1
  * else return expr2;
- * ```
  *
- * or variants thereof.
+ * // After
+ * return cond ? expr1 : expr2;
+ * ```
  */
 export const ifReturnToTernary = U.IfStatement({
   test: $,

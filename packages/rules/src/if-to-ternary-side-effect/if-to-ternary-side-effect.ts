@@ -11,24 +11,24 @@ const anyExprForm = U.maybeBlock(
  *
  * @example
  * ```ts
+ * // Before
  * if (cond) {
  *   expr1;
  * } else {
  *   expr2;
  * }
- * ```
  *
- * becomes
- *
- * ```ts
+ * // After
  * cond ? expr1 : expr2;
  * ```
  *
- * Also works with blockless forms:
- *
+ * @example
  * ```ts
+ * // Before
  * if (cond) expr1; else expr2;
- * // → cond ? expr1 : expr2;
+ *
+ * // After
+ * cond ? expr1 : expr2;
  * ```
  */
 export const ifToTernarySideEffect = U.IfStatement({
