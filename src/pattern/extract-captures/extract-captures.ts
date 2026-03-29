@@ -65,6 +65,9 @@ type ExtractFromPattern<P, Key extends string = ""> =
     : // Merge in branded bag additions from `.with(...)` if present
     P extends { readonly __with: infer WB }
     ? Overwrite<ExtractFromPattern<StripWith<P>, Key>, WB & {}>
+    : // Exclusive bind: use only the bind bag, suppress structural captures
+    P extends { readonly __only: infer OB }
+    ? OB & {}
     : // Short circuit: don't recurse into generic nodes
     P extends TSESTree.Node
     ? {}

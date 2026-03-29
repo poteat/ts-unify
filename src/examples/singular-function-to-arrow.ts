@@ -8,15 +8,19 @@ const returnBlock = U.BlockStatement({
   body: [U.ReturnStatement({ argument: $ }).defaultUndefined()],
 }).seal();
 
+// const exprBlock = U.BlockStatement({
+//   body: [U.ExpressionStatement({ expression: $ })],
+// })
+//   .map((expression) =>
+//     U.BlockStatement({
+//       body: [U.ExpressionStatement({ expression })],
+//     })
+//   )
+//   .seal();
+
 const exprBlock = U.BlockStatement({
   body: [U.ExpressionStatement({ expression: $ })],
-})
-  .map((expression) =>
-    U.BlockStatement({
-      body: [U.ExpressionStatement({ expression })],
-    })
-  )
-  .seal();
+}).bind("body");
 
 /**
  * Convert function declarations and expressions with single-statement bodies to
@@ -41,10 +45,7 @@ const exprBlock = U.BlockStatement({
  * function declarations (const assignments are not hoisted like declarations).
  */
 export const functionDeclReturnToArrow = U.fromNode({
-  type: U.or(
-    AST_NODE_TYPES.FunctionDeclaration,
-    AST_NODE_TYPES.FunctionExpression
-  ),
+  type: U.or(AST_NODE_TYPES.FunctionDeclaration, AST_NODE_TYPES.FunctionExpression),
   body: U.or(returnBlock, exprBlock),
   generator: false,
   ...$,
@@ -67,5 +68,5 @@ export const functionDeclReturnToArrow = U.fromNode({
             }),
           ],
         })
-      : init
+      : init,
   );

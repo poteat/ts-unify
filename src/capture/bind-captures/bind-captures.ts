@@ -135,22 +135,21 @@ type BindValue<P, S, Key extends string> =
       : Readonly<{
           [I in keyof Items]: BindNode<Items[I], unknown, `${I & string}`>;
         }>
-    : // Objects — map over filtered keys and optionally add spread extras
+    : // Objects — map over filtered keys and spread extras in one mapped type
     P extends object
     ? {
-        [K in PatternKeys<P>]: BindNode<
-          P[Extract<K, keyof P>],
-          ShapeAt<S, Extract<K, keyof any>>,
-          KeyStr<K>
-        >;
-      } & (P extends { readonly [OBJECT_SPREAD_BRAND]: true }
-        ? {
-            [K in Exclude<keyof S, keyof P | "type"> & string]: Capture<
-              K,
-              K extends keyof S ? S[K] : never
-            >;
-          }
-        : {})
+        [K in
+          | PatternKeys<P>
+          | (P extends { readonly [OBJECT_SPREAD_BRAND]: true }
+              ? Exclude<keyof S, keyof P | "type"> & string
+              : never)]: K extends PatternKeys<P>
+          ? BindNode<
+              P[Extract<K, keyof P>],
+              ShapeAt<S, Extract<K, keyof any>>,
+              KeyStr<K>
+            >
+          : Capture<KeyStr<K>, K extends keyof S ? S[K] : never>;
+      }
     : // Primitives and other types are left as-is
       P;
 

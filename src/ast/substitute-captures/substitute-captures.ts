@@ -1,6 +1,7 @@
 import type { Capture } from "@/capture/capture-type";
 import type { Spread } from "@/capture/spread/spread";
 import type { Sealed } from "@/ast/sealed";
+import type { TSESTree } from "@typescript-eslint/types";
 
 /**
  * SubstituteCaptures<Node, Bag>
@@ -14,6 +15,7 @@ import type { Sealed } from "@/ast/sealed";
  * Notes:
  * - Sealed/branding are preserved by callers; this utility only rewrites
  *   capture/spread occurrences.
+ * - Raw TSESTree nodes are returned as-is (they never contain captures).
  */
 export type SubstituteCaptures<Node, Bag> =
   // Refine explicit captures by name
@@ -30,6 +32,9 @@ export type SubstituteCaptures<Node, Bag> =
         ? Spread<SName & string, ElemN>
         : Node
       : Spread<SName & string, Elem>
+    : // Raw AST nodes never contain captures – short-circuit
+    Node extends TSESTree.Node
+    ? Node
     : // Tuples
     Node extends readonly [...infer Items]
     ? Readonly<{
