@@ -13,6 +13,7 @@ tester.run(
   "spread-new-set-to-uniq",
   createRule(spreadNewSetToUniq, {
     message: "Use uniq() instead of [...new Set()]",
+    fix: true,
   }),
   {
     valid: [
@@ -24,6 +25,7 @@ tester.run(
       {
         code: "const x = [...new Set(arr)];",
         errors: [{ messageId: "match" }],
+        output: "const x = uniq(arr);",
       },
     ],
   }

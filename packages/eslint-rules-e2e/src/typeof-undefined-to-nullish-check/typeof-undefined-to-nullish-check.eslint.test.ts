@@ -13,6 +13,7 @@ tester.run(
   "typeof-undefined",
   createRule(typeofUndefinedToNullishCheck, {
     message: "Use == null instead of typeof === 'undefined'",
+    fix: true,
   }),
   {
     valid: [
@@ -23,10 +24,12 @@ tester.run(
       {
         code: "typeof x === 'undefined';",
         errors: [{ messageId: "match" }],
+        output: "x == null;",
       },
       {
         code: "typeof foo == 'undefined';",
         errors: [{ messageId: "match" }],
+        output: "foo == null;",
       },
     ],
   }

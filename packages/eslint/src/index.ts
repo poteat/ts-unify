@@ -3,7 +3,7 @@ import type { ProxyNode } from "@ts-unify/core";
 import type { TSESTree } from "@typescript-eslint/types";
 
 type RuleModule = {
-  meta: { type: "suggestion"; messages: Record<string, string> };
+  meta: { type: "suggestion"; fixable?: "code"; messages: Record<string, string> };
   create: (context: any) => Record<string, (node: TSESTree.Node) => void>;
 };
 
@@ -12,18 +12,25 @@ type RuleModule = {
  */
 export function createRule(
   transform: any,
-  opts: { message?: string } = {}
+  opts: { message?: string; fix?: boolean } = {}
 ): RuleModule {
   const entries = extractPatterns(transform);
   const message = opts.message ?? "Matches a ts-unify pattern";
 
+  // Extract the .to() factory from the chain
+  const proxyNode: ProxyNode | undefined = transform[NODE];
+  const toEntry = proxyNode?.chain?.find((c: any) => c.method === "to");
+  const factory = opts.fix === true && toEntry?.args[0] ? toEntry.args[0] : null;
+
   return {
     meta: {
       type: "suggestion",
+      ...(factory ? { fixable: "code" as const } : {}),
       messages: { match: message },
     },
     create(context) {
       const visitors: Record<string, (node: TSESTree.Node) => void> = {};
+      const sourceCode = context.sourceCode ?? context.getSourceCode();
 
       for (const { tag, pattern } of entries) {
         visitors[tag] = (node) => {
@@ -33,7 +40,20 @@ export function createRule(
           for (const [k, v] of Object.entries(bag)) {
             data[k] = typeof v === "object" && v?.type === "Identifier" ? v.name : String(v);
           }
-          context.report({ node, messageId: "match", data });
+          context.report({
+            node,
+            messageId: "match",
+            data,
+            ...(factory
+              ? {
+                  fix(fixer: any) {
+                    const output = factory(bag);
+                    const text = serialize(output, sourceCode);
+                    return fixer.replaceText(node, text);
+                  },
+                }
+              : {}),
+          });
         };
       }
 
@@ -359,6 +379,141 @@ function deepEqual(a: any, b: any): boolean {
   const keysB = Object.keys(b).filter((k) => !SKIP_KEYS.has(k));
   if (keysA.length !== keysB.length) return false;
   return keysA.every((k) => deepEqual(a[k], b[k]));
+}
+
+/**
+ * Serialize a proxy node (or real AST node) back to source text.
+ */
+function serialize(value: any, sourceCode?: any): string {
+  // Real AST node — use source text if available
+  if (value && typeof value === "object" && value.range && sourceCode) {
+    return sourceCode.getText(value);
+  }
+
+  // Proxy node — reconstruct from tag + args
+  if (typeof value === "function" && value[NODE]) {
+    const node: ProxyNode = value[NODE];
+    return serializeProxyNode(node, sourceCode);
+  }
+
+  // Plain values
+  if (value === null) return "null";
+  if (value === undefined) return "undefined";
+  if (typeof value === "string") return JSON.stringify(value);
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+
+  // Real AST node without source — best-effort based on type
+  if (value && typeof value === "object" && value.type) {
+    return serializeAstNode(value, sourceCode);
+  }
+
+  return String(value);
+}
+
+function serializeProxyNode(node: ProxyNode, sourceCode?: any): string {
+  const args = node.args[0] ?? {};
+
+  switch (node.tag) {
+    case "Identifier":
+      return args.name ?? "unknown";
+    case "Literal":
+      if (args.value === null) return "null";
+      if (typeof args.value === "string") return JSON.stringify(args.value);
+      return String(args.value);
+    case "CallExpression": {
+      const callee = serialize(args.callee, sourceCode);
+      const argList = (args.arguments ?? [])
+        .map((a: any) => serialize(a, sourceCode))
+        .join(", ");
+      return `${callee}(${argList})`;
+    }
+    case "MemberExpression": {
+      const obj = serialize(args.object, sourceCode);
+      const prop = serialize(args.property, sourceCode);
+      return args.computed ? `${obj}[${prop}]` : `${obj}.${prop}`;
+    }
+    case "BinaryExpression":
+    case "LogicalExpression": {
+      const left = serialize(args.left, sourceCode);
+      const right = serialize(args.right, sourceCode);
+      return `${left} ${args.operator} ${right}`;
+    }
+    case "UnaryExpression":
+      return `${args.operator}${serialize(args.argument, sourceCode)}`;
+    case "ConditionalExpression": {
+      const test = serialize(args.test, sourceCode);
+      const consequent = serialize(args.consequent, sourceCode);
+      const alternate = serialize(args.alternate, sourceCode);
+      return `${test} ? ${consequent} : ${alternate}`;
+    }
+    case "ArrayExpression": {
+      const elems = (args.elements ?? [])
+        .map((e: any) => serialize(e, sourceCode))
+        .join(", ");
+      return `[${elems}]`;
+    }
+    case "ObjectExpression": {
+      const props = (args.properties ?? [])
+        .map((p: any) => serialize(p, sourceCode))
+        .join(", ");
+      return `{ ${props} }`;
+    }
+    case "SpreadElement":
+      return `...${serialize(args.argument, sourceCode)}`;
+    case "ReturnStatement":
+      return args.argument
+        ? `return ${serialize(args.argument, sourceCode)}`
+        : "return";
+    case "ExpressionStatement":
+      return serialize(args.expression, sourceCode);
+    case "BlockStatement": {
+      const body = (args.body ?? [])
+        .map((s: any) => serialize(s, sourceCode) + ";")
+        .join(" ");
+      return `{ ${body} }`;
+    }
+    case "ArrowFunctionExpression": {
+      const params = (args.params ?? [])
+        .map((p: any) => serialize(p, sourceCode))
+        .join(", ");
+      const body = serialize(args.body, sourceCode);
+      const async = args.async ? "async " : "";
+      return `${async}(${params}) => ${body}`;
+    }
+    case "VariableDeclaration": {
+      const decls = (args.declarations ?? [])
+        .map((d: any) => serialize(d, sourceCode))
+        .join(", ");
+      return `${args.kind} ${decls}`;
+    }
+    case "VariableDeclarator": {
+      const id = serialize(args.id, sourceCode);
+      return args.init ? `${id} = ${serialize(args.init, sourceCode)}` : id;
+    }
+    case "ChainExpression":
+      return serialize(args.expression, sourceCode);
+    case "TSAsExpression":
+      return `${serialize(args.expression, sourceCode)} as ${serialize(args.typeAnnotation, sourceCode)}`;
+    default:
+      return `/* unsupported: ${node.tag} */`;
+  }
+}
+
+function serializeAstNode(node: any, sourceCode?: any): string {
+  if (sourceCode && node.range) {
+    return sourceCode.getText(node);
+  }
+
+  switch (node.type) {
+    case "Identifier":
+      return node.name;
+    case "Literal":
+      if (node.value === null) return "null";
+      if (typeof node.value === "string") return JSON.stringify(node.value);
+      return String(node.value);
+    default:
+      return `/* unknown: ${node.type} */`;
+  }
 }
 
 function isCapture(v: any): v is { name: string } {
