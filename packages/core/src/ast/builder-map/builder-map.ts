@@ -10,14 +10,19 @@ export type BuilderMap = {
   [K in NodeKind]: PatternBuilder<K>;
 } & BuilderUtilities;
 
-function makeProxy(): any {
+export const TRACE = Symbol.for("ts-unify.trace");
+
+type TraceStep = { type: "get"; key: string } | { type: "apply"; args: any[] };
+
+function makeProxy(trace: TraceStep[] = []): any {
   const handler: ProxyHandler<any> = {
     get(_, prop) {
+      if (prop === TRACE) return trace;
       if (typeof prop === "symbol") return undefined;
-      return makeProxy();
+      return makeProxy([...trace, { type: "get", key: prop as string }]);
     },
-    apply(_, __, _args) {
-      return makeProxy();
+    apply(_, __, args) {
+      return makeProxy([...trace, { type: "apply", args }]);
     },
   };
   return new Proxy(function () {}, handler);
