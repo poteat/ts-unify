@@ -8,16 +8,6 @@ const returnBlock = U.BlockStatement({
   body: [U.ReturnStatement({ argument: $ }).defaultUndefined()],
 }).seal();
 
-// const exprBlock = U.BlockStatement({
-//   body: [U.ExpressionStatement({ expression: $ })],
-// })
-//   .map((expression) =>
-//     U.BlockStatement({
-//       body: [U.ExpressionStatement({ expression })],
-//     })
-//   )
-//   .seal();
-
 const exprBlock = U.BlockStatement({
   body: [U.ExpressionStatement({ expression: $ })],
 }).bind();
