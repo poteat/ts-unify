@@ -7,15 +7,12 @@ import type { NodeWithTruthy } from "@/ast/node-with-truthy";
 import type { NodeWithWith } from "@/ast/node-with-with";
 import type { NodeWithBind } from "@/ast/node-with-bind";
 
-/**
- * FluentNode<N>
- *
- * A node shape `N` augmented with fluent pattern helpers:
- * - `.when(...)` constraints (see NodeWithWhen)
- * - `.to(...)` terminal rewrite (see NodeWithTo)
- */
 export declare const FLUENT_INNER: unique symbol;
 
+/**
+ * A node shape `N` augmented with fluent pattern helpers:
+ * `.when()`, `.with()`, `.bind()`, `.seal()`, `.to()`, etc.
+ */
 export type FluentNode<N> = { readonly [FLUENT_INNER]: N } &
   NodeWithWhen<N> &
   NodeWithDefault<N> &
