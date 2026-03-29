@@ -1,8 +1,6 @@
-import type { BuilderMap } from "@/ast";
 import { $ } from "@/capture";
 import { AST_NODE_TYPES } from "@typescript-eslint/types";
-
-declare const U: BuilderMap;
+import { U } from "@/ast";
 
 const returnBlock = U.BlockStatement({
   body: [U.ReturnStatement({ argument: $ }).defaultUndefined()],

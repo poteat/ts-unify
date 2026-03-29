@@ -9,3 +9,19 @@ import type { BuilderUtilities } from "@/ast/builder-utilities";
 export type BuilderMap = {
   [K in NodeKind]: PatternBuilder<K>;
 } & BuilderUtilities;
+
+function makeProxy(): any {
+  const handler: ProxyHandler<any> = {
+    get(_, prop) {
+      if (typeof prop === "symbol") return undefined;
+      return makeProxy();
+    },
+    apply(_, __, _args) {
+      return makeProxy();
+    },
+  };
+  return new Proxy(function () {}, handler);
+}
+
+/** AST pattern builder namespace. */
+export const U = makeProxy() as BuilderMap;

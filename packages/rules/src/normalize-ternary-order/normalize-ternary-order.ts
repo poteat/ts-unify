@@ -1,7 +1,5 @@
-import type { BuilderMap } from "@/ast";
 import { $ } from "@/capture";
-
-declare const U: BuilderMap;
+import { U } from "@/ast";
 
 /**
  * Normalize ternary expressions to have positive conditions first

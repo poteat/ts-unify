@@ -1,7 +1,5 @@
-import { BuilderMap } from "@/ast";
+import { U } from "@/ast";
 import { $ } from "@/capture";
-
-declare const U: BuilderMap;
 
 const anyReturnForm = U.maybeBlock(U.ReturnStatement({ argument: $ }))
   .defaultUndefined()
