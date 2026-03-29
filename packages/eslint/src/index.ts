@@ -29,7 +29,11 @@ export function createRule(
         visitors[tag] = (node) => {
           const bag = match(node, pattern);
           if (!bag) return;
-          context.report({ node, messageId: "match" });
+          const data: Record<string, string> = {};
+          for (const [k, v] of Object.entries(bag)) {
+            data[k] = typeof v === "object" && v?.type === "Identifier" ? v.name : String(v);
+          }
+          context.report({ node, messageId: "match", data });
         };
       }
 
