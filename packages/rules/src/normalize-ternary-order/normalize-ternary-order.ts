@@ -1,6 +1,16 @@
 import { $ } from "@/capture";
 import { U } from "@/ast";
 
+const negatedTernary = U.ConditionalExpression({
+  test: U.UnaryExpression({ operator: "!", argument: $("condition") }),
+  ...$,
+});
+
+const inequalityTernary = U.ConditionalExpression({
+  test: U.BinaryExpression($),
+  ...$,
+}).when(({ operator }) => operator === "!=" || operator === "!==");
+
 /**
  * Normalize ternary expressions to have positive conditions first
  *
@@ -31,17 +41,6 @@ import { U } from "@/ast";
  * x == y ? alternate : consequent
  * ```
  */
-
-const negatedTernary = U.ConditionalExpression({
-  test: U.UnaryExpression({ operator: "!", argument: $("condition") }),
-  ...$,
-});
-
-const inequalityTernary = U.ConditionalExpression({
-  test: U.BinaryExpression($),
-  ...$,
-}).when(({ operator }) => operator === "!=" || operator === "!==");
-
 export const normalizeTernaryOrder = U.or(negatedTernary, inequalityTernary)
   .with(({ consequent: alternate, alternate: consequent }) => ({
     consequent,
