@@ -10,22 +10,33 @@ export type BuilderMap = {
   [K in NodeKind]: PatternBuilder<K>;
 } & BuilderUtilities;
 
-export const TRACE = Symbol.for("ts-unify.trace");
+export const NODE = Symbol.for("ts-unify.node");
 
-type TraceStep = { type: "get"; key: string } | { type: "apply"; args: any[] };
+export type ProxyNode = {
+  tag: string;
+  args: any[];
+  chain: { method: string; args: any[] }[];
+};
 
-function makeProxy(trace: TraceStep[] = []): any {
-  const handler: ProxyHandler<any> = {
+function makeProxy(node?: ProxyNode): any {
+  return new Proxy(function () {}, {
     get(_, prop) {
-      if (prop === TRACE) return trace;
+      if (prop === NODE) return node;
       if (typeof prop === "symbol") return undefined;
-      return makeProxy([...trace, { type: "get", key: prop as string }]);
+      if (node) {
+        // Fluent method on an existing node — return callable that appends to chain
+        const method = prop as string;
+        return (...args: any[]) =>
+          makeProxy({ ...node, chain: [...node.chain, { method, args }] });
+      }
+      // Builder access on root — return callable that creates a node
+      const tag = prop as string;
+      return (...args: any[]) => makeProxy({ tag, args, chain: [] });
     },
     apply(_, __, args) {
-      return makeProxy([...trace, { type: "apply", args }]);
+      return makeProxy({ tag: "", args, chain: [] });
     },
-  };
-  return new Proxy(function () {}, handler);
+  });
 }
 
 /** AST pattern builder namespace. */
