@@ -18,6 +18,10 @@ uniq(myArray)
 
 - `array` -- the array passed to `new Set()`.
 
-## Notes
+## Configuration
 
-- This rule adds an import: `{ uniq }` from `"my-utils/uniq"`.
+- `from` (default: `"lodash/uniq"`) -- the module path to import `uniq` from.
+
+## Imports
+
+- `{ uniq }` from the configured `from` path.
