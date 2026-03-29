@@ -1,4 +1,4 @@
-import { NODE, CAPTURE_BRAND, $ as dollarSentinel } from "@ts-unify/core";
+import { NODE, CAPTURE_BRAND, SPREAD_BRAND, $ as dollarSentinel } from "@ts-unify/core";
 import type { ProxyNode } from "@ts-unify/core";
 
 /**
@@ -100,13 +100,9 @@ export function match(
 
     if (Array.isArray(expected)) {
       if (!Array.isArray(actual)) return null;
-      // TODO: handle spread captures in arrays
-      if (actual.length !== expected.length) return null;
-      for (let i = 0; i < expected.length; i++) {
-        const elemBag = matchValue(actual[i], expected[i], `${i}`);
-        if (!elemBag) return null;
-        Object.assign(bag, elemBag);
-      }
+      const arrayBag = matchArray(actual, expected, key);
+      if (!arrayBag) return null;
+      Object.assign(bag, arrayBag);
       continue;
     }
 
@@ -153,6 +149,125 @@ export function extractPattern(rule: any): {
   const proxyNode: ProxyNode | undefined = rule[NODE];
   if (!proxyNode?.tag) return null;
   return { tag: proxyNode.tag, pattern: proxyNode.args[0] ?? {} };
+}
+
+function isSpread(v: any): v is { name: string } {
+  return v && typeof v === "object" && v[SPREAD_BRAND] === true;
+}
+
+function matchArray(
+  actual: any[],
+  expected: any[],
+  parentKey: string
+): Record<string, any> | null {
+  // Find spread positions
+  const spreadIndices: number[] = [];
+  for (let i = 0; i < expected.length; i++) {
+    if (isSpread(expected[i])) spreadIndices.push(i);
+  }
+
+  if (spreadIndices.length === 0) {
+    // No spreads — exact length match
+    if (actual.length !== expected.length) return null;
+    const bag: Record<string, any> = {};
+    for (let i = 0; i < expected.length; i++) {
+      const elemBag = matchValue(actual[i], expected[i], `${i}`);
+      if (!elemBag) return null;
+      Object.assign(bag, elemBag);
+    }
+    return bag;
+  }
+
+  if (spreadIndices.length === 1) {
+    const si = spreadIndices[0];
+    const before = expected.slice(0, si);
+    const after = expected.slice(si + 1);
+    const minLen = before.length + after.length;
+    if (actual.length < minLen) return null;
+
+    const bag: Record<string, any> = {};
+
+    // Match fixed elements before the spread
+    for (let i = 0; i < before.length; i++) {
+      const elemBag = matchValue(actual[i], before[i], `${i}`);
+      if (!elemBag) return null;
+      Object.assign(bag, elemBag);
+    }
+
+    // Match fixed elements after the spread (from the end)
+    for (let i = 0; i < after.length; i++) {
+      const actualIdx = actual.length - after.length + i;
+      const elemBag = matchValue(actual[actualIdx], after[i], `${actualIdx}`);
+      if (!elemBag) return null;
+      Object.assign(bag, elemBag);
+    }
+
+    // Capture the spread slice
+    const spread = expected[si];
+    const spreadName = spread.name || parentKey;
+    if (spreadName) {
+      bag[spreadName] = actual.slice(before.length, actual.length - after.length);
+    }
+
+    return bag;
+  }
+
+  // Multiple spreads — match greedily: first spread takes as much as possible
+  // leaving minimum for subsequent fixed+spread segments.
+  // For now, only support two spreads (before + after pattern)
+  if (spreadIndices.length === 2) {
+    const [si1, si2] = spreadIndices;
+    const before = expected.slice(0, si1);
+    const middle = expected.slice(si1 + 1, si2);
+    const after = expected.slice(si2 + 1);
+    const fixedLen = before.length + middle.length + after.length;
+    if (actual.length < fixedLen) return null;
+
+    const bag: Record<string, any> = {};
+
+    // Match before
+    for (let i = 0; i < before.length; i++) {
+      const elemBag = matchValue(actual[i], before[i], `${i}`);
+      if (!elemBag) return null;
+      Object.assign(bag, elemBag);
+    }
+
+    // Match after (from end)
+    for (let i = 0; i < after.length; i++) {
+      const actualIdx = actual.length - after.length + i;
+      const elemBag = matchValue(actual[actualIdx], after[i], `${actualIdx}`);
+      if (!elemBag) return null;
+      Object.assign(bag, elemBag);
+    }
+
+    // Try to match middle fixed elements at each possible position
+    const middleStart = before.length;
+    const middleEnd = actual.length - after.length;
+    const range = middleEnd - middleStart;
+
+    for (let offset = 0; offset <= range - middle.length; offset++) {
+      const pos = middleStart + offset;
+      let middleBag: Record<string, any> | null = {};
+      let ok = true;
+      for (let i = 0; i < middle.length; i++) {
+        const elemBag = matchValue(actual[pos + i], middle[i], `${pos + i}`);
+        if (!elemBag) { ok = false; break; }
+        Object.assign(middleBag, elemBag);
+      }
+      if (ok && middleBag) {
+        Object.assign(bag, middleBag);
+        const s1 = expected[si1];
+        const s2 = expected[si2];
+        if (s1.name || parentKey) bag[s1.name || parentKey] = actual.slice(before.length, pos);
+        if (s2.name) bag[s2.name] = actual.slice(pos + middle.length, middleEnd);
+        return bag;
+      }
+    }
+    return null;
+  }
+
+  // 3+ spreads not supported
+  return null;
 }
 
 function matchOr(actual: any, args: any[]): Record<string, any> | null {

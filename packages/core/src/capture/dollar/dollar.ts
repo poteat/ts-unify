@@ -1,6 +1,7 @@
 import type { Capture } from "@/capture/capture-type";
 import { CAPTURE_BRAND } from "@/capture/capture-type";
 import type { Spread } from "@/capture/spread/spread";
+import { SPREAD_BRAND } from "@/capture/spread/spread";
 import type { DollarObjectSpread } from "@/capture/dollar-spread/dollar-spread";
 import type { FluentCapture, FluentOps } from "@/capture/fluent-capture";
 
@@ -47,7 +48,7 @@ const __dollar = (<const Name extends string, Value = unknown>(name: Name) => {
       // Yield a single spread token for sequence spread sugar `...$('name')`.
       // The spread token is a type-level marker; runtime consumers may inspect
       // the brand and name when interpreting sequence patterns.
-      const token = { name } as unknown as Spread<Name, Value>;
+      const token = { [SPREAD_BRAND]: true, name } as unknown as Spread<Name, Value>;
       yield token;
     },
   });
@@ -62,7 +63,7 @@ Object.defineProperty(__dollar as any, Symbol.iterator, {
   configurable: false,
   writable: false,
   value: function* (): IterableIterator<Spread<"", unknown>> {
-    const token = { name: "" } as unknown as Spread<"", unknown>;
+    const token = { [SPREAD_BRAND]: true, name: "" } as unknown as Spread<"", unknown>;
     yield token;
   },
 });

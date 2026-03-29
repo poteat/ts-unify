@@ -8,13 +8,48 @@ describe("objectAssignToSpread matching", () => {
     expect(rule.tag).toBe("CallExpression");
   });
 
-  // The pattern uses ...$("sources") as a spread capture in the arguments
-  // array. At runtime the spread token becomes a plain {name: "sources"}
-  // object in the array. The current match() compares array lengths strictly
-  // and does not handle spread semantics, so it would only match calls with
-  // exactly 2 arguments and would try to literally match the second argument
-  // against {name: "sources"} as a plain-object pattern.
-  it.skip("matches Object.assign({}, a, b) (requires spread capture support in arrays)", () => {});
+  it("matches Object.assign({}, a, b)", () => {
+    const a = { type: "Identifier", name: "a" };
+    const b = { type: "Identifier", name: "b" };
+    const ast = {
+      type: "CallExpression",
+      callee: {
+        type: "MemberExpression",
+        object: { type: "Identifier", name: "Object" },
+        property: { type: "Identifier", name: "assign" },
+        computed: false,
+        optional: false,
+      },
+      arguments: [{ type: "ObjectExpression", properties: [] }, a, b],
+      optional: false,
+    };
+
+    const bag = match(ast, rule.pattern);
+    expect(bag).not.toBeNull();
+    expect(bag!.sources).toEqual([a, b]);
+  });
+
+  it("matches Object.assign({}, single)", () => {
+    const ast = {
+      type: "CallExpression",
+      callee: {
+        type: "MemberExpression",
+        object: { type: "Identifier", name: "Object" },
+        property: { type: "Identifier", name: "assign" },
+        computed: false,
+        optional: false,
+      },
+      arguments: [
+        { type: "ObjectExpression", properties: [] },
+        { type: "Identifier", name: "x" },
+      ],
+      optional: false,
+    };
+
+    const bag = match(ast, rule.pattern);
+    expect(bag).not.toBeNull();
+    expect(bag!.sources).toEqual([{ type: "Identifier", name: "x" }]);
+  });
 
   it("rejects Object.create({}) (wrong method name)", () => {
     const ast = {
