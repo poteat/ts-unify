@@ -1,14 +1,14 @@
 {
-  "extends": "./tsconfig.base.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
-    "baseUrl": "./packages/core/src",
+    "baseUrl": "../core/src",
     "paths": {
       "@/*": ["*"],
       "@": ["index.ts"],
       "@ts-unify/core": ["index.ts"]
     }
   },
-  "include": ["packages/core/src/**/*", "packages/rules/src/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

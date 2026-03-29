@@ -15,20 +15,20 @@ const nullCheck = U.IfStatement({
     U.BlockStatement({
       body: [returnFallback],
     }),
-    returnFallback
+    returnFallback,
   ).truthy(),
   alternate: null,
 });
 
-const returnOfValue = U.or(
-  U.ReturnStatement({ argument: $("value") }),
-  U.ReturnStatement({
-    argument: U.TSAsExpression({
+const returnOfValue = U.ReturnStatement({
+  argument: U.or(
+    $("value"),
+    U.TSAsExpression({
       expression: $("value"),
       typeAnnotation: $,
     }),
-  })
-);
+  ),
+});
 
 /**
  * Collapse null guard with early return into nullish coalescing.
@@ -63,7 +63,7 @@ export const collapseNullGuard = U.BlockStatement({
     ? U.TSAsExpression({ expression: coalesce, typeAnnotation })
     : coalesce;
 
-  return U.BlockStatement({
+  const block = U.BlockStatement({
     body: [
       ...body,
       U.ReturnStatement({
@@ -71,4 +71,6 @@ export const collapseNullGuard = U.BlockStatement({
       }),
     ],
   });
+
+  return block;
 });

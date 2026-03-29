@@ -1,0 +1,17 @@
+{
+  "name": "@ts-unify/eslint",
+  "version": "0.0.1",
+  "description": "ESLint integration for ts-unify",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@ts-unify/core": "0.0.1"
+  },
+  "files": ["dist"],
+  "license": "MIT"
+}
