@@ -4,18 +4,21 @@ import { U } from "@/ast";
 /**
  * Transform guarded for-loops with push into filter().map() chains
  *
- * Transforms:
- *   const result: T = [];
- *   for (const item of items) {
- *     if (condition(item)) {
- *       result.push(transform(item));
- *     }
+ * @example
+ * ```ts
+ * // Before
+ * const result: T = [];
+ * for (const item of items) {
+ *   if (condition(item)) {
+ *     result.push(transform(item));
  *   }
+ * }
  *
- * Into:
- *   const result = items
- *     .filter(item => condition(item))
- *     .map(item => transform(item));
+ * // After
+ * const result = items
+ *   .filter(item => condition(item))
+ *   .map(item => transform(item));
+ * ```
  */
 
 // `result.push(value)` as a statement (allow block or bare via maybeBlock)

@@ -4,10 +4,14 @@ import { U } from "@/ast";
 /**
  * Collapse Array.from(x).map(fn) into Array.from(x, fn)
  *
- * Transforms:
- *   Array.from(iterable).map(mapFn)
- * Into:
- *   Array.from(iterable, mapFn)
+ * @example
+ * ```ts
+ * // Before
+ * Array.from(iterable).map(mapFn)
+ *
+ * // After
+ * Array.from(iterable, mapFn)
+ * ```
  */
 export const arrayFromMapToArrayFrom = U.CallExpression({
   callee: U.MemberExpression({

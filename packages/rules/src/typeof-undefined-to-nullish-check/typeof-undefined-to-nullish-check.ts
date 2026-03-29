@@ -4,10 +4,14 @@ import { U } from "@/ast";
 /**
  * Replace typeof x === "undefined" with x == null
  *
- * Transforms:
- *   typeof x === "undefined"
- * Into:
- *   x == null
+ * @example
+ * ```ts
+ * // Before
+ * typeof x === "undefined"
+ *
+ * // After
+ * x == null
+ * ```
  */
 export const typeofUndefinedToNullishCheck = U.BinaryExpression({
   operator: U.or("===", "=="),

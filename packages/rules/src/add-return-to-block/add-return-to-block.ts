@@ -11,11 +11,14 @@ const functionParent = U.or(
  * Transform function body blocks with a single expression statement into blocks
  * that return that expression
  *
- * Transforms:
- *   function foo() { someFunction(); }
+ * @example
+ * ```ts
+ * // Before
+ * function foo() { someFunction(); }
  *
- * Into:
- *   function foo() { return someFunction(); }
+ * // After
+ * function foo() { return someFunction(); }
+ * ```
  */
 export const addReturnToBlock = U.BlockStatement({
   parent: functionParent,

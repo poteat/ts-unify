@@ -14,23 +14,31 @@ const exprBlock = U.BlockStatement({
  * Convert function declarations and expressions with single-statement bodies to
  * arrow functions
  *
- * Transforms:
- *   function foo(x) {
- *     return x + 1;
- *   }
- *   →
- *   const foo = (x) => x + 1;
- *
- * Also transforms anonymous function expressions:
- *   function(x) { return x + 1; }
- *   →
- *   (x) => x + 1
- *
  * WARNING: This transformation is potentially unsafe because arrow functions
  * don't have their own `this` binding. Code that relies on dynamic `this`
  * (e.g., object methods, event handlers, or functions using `call`/`apply`)
  * may break after this transformation. It also changes hoisting behavior for
  * function declarations (const assignments are not hoisted like declarations).
+ *
+ * @example
+ * ```ts
+ * // Before
+ * function foo(x) {
+ *   return x + 1;
+ * }
+ *
+ * // After
+ * const foo = (x) => x + 1;
+ * ```
+ *
+ * @example
+ * ```ts
+ * // Before
+ * function(x) { return x + 1; }
+ *
+ * // After
+ * (x) => x + 1
+ * ```
  */
 export const functionDeclReturnToArrow = U.fromNode({
   type: U.or(AST_NODE_TYPES.FunctionDeclaration, AST_NODE_TYPES.FunctionExpression),

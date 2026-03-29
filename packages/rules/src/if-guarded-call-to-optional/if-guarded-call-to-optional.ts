@@ -13,13 +13,16 @@ const callConsequent = U.maybeBlock(
 /**
  * Transform if-guarded function calls into optional chaining
  *
- * Transforms:
- *   if (func) {
- *     func(arg1, arg2);
- *   }
+ * @example
+ * ```ts
+ * // Before
+ * if (func) {
+ *   func(arg1, arg2);
+ * }
  *
- * Into:
- *   func?.(arg1, arg2);
+ * // After
+ * func?.(arg1, arg2);
+ * ```
  */
 export const ifGuardedCallToOptional = U.IfStatement({
   test: $("callee"),

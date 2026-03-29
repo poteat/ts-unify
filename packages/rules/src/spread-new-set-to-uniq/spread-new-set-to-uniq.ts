@@ -4,10 +4,14 @@ import { U } from "@/ast";
 /**
  * Replace [...new Set(array)] with uniq(array)
  *
- * Transforms:
- *   [...new Set(myArray)]
- * Into:
- *   uniq(myArray)
+ * @example
+ * ```ts
+ * // Before
+ * [...new Set(myArray)]
+ *
+ * // After
+ * uniq(myArray)
+ * ```
  */
 export const spreadNewSetToUniq = U.ArrayExpression({
   elements: [

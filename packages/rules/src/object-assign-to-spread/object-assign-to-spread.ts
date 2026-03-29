@@ -4,10 +4,14 @@ import { U } from "@/ast";
 /**
  * Replace Object.assign with spread syntax
  *
- * Transforms:
- *   Object.assign({}, a, b)
- * Into:
- *   { ...a, ...b }
+ * @example
+ * ```ts
+ * // Before
+ * Object.assign({}, a, b)
+ *
+ * // After
+ * { ...a, ...b }
+ * ```
  */
 export const objectAssignToSpread = U.CallExpression({
   callee: U.MemberExpression({

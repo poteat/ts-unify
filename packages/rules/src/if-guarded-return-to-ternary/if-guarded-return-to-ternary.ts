@@ -8,18 +8,27 @@ const anyReturnForm = U.maybeBlock(U.ReturnStatement({ argument: $ }))
 /**
  * Collapse if-guarded return patterns into ternary expressions
  *
- * Transforms:
- *   if (condition) {
- *     return valueA;
- *   }
- *   return valueB;
+ * @example
+ * ```ts
+ * // Before
+ * if (condition) {
+ *   return valueA;
+ * }
+ * return valueB;
  *
- * Into:
- *   return condition ? valueA : valueB;
+ * // After
+ * return condition ? valueA : valueB;
+ * ```
  *
- * Also handles non-block if statements:
- *   if (condition) return valueA;
- *   return valueB;
+ * @example
+ * ```ts
+ * // Before
+ * if (condition) return valueA;
+ * return valueB;
+ *
+ * // After
+ * return condition ? valueA : valueB;
+ * ```
  */
 export const ifGuardedReturnToTernary = U.BlockStatement({
   body: [

@@ -4,10 +4,14 @@ import { U } from "@/ast";
 /**
  * Replace guard-and-access with optional chaining
  *
- * Transforms:
- *   obj && obj.prop
- * Into:
- *   obj?.prop
+ * @example
+ * ```ts
+ * // Before
+ * obj && obj.prop
+ *
+ * // After
+ * obj?.prop
+ * ```
  */
 export const guardAndAccessToOptionalChain = U.LogicalExpression({
   operator: "&&",

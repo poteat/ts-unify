@@ -4,20 +4,32 @@ import { U } from "@/ast";
 /**
  * Normalize ternary expressions to have positive conditions first
  *
- * Transforms:
- *   !condition ? consequent : alternate
- * Into:
- *   condition ? alternate : consequent
+ * @example
+ * ```ts
+ * // Before
+ * !condition ? consequent : alternate
  *
- * Also transforms:
- *   x !== y ? consequent : alternate
- * Into:
- *   x === y ? alternate : consequent
+ * // After
+ * condition ? alternate : consequent
+ * ```
  *
- * And:
- *   x != y ? consequent : alternate
- * Into:
- *   x == y ? alternate : consequent
+ * @example
+ * ```ts
+ * // Before
+ * x !== y ? consequent : alternate
+ *
+ * // After
+ * x === y ? alternate : consequent
+ * ```
+ *
+ * @example
+ * ```ts
+ * // Before
+ * x != y ? consequent : alternate
+ *
+ * // After
+ * x == y ? alternate : consequent
+ * ```
  */
 
 const negatedTernary = U.ConditionalExpression({
