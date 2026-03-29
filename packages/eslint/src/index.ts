@@ -1,43 +1,60 @@
 import { NODE, CAPTURE_BRAND, SPREAD_BRAND, $ as dollarSentinel } from "@ts-unify/core";
 import type { ProxyNode } from "@ts-unify/core";
+import type { TSESTree } from "@typescript-eslint/types";
+
+type RuleModule = {
+  meta: { type: "suggestion"; messages: Record<string, string> };
+  create: (context: any) => Record<string, (node: TSESTree.Node) => void>;
+};
 
 /**
- * Compile an AstTransform (or array of them) into an ESLint rule definition.
+ * Compile an AstTransform into an ESLint rule module.
  */
 export function createRule(
-  ...transforms: any[]
-): { create: (context: any) => Record<string, (node: any) => void> } {
-  const visitors: Record<string, ((node: any) => void)[]> = {};
+  transform: any,
+  opts: { message?: string } = {}
+): RuleModule {
+  const entries = extractPatterns(transform);
+  const message = opts.message ?? "Matches a ts-unify pattern";
 
-  for (const transform of transforms) {
-    const proxyNode: ProxyNode | undefined = transform[NODE];
-    if (!proxyNode) continue;
+  return {
+    meta: {
+      type: "suggestion",
+      messages: { match: message },
+    },
+    create(context) {
+      const visitors: Record<string, (node: TSESTree.Node) => void> = {};
 
-    const { tag, args, chain } = proxyNode;
-    const pattern = args[0] ?? {};
-    const toEntry = chain.find((c) => c.method === "to");
-    const factory = toEntry?.args[0];
-    if (!tag || !factory) continue;
+      for (const { tag, pattern } of entries) {
+        visitors[tag] = (node) => {
+          const bag = match(node, pattern);
+          if (!bag) return;
+          context.report({ node, messageId: "match" });
+        };
+      }
 
-    if (!visitors[tag]) visitors[tag] = [];
-    visitors[tag].push((node) => {
-      const bag = match(node, pattern);
-      if (!bag) return;
-      // TODO: apply factory, generate fix
+      return visitors;
+    },
+  };
+}
+
+/**
+ * Create an ESLint plugin from a map of rule names to AstTransform values.
+ */
+export function createPlugin(
+  rules: Record<string, any>,
+  opts: { prefix?: string } = {}
+): { rules: Record<string, RuleModule> } {
+  const prefix = opts.prefix ?? "ts-unify";
+  const ruleModules: Record<string, RuleModule> = {};
+
+  for (const [name, transform] of Object.entries(rules)) {
+    ruleModules[`${prefix}/${name}`] = createRule(transform, {
+      message: `ts-unify: ${name}`,
     });
   }
 
-  return {
-    create(_context) {
-      const result: Record<string, (node: any) => void> = {};
-      for (const [type, fns] of Object.entries(visitors)) {
-        result[type] = (node) => {
-          for (const fn of fns) fn(node);
-        };
-      }
-      return result;
-    },
-  };
+  return { rules: ruleModules };
 }
 
 /**
@@ -54,7 +71,6 @@ export function match(
     const actual = node[key];
 
     if (expected === dollarSentinel) {
-      // Bare $ — capture using the property key as the name
       bag[key] = actual;
       continue;
     }
@@ -67,21 +83,17 @@ export function match(
     if (isProxyNode(expected)) {
       const inner: ProxyNode = (expected as any)[NODE];
       if (inner.tag === "or") {
-        // U.or(a, b, ...) — match if actual equals any arg
         const orBag = matchOr(actual, inner.args);
         if (!orBag) return null;
         Object.assign(bag, orBag);
         continue;
       }
       if (inner.tag === "maybeBlock") {
-        // U.maybeBlock(stmt) — match BlockStatement { body: [stmt] } or bare stmt
-        const stmtPattern = inner.args[0];
-        const maybeBlockBag = matchMaybeBlock(actual, stmtPattern);
+        const maybeBlockBag = matchMaybeBlock(actual, inner.args[0]);
         if (!maybeBlockBag) return null;
         Object.assign(bag, maybeBlockBag);
         continue;
       }
-      // Nested builder pattern: U.UnaryExpression({ operator: "!" })
       if (actual?.type !== inner.tag) return null;
       const innerPattern = inner.args[0] ?? {};
       const innerBag = match(actual, innerPattern);
@@ -91,7 +103,6 @@ export function match(
     }
 
     if (typeof expected === "object" && expected !== null && !Array.isArray(expected)) {
-      // Plain object pattern (not a builder, not a capture)
       const innerBag = match(actual, expected);
       if (!innerBag) return null;
       Object.assign(bag, innerBag);
@@ -106,11 +117,54 @@ export function match(
       continue;
     }
 
-    // Literal comparison
     if (actual !== expected) return null;
   }
 
   return bag;
+}
+
+/** Extract the first entry pattern from a rule's proxy trace. */
+export function extractPattern(rule: any): {
+  tag: string;
+  pattern: any;
+} | null {
+  const patterns = extractPatterns(rule);
+  return patterns[0] ?? null;
+}
+
+/** Extract all entry patterns (handles top-level U.or and U.fromNode). */
+export function extractPatterns(rule: any): {
+  tag: string;
+  pattern: any;
+}[] {
+  const proxyNode: ProxyNode | undefined = rule[NODE];
+  if (!proxyNode?.tag) return [];
+  if (proxyNode.tag === "or") {
+    return proxyNode.args.flatMap((arg: any) => {
+      if (typeof arg === "function" && arg[NODE]) {
+        const inner: ProxyNode = arg[NODE];
+        return [{ tag: inner.tag, pattern: inner.args[0] ?? {} }];
+      }
+      return [];
+    });
+  }
+  if (proxyNode.tag === "fromNode") {
+    const pattern = proxyNode.args[0] ?? {};
+    const typeField = pattern.type;
+    if (typeof typeField === "function" && typeField[NODE]) {
+      const typeNode: ProxyNode = typeField[NODE];
+      if (typeNode.tag === "or") {
+        const { type: _type, ...rest } = pattern;
+        return typeNode.args.map((t: string) => ({ tag: t, pattern: rest }));
+      }
+    }
+    if (typeof typeField === "string") {
+      const { type: _type, ...rest } = pattern;
+      return [{ tag: typeField, pattern: rest }];
+    }
+    return [];
+  }
+  return [{ tag: proxyNode.tag, pattern: proxyNode.args[0] ?? {} }];
 }
 
 function matchValue(
@@ -141,53 +195,6 @@ function matchValue(
   return actual === expected ? {} : null;
 }
 
-/** Extract the entry node type and pattern from a rule's proxy trace. */
-export function extractPattern(rule: any): {
-  tag: string;
-  pattern: any;
-} | null {
-  const patterns = extractPatterns(rule);
-  return patterns[0] ?? null;
-}
-
-/** Extract all entry patterns (handles top-level U.or). */
-export function extractPatterns(rule: any): {
-  tag: string;
-  pattern: any;
-}[] {
-  const proxyNode: ProxyNode | undefined = rule[NODE];
-  if (!proxyNode?.tag) return [];
-  if (proxyNode.tag === "or") {
-    return proxyNode.args.flatMap((arg: any) => {
-      if (typeof arg === "function" && arg[NODE]) {
-        const inner: ProxyNode = arg[NODE];
-        return [{ tag: inner.tag, pattern: inner.args[0] ?? {} }];
-      }
-      return [];
-    });
-  }
-  if (proxyNode.tag === "fromNode") {
-    // U.fromNode({ type: U.or("A", "B"), ...pattern })
-    // Extract type tags from the pattern's type field
-    const pattern = proxyNode.args[0] ?? {};
-    const typeField = pattern.type;
-    if (typeof typeField === "function" && typeField[NODE]) {
-      const typeNode: ProxyNode = typeField[NODE];
-      if (typeNode.tag === "or") {
-        // Multiple types — create a pattern for each, excluding the type field
-        const { type: _type, ...rest } = pattern;
-        return typeNode.args.map((t: string) => ({ tag: t, pattern: rest }));
-      }
-    }
-    if (typeof typeField === "string") {
-      const { type: _type, ...rest } = pattern;
-      return [{ tag: typeField, pattern: rest }];
-    }
-    return [];
-  }
-  return [{ tag: proxyNode.tag, pattern: proxyNode.args[0] ?? {} }];
-}
-
 function isSpread(v: any): v is { name: string } {
   return v && typeof v === "object" && v[SPREAD_BRAND] === true;
 }
@@ -197,14 +204,12 @@ function matchArray(
   expected: any[],
   parentKey: string
 ): Record<string, any> | null {
-  // Find spread positions
   const spreadIndices: number[] = [];
   for (let i = 0; i < expected.length; i++) {
     if (isSpread(expected[i])) spreadIndices.push(i);
   }
 
   if (spreadIndices.length === 0) {
-    // No spreads — exact length match
     if (actual.length !== expected.length) return null;
     const bag: Record<string, any> = {};
     for (let i = 0; i < expected.length; i++) {
@@ -224,14 +229,12 @@ function matchArray(
 
     const bag: Record<string, any> = {};
 
-    // Match fixed elements before the spread
     for (let i = 0; i < before.length; i++) {
       const elemBag = matchValue(actual[i], before[i], `${i}`);
       if (!elemBag) return null;
       Object.assign(bag, elemBag);
     }
 
-    // Match fixed elements after the spread (from the end)
     for (let i = 0; i < after.length; i++) {
       const actualIdx = actual.length - after.length + i;
       const elemBag = matchValue(actual[actualIdx], after[i], `${actualIdx}`);
@@ -239,7 +242,6 @@ function matchArray(
       Object.assign(bag, elemBag);
     }
 
-    // Capture the spread slice
     const spread = expected[si];
     const spreadName = spread.name || parentKey;
     if (spreadName) {
@@ -249,9 +251,6 @@ function matchArray(
     return bag;
   }
 
-  // Multiple spreads — match greedily: first spread takes as much as possible
-  // leaving minimum for subsequent fixed+spread segments.
-  // For now, only support two spreads (before + after pattern)
   if (spreadIndices.length === 2) {
     const [si1, si2] = spreadIndices;
     const before = expected.slice(0, si1);
@@ -262,14 +261,12 @@ function matchArray(
 
     const bag: Record<string, any> = {};
 
-    // Match before
     for (let i = 0; i < before.length; i++) {
       const elemBag = matchValue(actual[i], before[i], `${i}`);
       if (!elemBag) return null;
       Object.assign(bag, elemBag);
     }
 
-    // Match after (from end)
     for (let i = 0; i < after.length; i++) {
       const actualIdx = actual.length - after.length + i;
       const elemBag = matchValue(actual[actualIdx], after[i], `${actualIdx}`);
@@ -277,7 +274,6 @@ function matchArray(
       Object.assign(bag, elemBag);
     }
 
-    // Try to match middle fixed elements at each possible position
     const middleStart = before.length;
     const middleEnd = actual.length - after.length;
     const range = middleEnd - middleStart;
@@ -303,7 +299,6 @@ function matchArray(
     return null;
   }
 
-  // 3+ spreads not supported
   return null;
 }
 
@@ -319,12 +314,10 @@ function matchMaybeBlock(
   actual: any,
   stmtPattern: any
 ): Record<string, any> | null {
-  // Try as BlockStatement { body: [stmt] }
   if (actual?.type === "BlockStatement" && Array.isArray(actual.body) && actual.body.length === 1) {
     const result = matchValue(actual.body[0], stmtPattern);
     if (result) return result;
   }
-  // Try as bare statement
   return matchValue(actual, stmtPattern);
 }
 

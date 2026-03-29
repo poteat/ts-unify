@@ -10,8 +10,12 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@ts-unify/core": "0.0.1"
+    "@ts-unify/core": "0.0.1",
+    "@typescript-eslint/utils": "^8.57.2",
+    "eslint": "^10.1.0"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "license": "MIT"
 }

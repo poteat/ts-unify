@@ -4,7 +4,7 @@ module.exports = {
   roots: ["<rootDir>/src"],
   testMatch: ["**/?(*.)+(spec|test).ts"],
   transform: {
-    "^.+\\.ts$": "ts-jest",
+    "^.+\\.ts$": ["ts-jest", { tsconfig: "<rootDir>/tsconfig.json" }],
   },
   moduleNameMapper: {
     "^@ts-unify/core$": "<rootDir>/../core/src/index.ts",
