@@ -1,6 +1,7 @@
 import type { Capture } from "@/capture";
 import type { $ } from "@/capture";
 import type { Spread } from "@/capture";
+import type { ConfigSlot } from "@/config/config-type";
 import type {
   Prettify,
   UnionToIntersection,
@@ -14,6 +15,9 @@ import type { OR_BRAND } from "@/ast/or";
 import type { TSESTree } from "@typescript-eslint/types";
 
 type ExtractFromPropertyValue<T, Key extends string> = T extends TSESTree.Node
+  ? {}
+  : // Skip config slots — they don't contribute to the capture bag
+  T extends ConfigSlot
   ? {}
   : // Check if type contains a Capture (works with unions)
   T extends Capture

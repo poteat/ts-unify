@@ -1,5 +1,6 @@
 import type { Capture } from "@/capture/capture-type";
 import type { Spread } from "@/capture/spread/spread";
+import type { ConfigSlot } from "@/config/config-type";
 import type { Sealed } from "@/ast/sealed";
 import type { TSESTree } from "@typescript-eslint/types";
 
@@ -25,6 +26,9 @@ export type SubstituteCaptures<Node, Bag> =
     ? Name extends keyof Bag
       ? Capture<Name & string, Bag[Name]>
       : Node
+    : // Config slots pass through unchanged
+    Node extends ConfigSlot
+    ? Node
     : // Refine spread captures when bag provides a readonly array type
     Node extends Spread<infer SName, infer Elem>
     ? SName extends keyof Bag

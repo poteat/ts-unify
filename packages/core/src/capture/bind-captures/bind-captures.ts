@@ -1,6 +1,7 @@
 import type { $ } from "@/capture/dollar";
 import type { OBJECT_SPREAD_BRAND } from "@/capture/dollar-spread/dollar-spread";
 import type { Capture } from "@/capture/capture-type";
+import type { ConfigSlot } from "@/config/config-type";
 import type { Spread } from "@/capture/spread/spread";
 import type { TSESTree } from "@typescript-eslint/types";
 import type { Sealed } from "@/ast/sealed";
@@ -112,6 +113,9 @@ type BindValue<P, S, Key extends string> =
         ? { [K in keyof S]: Capture<K & string, S[K]> }
         : never
       : Capture<Key, ApplyMods<S, ExtractMods<P>>>
+    : // Config slot: bind value type from the position in the AST shape
+    P extends ConfigSlot<infer Name, infer V>
+    ? ConfigSlot<Name & string, unknown extends V ? S : V>
     : // Explicit capture: upgrade unknown value type to the shape at position
     P extends Capture<infer Name, infer V>
     ? Capture<
