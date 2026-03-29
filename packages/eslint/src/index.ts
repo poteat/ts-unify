@@ -1,4 +1,4 @@
-import { NODE, CAPTURE_BRAND } from "@ts-unify/core";
+import { NODE, CAPTURE_BRAND, $ as dollarSentinel } from "@ts-unify/core";
 import type { ProxyNode } from "@ts-unify/core";
 
 /**
@@ -53,6 +53,12 @@ export function match(
   for (const [key, expected] of Object.entries(pattern)) {
     const actual = node[key];
 
+    if (expected === dollarSentinel) {
+      // Bare $ — capture using the property key as the name
+      bag[key] = actual;
+      continue;
+    }
+
     if (isCapture(expected)) {
       bag[expected.name] = actual;
       continue;
@@ -62,7 +68,17 @@ export function match(
       const inner: ProxyNode = (expected as any)[NODE];
       if (inner.tag === "or") {
         // U.or(a, b, ...) — match if actual equals any arg
-        if (!inner.args.some((arg) => matchValue(actual, arg) !== null)) return null;
+        const orBag = matchOr(actual, inner.args);
+        if (!orBag) return null;
+        Object.assign(bag, orBag);
+        continue;
+      }
+      if (inner.tag === "maybeBlock") {
+        // U.maybeBlock(stmt) — match BlockStatement { body: [stmt] } or bare stmt
+        const stmtPattern = inner.args[0];
+        const maybeBlockBag = matchMaybeBlock(actual, stmtPattern);
+        if (!maybeBlockBag) return null;
+        Object.assign(bag, maybeBlockBag);
         continue;
       }
       // Nested builder pattern: U.UnaryExpression({ operator: "!" })
@@ -87,7 +103,7 @@ export function match(
       // TODO: handle spread captures in arrays
       if (actual.length !== expected.length) return null;
       for (let i = 0; i < expected.length; i++) {
-        const elemBag = matchValue(actual[i], expected[i]);
+        const elemBag = matchValue(actual[i], expected[i], `${i}`);
         if (!elemBag) return null;
         Object.assign(bag, elemBag);
       }
@@ -103,19 +119,22 @@ export function match(
 
 function matchValue(
   actual: any,
-  expected: any
+  expected: any,
+  key?: string
 ): Record<string, any> | null {
+  if (expected === dollarSentinel) {
+    return key ? { [key]: actual } : { _: actual };
+  }
   if (isCapture(expected)) {
     return { [expected.name]: actual };
   }
   if (isProxyNode(expected)) {
     const inner: ProxyNode = (expected as any)[NODE];
     if (inner.tag === "or") {
-      for (const arg of inner.args) {
-        const result = matchValue(actual, arg);
-        if (result) return result;
-      }
-      return null;
+      return matchOr(actual, inner.args);
+    }
+    if (inner.tag === "maybeBlock") {
+      return matchMaybeBlock(actual, inner.args[0]);
     }
     if (actual?.type !== inner.tag) return null;
     return match(actual, inner.args[0] ?? {});
@@ -134,6 +153,27 @@ export function extractPattern(rule: any): {
   const proxyNode: ProxyNode | undefined = rule[NODE];
   if (!proxyNode?.tag) return null;
   return { tag: proxyNode.tag, pattern: proxyNode.args[0] ?? {} };
+}
+
+function matchOr(actual: any, args: any[]): Record<string, any> | null {
+  for (const arg of args) {
+    const result = matchValue(actual, arg);
+    if (result) return result;
+  }
+  return null;
+}
+
+function matchMaybeBlock(
+  actual: any,
+  stmtPattern: any
+): Record<string, any> | null {
+  // Try as BlockStatement { body: [stmt] }
+  if (actual?.type === "BlockStatement" && Array.isArray(actual.body) && actual.body.length === 1) {
+    const result = matchValue(actual.body[0], stmtPattern);
+    if (result) return result;
+  }
+  // Try as bare statement
+  return matchValue(actual, stmtPattern);
 }
 
 function isCapture(v: any): v is { name: string } {

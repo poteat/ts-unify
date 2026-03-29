@@ -8,9 +8,36 @@ describe("ifToTernarySideEffect matching", () => {
     expect(rule.tag).toBe("IfStatement");
   });
 
-  // Same issue as ifReturnToTernary: bare $ for test and expressions, plus
-  // U.maybeBlock (with .seal()) for both branches.
-  it.skip("matches if (c) expr1; else expr2; (requires bare-$ and maybeBlock support)", () => {});
+  it("matches if (c) { expr1; } else { expr2; }", () => {
+    const ast = {
+      type: "IfStatement",
+      test: { type: "Identifier", name: "cond" },
+      consequent: {
+        type: "BlockStatement",
+        body: [{ type: "ExpressionStatement", expression: { type: "Identifier", name: "a" } }],
+      },
+      alternate: {
+        type: "BlockStatement",
+        body: [{ type: "ExpressionStatement", expression: { type: "Identifier", name: "b" } }],
+      },
+    };
+
+    const bag = match(ast, rule.pattern);
+    expect(bag).not.toBeNull();
+    expect(bag!.test).toEqual({ type: "Identifier", name: "cond" });
+  });
+
+  it("matches if (c) expr1; else expr2; (blockless)", () => {
+    const ast = {
+      type: "IfStatement",
+      test: { type: "Identifier", name: "cond" },
+      consequent: { type: "ExpressionStatement", expression: { type: "Identifier", name: "a" } },
+      alternate: { type: "ExpressionStatement", expression: { type: "Identifier", name: "b" } },
+    };
+
+    const bag = match(ast, rule.pattern);
+    expect(bag).not.toBeNull();
+  });
 
   it("rejects an IfStatement with null alternate", () => {
     const ast = {
@@ -26,7 +53,7 @@ describe("ifToTernarySideEffect matching", () => {
     expect(match(ast, rule.pattern)).toBeNull();
   });
 
-  it("rejects when consequent is wrong AST type for maybeBlock", () => {
+  it("rejects when branches are not expression statements", () => {
     const ast = {
       type: "IfStatement",
       test: { type: "Identifier", name: "flag" },

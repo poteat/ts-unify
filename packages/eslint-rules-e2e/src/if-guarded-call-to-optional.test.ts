@@ -8,11 +8,49 @@ describe("ifGuardedCallToOptional matching", () => {
     expect(rule.tag).toBe("IfStatement");
   });
 
-  // The pattern uses U.maybeBlock for the consequent branch, which produces
-  // a proxy with tag "maybeBlock" -- a pseudo-type the matcher does not
-  // recognize. The matcher compares actual.type against "maybeBlock" and
-  // rejects because no real AST node has that type.
-  it.skip("matches if (fn) { fn(args); } (requires maybeBlock support)", () => {});
+  it("matches if (fn) { fn(arg1, arg2); }", () => {
+    const ast = {
+      type: "IfStatement",
+      test: { type: "Identifier", name: "fn" },
+      consequent: {
+        type: "BlockStatement",
+        body: [
+          {
+            type: "ExpressionStatement",
+            expression: {
+              type: "CallExpression",
+              callee: { type: "Identifier", name: "fn" },
+              arguments: [{ type: "Literal", value: 1 }],
+            },
+          },
+        ],
+      },
+      alternate: null,
+    };
+
+    const bag = match(ast, rule.pattern);
+    expect(bag).not.toBeNull();
+    expect(bag!.callee).toEqual({ type: "Identifier", name: "fn" });
+  });
+
+  it("matches if (fn) fn(); (blockless)", () => {
+    const ast = {
+      type: "IfStatement",
+      test: { type: "Identifier", name: "fn" },
+      consequent: {
+        type: "ExpressionStatement",
+        expression: {
+          type: "CallExpression",
+          callee: { type: "Identifier", name: "fn" },
+          arguments: [],
+        },
+      },
+      alternate: null,
+    };
+
+    const bag = match(ast, rule.pattern);
+    expect(bag).not.toBeNull();
+  });
 
   it("rejects if (fn) { fn(args); } else { ... } (alternate must be null)", () => {
     const ast = {
@@ -31,23 +69,17 @@ describe("ifGuardedCallToOptional matching", () => {
           },
         ],
       },
-      alternate: {
-        type: "BlockStatement",
-        body: [],
-      },
+      alternate: { type: "BlockStatement", body: [] },
     };
 
     expect(match(ast, rule.pattern)).toBeNull();
   });
 
-  it("rejects when consequent is a non-block, non-maybeBlock type", () => {
+  it("rejects when consequent is not a call expression", () => {
     const ast = {
       type: "IfStatement",
       test: { type: "Identifier", name: "fn" },
-      consequent: {
-        type: "ReturnStatement",
-        argument: null,
-      },
+      consequent: { type: "ReturnStatement", argument: null },
       alternate: null,
     };
 
