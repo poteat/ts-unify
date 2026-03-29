@@ -4,7 +4,9 @@
     "noEmit": true,
     "baseUrl": "../core/src",
     "paths": {
-      "@ts-unify/core": ["index.ts"]
+      "@ts-unify/core": ["index.ts"],
+      "@/*": ["*"],
+      "@": ["index.ts"]
     }
   },
   "include": ["src/**/*"],
