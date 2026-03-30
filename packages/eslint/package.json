@@ -12,7 +12,8 @@
   "dependencies": {
     "@ts-unify/core": "0.0.1",
     "@typescript-eslint/utils": "^8.57.2",
-    "eslint": "^10.1.0"
+    "eslint": "^10.1.0",
+    "recast": "^0.23.11"
   },
   "files": [
     "dist"

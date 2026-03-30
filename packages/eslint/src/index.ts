@@ -1,6 +1,7 @@
 import { NODE, CAPTURE_BRAND, SPREAD_BRAND, $ as dollarSentinel } from "@ts-unify/core";
 import type { ProxyNode } from "@ts-unify/core";
 import type { TSESTree } from "@typescript-eslint/types";
+import { print } from "recast";
 
 type RuleModule = {
   meta: { type: "suggestion"; fixable?: "code"; messages: Record<string, string> };
@@ -48,7 +49,8 @@ export function createRule(
               ? {
                   fix(fixer: any) {
                     const output = factory(bag);
-                    const text = serialize(output, sourceCode);
+                    const ast = reify(output, sourceCode);
+                    const text = print(ast).code;
                     return fixer.replaceText(node, text);
                   },
                 }
@@ -382,138 +384,46 @@ function deepEqual(a: any, b: any): boolean {
 }
 
 /**
- * Serialize a proxy node (or real AST node) back to source text.
+ * Convert a proxy tree (or real AST node) into a plain ESTree object
+ * suitable for astring's `generate()`.
  */
-function serialize(value: any, sourceCode?: any): string {
-  // Real AST node — use source text if available
-  if (value && typeof value === "object" && value.range && sourceCode) {
-    return sourceCode.getText(value);
-  }
-
-  // Proxy node — reconstruct from tag + args
+function reify(value: any, sourceCode?: any): any {
+  // Proxy node — convert tag + args into ESTree
   if (typeof value === "function" && value[NODE]) {
     const node: ProxyNode = value[NODE];
-    return serializeProxyNode(node, sourceCode);
+    const args = node.args[0] ?? {};
+    const result: any = { type: node.tag };
+    for (const [k, v] of Object.entries(args)) {
+      result[k] = reify(v, sourceCode);
+    }
+    return result;
   }
 
-  // Plain values
-  if (value === null) return "null";
-  if (value === undefined) return "undefined";
-  if (typeof value === "string") return JSON.stringify(value);
-  if (typeof value === "number" || typeof value === "boolean") return String(value);
-
-  // Real AST node without source — best-effort based on type
-  if (value && typeof value === "object" && value.type) {
-    return serializeAstNode(value, sourceCode);
+  // Real AST node from capture bag — strip TSESTree extras for astring
+  if (value && typeof value === "object" && value.type && value.range) {
+    return stripForEstree(value);
   }
 
-  return String(value);
+  // Arrays
+  if (Array.isArray(value)) {
+    return value.map((v: any) => reify(v, sourceCode));
+  }
+
+  // Primitives and plain values
+  return value;
 }
 
-function serializeProxyNode(node: ProxyNode, sourceCode?: any): string {
-  const args = node.args[0] ?? {};
+/** Strip TSESTree-specific fields that confuse astring. */
+function stripForEstree(node: any): any {
+  if (!node || typeof node !== "object") return node;
+  if (Array.isArray(node)) return node.map(stripForEstree);
 
-  switch (node.tag) {
-    case "Identifier":
-      return args.name ?? "unknown";
-    case "Literal":
-      if (args.value === null) return "null";
-      if (typeof args.value === "string") return JSON.stringify(args.value);
-      return String(args.value);
-    case "CallExpression": {
-      const callee = serialize(args.callee, sourceCode);
-      const argList = (args.arguments ?? [])
-        .map((a: any) => serialize(a, sourceCode))
-        .join(", ");
-      return `${callee}(${argList})`;
-    }
-    case "MemberExpression": {
-      const obj = serialize(args.object, sourceCode);
-      const prop = serialize(args.property, sourceCode);
-      return args.computed ? `${obj}[${prop}]` : `${obj}.${prop}`;
-    }
-    case "BinaryExpression":
-    case "LogicalExpression": {
-      const left = serialize(args.left, sourceCode);
-      const right = serialize(args.right, sourceCode);
-      return `${left} ${args.operator} ${right}`;
-    }
-    case "UnaryExpression":
-      return `${args.operator}${serialize(args.argument, sourceCode)}`;
-    case "ConditionalExpression": {
-      const test = serialize(args.test, sourceCode);
-      const consequent = serialize(args.consequent, sourceCode);
-      const alternate = serialize(args.alternate, sourceCode);
-      return `${test} ? ${consequent} : ${alternate}`;
-    }
-    case "ArrayExpression": {
-      const elems = (args.elements ?? [])
-        .map((e: any) => serialize(e, sourceCode))
-        .join(", ");
-      return `[${elems}]`;
-    }
-    case "ObjectExpression": {
-      const props = (args.properties ?? [])
-        .map((p: any) => serialize(p, sourceCode))
-        .join(", ");
-      return `{ ${props} }`;
-    }
-    case "SpreadElement":
-      return `...${serialize(args.argument, sourceCode)}`;
-    case "ReturnStatement":
-      return args.argument
-        ? `return ${serialize(args.argument, sourceCode)}`
-        : "return";
-    case "ExpressionStatement":
-      return serialize(args.expression, sourceCode);
-    case "BlockStatement": {
-      const body = (args.body ?? [])
-        .map((s: any) => serialize(s, sourceCode) + ";")
-        .join(" ");
-      return `{ ${body} }`;
-    }
-    case "ArrowFunctionExpression": {
-      const params = (args.params ?? [])
-        .map((p: any) => serialize(p, sourceCode))
-        .join(", ");
-      const body = serialize(args.body, sourceCode);
-      const async = args.async ? "async " : "";
-      return `${async}(${params}) => ${body}`;
-    }
-    case "VariableDeclaration": {
-      const decls = (args.declarations ?? [])
-        .map((d: any) => serialize(d, sourceCode))
-        .join(", ");
-      return `${args.kind} ${decls}`;
-    }
-    case "VariableDeclarator": {
-      const id = serialize(args.id, sourceCode);
-      return args.init ? `${id} = ${serialize(args.init, sourceCode)}` : id;
-    }
-    case "ChainExpression":
-      return serialize(args.expression, sourceCode);
-    case "TSAsExpression":
-      return `${serialize(args.expression, sourceCode)} as ${serialize(args.typeAnnotation, sourceCode)}`;
-    default:
-      return `/* unsupported: ${node.tag} */`;
+  const result: any = {};
+  for (const [k, v] of Object.entries(node)) {
+    if (k === "parent" || k === "loc" || k === "range") continue;
+    result[k] = typeof v === "object" ? stripForEstree(v) : v;
   }
-}
-
-function serializeAstNode(node: any, sourceCode?: any): string {
-  if (sourceCode && node.range) {
-    return sourceCode.getText(node);
-  }
-
-  switch (node.type) {
-    case "Identifier":
-      return node.name;
-    case "Literal":
-      if (node.value === null) return "null";
-      if (typeof node.value === "string") return JSON.stringify(node.value);
-      return String(node.value);
-    default:
-      return `/* unknown: ${node.type} */`;
-  }
+  return result;
 }
 
 function isCapture(v: any): v is { name: string } {
