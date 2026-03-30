@@ -385,7 +385,7 @@ function deepEqual(a: any, b: any): boolean {
 
 /**
  * Convert a proxy tree (or real AST node) into a plain ESTree object
- * suitable for astring's `generate()`.
+ * suitable for recast's `print()`.
  */
 function reify(value: any, sourceCode?: any): any {
   // Proxy node — convert tag + args into ESTree
@@ -399,7 +399,7 @@ function reify(value: any, sourceCode?: any): any {
     return result;
   }
 
-  // Real AST node from capture bag — strip TSESTree extras for astring
+  // Real AST node from capture bag — strip internal fields
   if (value && typeof value === "object" && value.type && value.range) {
     return stripForEstree(value);
   }
@@ -413,7 +413,7 @@ function reify(value: any, sourceCode?: any): any {
   return value;
 }
 
-/** Strip TSESTree-specific fields that confuse astring. */
+/** Strip parent/loc/range from AST nodes before printing. */
 function stripForEstree(node: any): any {
   if (!node || typeof node !== "object") return node;
   if (Array.isArray(node)) return node.map(stripForEstree);
