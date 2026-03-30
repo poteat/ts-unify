@@ -399,11 +399,6 @@ function reify(value: any, sourceCode?: any): any {
     return result;
   }
 
-  // Real AST node from capture bag — strip internal fields
-  if (value && typeof value === "object" && value.type && value.range) {
-    return stripForEstree(value);
-  }
-
   // Arrays
   if (Array.isArray(value)) {
     return value.map((v: any) => reify(v, sourceCode));
@@ -411,19 +406,6 @@ function reify(value: any, sourceCode?: any): any {
 
   // Primitives and plain values
   return value;
-}
-
-/** Strip parent/loc/range from AST nodes before printing. */
-function stripForEstree(node: any): any {
-  if (!node || typeof node !== "object") return node;
-  if (Array.isArray(node)) return node.map(stripForEstree);
-
-  const result: any = {};
-  for (const [k, v] of Object.entries(node)) {
-    if (k === "parent" || k === "loc" || k === "range") continue;
-    result[k] = typeof v === "object" ? stripForEstree(v) : v;
-  }
-  return result;
 }
 
 function isCapture(v: any): v is { name: string } {
