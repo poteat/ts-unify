@@ -40,8 +40,61 @@ describe("normalizeTernaryOrder matching", () => {
       alternate: { type: "Literal", value: 2 },
     };
 
-    const bag = match(ast, patterns[1].pattern);
+    const bag = match(ast, patterns[1].pattern, patterns[1].chain);
     expect(bag).not.toBeNull();
+    expect(bag!.operator).toBe("!==");
+  });
+
+  it("branch 2 matches x != y ? a : b", () => {
+    const ast = {
+      type: "ConditionalExpression",
+      test: {
+        type: "BinaryExpression",
+        operator: "!=",
+        left: { type: "Identifier", name: "x" },
+        right: { type: "Identifier", name: "y" },
+      },
+      consequent: { type: "Literal", value: 1 },
+      alternate: { type: "Literal", value: 2 },
+    };
+
+    const bag = match(ast, patterns[1].pattern, patterns[1].chain);
+    expect(bag).not.toBeNull();
+    expect(bag!.operator).toBe("!=");
+  });
+
+  it("branch 2 rejects x === y ? a : b (when guard filters it out)", () => {
+    const ast = {
+      type: "ConditionalExpression",
+      test: {
+        type: "BinaryExpression",
+        operator: "===",
+        left: { type: "Identifier", name: "x" },
+        right: { type: "Identifier", name: "y" },
+      },
+      consequent: { type: "Literal", value: 1 },
+      alternate: { type: "Literal", value: 2 },
+    };
+
+    const bag = match(ast, patterns[1].pattern, patterns[1].chain);
+    expect(bag).toBeNull();
+  });
+
+  it("branch 2 rejects x == y ? a : b (when guard filters it out)", () => {
+    const ast = {
+      type: "ConditionalExpression",
+      test: {
+        type: "BinaryExpression",
+        operator: "==",
+        left: { type: "Identifier", name: "x" },
+        right: { type: "Identifier", name: "y" },
+      },
+      consequent: { type: "Literal", value: 1 },
+      alternate: { type: "Literal", value: 2 },
+    };
+
+    const bag = match(ast, patterns[1].pattern, patterns[1].chain);
+    expect(bag).toBeNull();
   });
 
   it("branch 1 rejects cond ? a : b (no negation)", () => {

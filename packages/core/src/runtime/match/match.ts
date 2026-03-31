@@ -10,7 +10,8 @@ import { $ as dollarSentinel } from "@/capture/dollar";
  */
 export function match(
   node: any,
-  pattern: any
+  pattern: any,
+  chain?: { method: string; args: any[] }[]
 ): Record<string, any> | null {
   const namedBindings: { name: string; value: any }[] = [];
   const bag = matchInner(node, pattern, namedBindings);
@@ -26,6 +27,9 @@ export function match(
     }
   }
 
+  // Enforce top-level .when() guards
+  if (chain && !applyWhenGuards(chain, bag)) return null;
+
   return bag;
 }
 
@@ -34,6 +38,17 @@ function matchInner(
   pattern: any,
   namedBindings: { name: string; value: any }[]
 ): Record<string, any> | null {
+  // When the entire pattern is $, capture all own non-meta properties of the node
+  if (pattern === dollarSentinel) {
+    const bag: Record<string, any> = {};
+    if (node && typeof node === "object") {
+      for (const key of Object.keys(node)) {
+        if (!SKIP_KEYS.has(key)) bag[key] = node[key];
+      }
+    }
+    return bag;
+  }
+
   const bag: Record<string, any> = {};
 
   for (const [key, expected] of Object.entries(pattern)) {
@@ -55,12 +70,14 @@ function matchInner(
       if (inner.tag === "or") {
         const orBag = matchOrInner(actual, inner.args, namedBindings);
         if (!orBag) return null;
+        if (!applyWhenGuards(inner.chain, orBag)) return null;
         Object.assign(bag, orBag);
         continue;
       }
       if (inner.tag === "maybeBlock") {
         const maybeBlockBag = matchMaybeBlockInner(actual, inner.args[0], namedBindings);
         if (!maybeBlockBag) return null;
+        if (!applyWhenGuards(inner.chain, maybeBlockBag)) return null;
         Object.assign(bag, maybeBlockBag);
         continue;
       }
@@ -68,6 +85,7 @@ function matchInner(
       const innerPattern = inner.args[0] ?? {};
       const innerBag = matchInner(actual, innerPattern, namedBindings);
       if (!innerBag) return null;
+      if (!applyWhenGuards(inner.chain, innerBag)) return null;
       Object.assign(bag, innerBag);
       continue;
     }
@@ -109,13 +127,22 @@ function matchValueInner(
   if (isProxyNode(expected)) {
     const inner: ProxyNode = (expected as any)[NODE];
     if (inner.tag === "or") {
-      return matchOrInner(actual, inner.args, namedBindings);
+      const orBag = matchOrInner(actual, inner.args, namedBindings);
+      if (!orBag) return null;
+      if (!applyWhenGuards(inner.chain, orBag)) return null;
+      return orBag;
     }
     if (inner.tag === "maybeBlock") {
-      return matchMaybeBlockInner(actual, inner.args[0], namedBindings);
+      const maybeBlockBag = matchMaybeBlockInner(actual, inner.args[0], namedBindings);
+      if (!maybeBlockBag) return null;
+      if (!applyWhenGuards(inner.chain, maybeBlockBag)) return null;
+      return maybeBlockBag;
     }
     if (actual?.type !== inner.tag) return null;
-    return matchInner(actual, inner.args[0] ?? {}, namedBindings);
+    const innerBag = matchInner(actual, inner.args[0] ?? {}, namedBindings);
+    if (!innerBag) return null;
+    if (!applyWhenGuards(inner.chain, innerBag)) return null;
+    return innerBag;
   }
   if (typeof expected === "object" && expected !== null) {
     return matchInner(actual, expected, namedBindings);
@@ -256,6 +283,23 @@ function deepEqual(a: any, b: any): boolean {
   const keysB = Object.keys(b).filter((k) => !SKIP_KEYS.has(k));
   if (keysA.length !== keysB.length) return false;
   return keysA.every((k) => deepEqual(a[k], b[k]));
+}
+
+/**
+ * Check `.when()` guards in a proxy node's chain.
+ * Returns true if all guards pass (or there are none), false otherwise.
+ */
+function applyWhenGuards(
+  chain: { method: string; args: any[] }[],
+  bag: Record<string, any>
+): boolean {
+  for (const entry of chain) {
+    if (entry.method === "when") {
+      const guardFn = entry.args[0];
+      if (typeof guardFn === "function" && !guardFn(bag)) return false;
+    }
+  }
+  return true;
 }
 
 function isCapture(v: any): v is { name: string } {

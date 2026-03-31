@@ -9,11 +9,6 @@ const tester = new RuleTester({
   },
 });
 
-// Note: This rule uses U.or() with two ConditionalExpression branches.
-// Because createRule assigns visitors by tag, the second branch (inequality)
-// overwrites the first (negation). Additionally, .when() is not implemented
-// in the ESLint matcher, so the inequality branch matches ANY ternary whose
-// test is a BinaryExpression — not just !== and !=.
 tester.run(
   "normalize-ternary-order",
   createRule(normalizeTernaryOrder, {
@@ -25,6 +20,8 @@ tester.run(
       "const x = cond ? a : b;",
       // Call expression test — not a BinaryExpression
       "const x = isReady() ? a : b;",
+      // === is rejected by the .when() guard (only !== and != are allowed)
+      "const x = a === b ? c : d;",
     ],
     invalid: [
       {
@@ -35,11 +32,6 @@ tester.run(
       {
         // != is the intended target of this rule
         code: "const x = a != b ? c : d;",
-        errors: [{ messageId: "match" }],
-      },
-      {
-        // === also matches because .when() guard is not enforced
-        code: "const x = a === b ? c : d;",
         errors: [{ messageId: "match" }],
       },
     ],

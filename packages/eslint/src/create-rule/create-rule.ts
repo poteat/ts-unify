@@ -34,9 +34,9 @@ export function createRule(
       const visitors: Record<string, (node: TSESTree.Node) => void> = {};
       const sourceCode = context.sourceCode ?? context.getSourceCode?.();
 
-      for (const { tag, pattern } of entries) {
+      for (const { tag, pattern, chain } of entries) {
         visitors[tag] = (node: TSESTree.Node) => {
-          const bag = match(node, pattern);
+          const bag = match(node, pattern, chain);
           if (!bag) return;
           const data: Record<string, string> = {};
           for (const [k, v] of Object.entries(bag)) {

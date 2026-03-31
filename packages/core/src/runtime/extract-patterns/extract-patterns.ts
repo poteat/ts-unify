@@ -9,6 +9,7 @@ import type { ProxyNode } from "@/ast/builder-map";
 export function extractPatterns(rule: any): {
   tag: string;
   pattern: any;
+  chain: { method: string; args: any[] }[];
 }[] {
   const proxyNode: ProxyNode | undefined = rule[NODE];
   if (!proxyNode?.tag) return [];
@@ -16,7 +17,7 @@ export function extractPatterns(rule: any): {
     return proxyNode.args.flatMap((arg: any) => {
       if (typeof arg === "function" && arg[NODE]) {
         const inner: ProxyNode = arg[NODE];
-        return [{ tag: inner.tag, pattern: inner.args[0] ?? {} }];
+        return [{ tag: inner.tag, pattern: inner.args[0] ?? {}, chain: inner.chain }];
       }
       return [];
     });
@@ -28,16 +29,16 @@ export function extractPatterns(rule: any): {
       const typeNode: ProxyNode = typeField[NODE];
       if (typeNode.tag === "or") {
         const { type: _type, ...rest } = pattern;
-        return typeNode.args.map((t: string) => ({ tag: t, pattern: rest }));
+        return typeNode.args.map((t: string) => ({ tag: t, pattern: rest, chain: proxyNode.chain }));
       }
     }
     if (typeof typeField === "string") {
       const { type: _type, ...rest } = pattern;
-      return [{ tag: typeField, pattern: rest }];
+      return [{ tag: typeField, pattern: rest, chain: proxyNode.chain }];
     }
     return [];
   }
-  return [{ tag: proxyNode.tag, pattern: proxyNode.args[0] ?? {} }];
+  return [{ tag: proxyNode.tag, pattern: proxyNode.args[0] ?? {}, chain: proxyNode.chain }];
 }
 
 /** Extract the first entry pattern from a rule's proxy trace. */
