@@ -31,6 +31,9 @@ tester.run(
   }
 }`,
         errors: [{ messageId: "match" }],
+        output: `function f() {
+    const result = items.filter(item => isValid(item)).map(item => transform(item));
+}`,
       },
       {
         code: `function f() {
@@ -44,6 +47,11 @@ tester.run(
   cleanup();
 }`,
         errors: [{ messageId: "match" }],
+        output: `function f() {
+    setup();
+    const out = xs.filter(x => x > 0).map(x => x * 2);
+    cleanup();
+}`,
       },
     ],
   }

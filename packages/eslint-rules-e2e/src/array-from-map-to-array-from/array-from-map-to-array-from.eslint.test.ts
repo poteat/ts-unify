@@ -26,10 +26,12 @@ tester.run(
       {
         code: "Array.from(items).map(x => x + 1);",
         errors: [{ messageId: "match" }],
+        output: "Array.from(items, x => x + 1);",
       },
       {
         code: "Array.from(set).map(transform);",
         errors: [{ messageId: "match" }],
+        output: "Array.from(set, transform);",
       },
     ],
   }

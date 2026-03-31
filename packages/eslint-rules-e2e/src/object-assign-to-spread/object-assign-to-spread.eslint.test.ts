@@ -25,10 +25,12 @@ tester.run(
       {
         code: "const x = Object.assign({}, a, b);",
         errors: [{ messageId: "match" }],
+        output: "const x = {\n    ...a,\n    ...b\n};",
       },
       {
         code: "const x = Object.assign({}, source);",
         errors: [{ messageId: "match" }],
+        output: "const x = {\n    ...source\n};",
       },
     ],
   }

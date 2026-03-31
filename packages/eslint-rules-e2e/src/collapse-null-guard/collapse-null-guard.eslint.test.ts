@@ -24,14 +24,17 @@ tester.run(
       {
         code: "function f(x) { if (x === null) return def; return x; }",
         errors: [{ messageId: "match" }],
+        output: "function f(x) {\n    return x ?? def;\n}",
       },
       {
         code: "function f(x) { if (x === null) { return def; } return x; }",
         errors: [{ messageId: "match" }],
+        output: "function f(x) {\n    return x ?? def;\n}",
       },
       {
         code: "function f(x) { setup(); if (x === null) return def; return x; }",
         errors: [{ messageId: "match" }],
+        output: "function f(x) {\n    setup();\n    return x ?? def;\n}",
       },
     ],
   }

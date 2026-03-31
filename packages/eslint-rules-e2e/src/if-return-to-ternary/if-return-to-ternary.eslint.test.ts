@@ -24,10 +24,12 @@ tester.run(
       {
         code: "function f() { if (cond) { return a; } else { return b; } }",
         errors: [{ messageId: "match" }],
+        output: "function f() { return cond ? a : b; }",
       },
       {
         code: "function f() { if (cond) return a; else return b; }",
         errors: [{ messageId: "match" }],
+        output: "function f() { return cond ? a : b; }",
       },
     ],
   }

@@ -72,7 +72,7 @@ export function createRule(
     (c: ChainEntry) => c.method === "to"
   );
   const factory =
-    opts.fix === true && toEntry?.args[0]
+    opts.fix !== false && toEntry?.args[0]
       ? (toEntry.args[0] as (bag: Record<string, unknown>) => unknown)
       : null;
 

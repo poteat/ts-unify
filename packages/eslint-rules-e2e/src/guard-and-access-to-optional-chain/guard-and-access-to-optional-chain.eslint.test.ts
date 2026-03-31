@@ -24,6 +24,7 @@ tester.run(
       {
         code: "obj && obj.prop;",
         errors: [{ messageId: "match" }],
+        output: "obj?.prop;",
       },
     ],
   }

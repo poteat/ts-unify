@@ -24,10 +24,12 @@ tester.run(
       {
         code: "if (cond) { doA(); } else { doB(); }",
         errors: [{ messageId: "match" }],
+        output: "cond ? doA() : doB();",
       },
       {
         code: "if (cond) doA(); else doB();",
         errors: [{ messageId: "match" }],
+        output: "cond ? doA() : doB();",
       },
     ],
   }

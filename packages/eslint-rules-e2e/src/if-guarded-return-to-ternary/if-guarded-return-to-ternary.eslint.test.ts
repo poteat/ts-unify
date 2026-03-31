@@ -24,14 +24,17 @@ tester.run(
       {
         code: "function f() { if (cond) { return a; } return b; }",
         errors: [{ messageId: "match" }],
+        output: "function f() {\n    return cond ? a : b;\n}",
       },
       {
         code: "function f() { if (cond) return a; return b; }",
         errors: [{ messageId: "match" }],
+        output: "function f() {\n    return cond ? a : b;\n}",
       },
       {
         code: "function f() { setup(); if (cond) { return a; } return b; }",
         errors: [{ messageId: "match" }],
+        output: "function f() {\n    setup();\n    return cond ? a : b;\n}",
       },
     ],
   }

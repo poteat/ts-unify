@@ -25,14 +25,17 @@ tester.run(
       {
         code: "function foo() { bar(); }",
         errors: [{ messageId: "match" }],
+        output: "function foo() {\n    return bar();\n}",
       },
       {
         code: "const f = function() { doSomething(); };",
         errors: [{ messageId: "match" }],
+        output: "const f = function() {\n    return doSomething();\n};",
       },
       {
         code: "const f = () => { doSomething(); };",
         errors: [{ messageId: "match" }],
+        output: "const f = () => {\n    return doSomething();\n};",
       },
     ],
   }

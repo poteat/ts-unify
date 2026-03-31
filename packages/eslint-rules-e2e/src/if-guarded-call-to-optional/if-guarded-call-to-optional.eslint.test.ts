@@ -24,14 +24,17 @@ tester.run(
       {
         code: "if (fn) { fn(arg1, arg2); }",
         errors: [{ messageId: "match" }],
+        output: "fn?.(arg1, arg2);",
       },
       {
         code: "if (callback) { callback(); }",
         errors: [{ messageId: "match" }],
+        output: "callback?.();",
       },
       {
         code: "if (handler) handler(event);",
         errors: [{ messageId: "match" }],
+        output: "handler?.(event);",
       },
     ],
   }

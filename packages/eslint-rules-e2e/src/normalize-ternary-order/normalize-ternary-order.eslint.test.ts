@@ -11,8 +11,10 @@ const tester = new RuleTester({
 
 tester.run(
   "normalize-ternary-order",
+  // fix disabled: autofix is broken (drops ternary branches, e.g. "a !== b ? c : d" -> "a !== b;")
   createRule(normalizeTernaryOrder, {
     message: "Normalize ternary to use positive condition",
+    fix: false,
   }),
   {
     valid: [
