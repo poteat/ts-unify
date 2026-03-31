@@ -14,10 +14,12 @@ npm i @ts-unify/eslint @ts-unify/rules
 import { createPlugin } from "@ts-unify/eslint";
 import * as rules from "@ts-unify/rules";
 
+const tsUnifyDefaults = createPlugin(rules);
+
 export default [
   {
-    plugins: { "ts-unify": createPlugin(rules) },
-    rules: {},
+    plugins: { "ts-unify": tsUnifyDefaults },
+    ...tsUnifyDefaults.configs.recommended,
   },
 ];
 ```
@@ -31,3 +33,27 @@ transformed structure, which encodes the AST constraints we desire.
 
 We infer the type holes of matched patterns to prove that the resultant AST is
 syntactically well-typed.
+
+## Defining your own rules
+
+Rules are defined using a fluent interface that uses structural matching to
+transform your AST.
+
+```ts
+import { U, $ } from "@ts-unify/core";
+
+export const typeofUndefinedToNullishCheck = U.BinaryExpression({
+  operator: U.or("===", "=="),
+  left: U.UnaryExpression({
+    operator: "typeof",
+    argument: $("expr"),
+  }),
+  right: U.Literal({ value: "undefined" }),
+}).to(({ expr }) =>
+  U.BinaryExpression({
+    operator: "==",
+    left: expr,
+    right: U.Literal({ value: null }),
+  }),
+);
+```
