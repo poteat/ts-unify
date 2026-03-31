@@ -2,35 +2,21 @@ import type { Capture } from "@/capture";
 import type { $ } from "@/capture";
 import type { Spread } from "@/capture";
 import type { ConfigSlot } from "@/config/config-type";
-import type {
-  Prettify,
-  UnionToIntersection,
-  Values,
-  KeysOfUnion,
-} from "@/type-utils";
+import type { Prettify, UnionToIntersection, Values } from "@/type-utils";
 import type { SingleKeyOf } from "@/type-utils/single-key-of";
 import type { Sealed } from "@/ast/sealed";
 import type { Overwrite } from "@/type-utils";
 import type { OR_BRAND } from "@/ast/or";
 import type { TSESTree } from "@typescript-eslint/types";
+import type { StripSeal } from "@/pattern/strip-seal";
+import type { StripOr } from "@/pattern/strip-or";
+import type { CoalesceUnionOfBags } from "@/pattern/coalesce-union-of-bags";
 
-type StripSeal<T> = T extends Sealed<infer Inner> ? Inner : T;
-type StripOr<T> = T extends { readonly [OR_BRAND]: true }
-  ? Omit<T, typeof OR_BRAND>
-  : T;
 type StripWith<T> = T extends { readonly __with: any } ? Omit<T, "__with"> : T;
 
 type ReKeyIfSingle<Bag, K extends string> = [SingleKeyOf<Bag>] extends [never]
   ? Bag
   : { [P in K]: Bag extends any ? Bag[SingleKeyOf<Bag>] : never };
-
-type CoalesceUnionOfBags<U> = {
-  [K in KeysOfUnion<U>]: U extends any
-    ? K extends keyof U
-      ? U[K]
-      : never
-    : never;
-};
 
 type ExtractFromPropertyValue<T, Key extends string> = T extends TSESTree.Node
   ? {}

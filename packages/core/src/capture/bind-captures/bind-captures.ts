@@ -8,6 +8,8 @@ import type { Sealed } from "@/ast/sealed";
 import type { OR_BRAND } from "@/ast/or";
 import type { CAPTURE_MODS_BRAND } from "@/capture/capture-mods/capture-mods";
 import type { Falsy, Truthy } from "@/ast/builder-helpers";
+import type { StripSeal } from "@/pattern/strip-seal";
+import type { StripOr } from "@/pattern/strip-or";
 
 /**
  * Bind capture names and value types in a pattern `P` using a reference `Shape`.
@@ -17,12 +19,6 @@ import type { Falsy, Truthy } from "@/ast/builder-helpers";
  *   to the corresponding type from `Shape` at that position.
  * - Recurses through objects, tuples, and arrays.
  */
-
-// ————— Small helpers to clarify intent —————
-type StripSeal<T> = T extends Sealed<infer Inner> ? Inner : T;
-type StripOr<T> = T extends { readonly [OR_BRAND]: true }
-  ? Omit<T, typeof OR_BRAND>
-  : T;
 
 type KeyStr<K> = K & string;
 type ShapeAt<S, K extends PropertyKey> = K extends keyof S ? S[K] : unknown;

@@ -1,14 +1,10 @@
-import type { UnionToIntersection, Values, KeysOfUnion } from "@/type-utils";
+import type { UnionToIntersection, Values } from "@/type-utils";
 import type { Sealed } from "@/ast/sealed";
 import type { OR_BRAND } from "@/ast/or";
 import type { TSESTree } from "@typescript-eslint/types";
-
-type StripSeal<T> = T extends Sealed<infer Inner> ? Inner : T;
-type StripOr<T> = T extends { readonly [OR_BRAND]: true } ? Omit<T, typeof OR_BRAND> : T;
-
-type CoalesceUnionOfBags<U> = {
-  [K in KeysOfUnion<U>]: U extends any ? (K extends keyof U ? U[K] : never) : never;
-};
+import type { StripSeal } from "@/pattern/strip-seal";
+import type { StripOr } from "@/pattern/strip-or";
+import type { CoalesceUnionOfBags } from "@/pattern/coalesce-union-of-bags";
 
 type Walk<P, Token> = {
   [K in keyof P]-?: CoalesceUnionOfBags<PropertyValue<P[K], Token>>;
