@@ -11,10 +11,8 @@ const tester = new RuleTester({
 
 tester.run(
   "singular-function-to-arrow",
-  // fix disabled: autofix is broken (declaration produces empty string, expression produces parse error)
   createRule(functionDeclReturnToArrow, {
     message: "Convert single-statement function to arrow function",
-    fix: false,
   }),
   {
     valid: [
@@ -26,10 +24,12 @@ tester.run(
       {
         code: "function foo(x) { return x + 1; }",
         errors: [{ messageId: "match" }],
+        output: "const foo = x => x + 1;",
       },
       {
         code: "const f = function(x) { return x * 2; };",
         errors: [{ messageId: "match" }],
+        output: "const f = x => x * 2;",
       },
     ],
   }

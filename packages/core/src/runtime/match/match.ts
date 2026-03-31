@@ -2,7 +2,7 @@ import { NODE } from "@/ast/builder-map";
 import type { ProxyNode } from "@/ast/builder-map";
 import { CAPTURE_BRAND } from "@/capture/capture-type";
 import { SPREAD_BRAND } from "@/capture/spread/spread";
-import { $ as dollarSentinel } from "@/capture/dollar";
+import { $ as dollarSentinel, REST_CAPTURE } from "@/capture/dollar";
 import { CONFIG_BRAND } from "@/config/config-type";
 
 /**
@@ -98,6 +98,17 @@ function matchInner(
     }
 
     if (actual !== expected) return null;
+  }
+
+  // When the pattern was built with `{ ...$ }`, capture all remaining
+  // (unmatched) properties of the node into the bag.
+  if (pattern[REST_CAPTURE] && node && typeof node === "object") {
+    const patternKeys = new Set(Object.keys(pattern));
+    for (const key of Object.keys(node)) {
+      if (!SKIP_KEYS.has(key) && !patternKeys.has(key)) {
+        bag[key] = node[key];
+      }
+    }
   }
 
   return bag;

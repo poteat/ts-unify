@@ -76,6 +76,15 @@ export function createRule(
       ? (toEntry.args[0] as (bag: Record<string, unknown>) => unknown)
       : null;
 
+  // Collect .with() entries that appear before .to() in the chain
+  const withEntries: ChainEntry[] = [];
+  if (factory && proxyNode?.chain) {
+    for (const entry of proxyNode.chain) {
+      if (entry.method === "to") break;
+      if (entry.method === "with") withEntries.push(entry);
+    }
+  }
+
   // Pre-resolve imports from the top-level chain
   const importMap = proxyNode?.chain
     ? resolveImports(proxyNode.chain)
@@ -113,7 +122,13 @@ export function createRule(
             ...(factory
               ? {
                   fix(fixer) {
-                    const output = factory(bag);
+                    let transformedBag: Record<string, unknown> = bag;
+                    for (const withEntry of withEntries) {
+                      const withFn = withEntry.args[0] as (bag: Record<string, unknown>) => Record<string, unknown>;
+                      const newEntries = withFn(transformedBag);
+                      transformedBag = { ...transformedBag, ...newEntries };
+                    }
+                    const output = factory(transformedBag);
                     const ast = reify(output, sourceCode);
                     const text = print(ast).code;
 

@@ -5,6 +5,12 @@ import { SPREAD_BRAND } from "@/capture/spread/spread";
 import type { DollarObjectSpread } from "@/capture/dollar-spread/dollar-spread";
 import type { FluentCapture, FluentOps } from "@/capture/fluent-capture";
 
+/**
+ * Symbol marker that `{ ...$ }` copies into the pattern object to signal
+ * that unmatched properties should be captured into the bag at runtime.
+ */
+export const REST_CAPTURE = Symbol.for("ts-unify.rest-capture");
+
 export interface $
   extends DollarObjectSpread,
     Iterable<Spread<"", unknown>>,
@@ -66,6 +72,15 @@ Object.defineProperty(__dollar as any, Symbol.iterator, {
     const token = { [SPREAD_BRAND]: true, name: "" } as unknown as Spread<"", unknown>;
     yield token;
   },
+});
+
+// Mark `$` with an enumerable Symbol property so that `{ ...$ }` copies
+// the REST_CAPTURE marker into the resulting pattern object.
+Object.defineProperty(__dollar as any, REST_CAPTURE, {
+  enumerable: true,
+  configurable: false,
+  writable: false,
+  value: true,
 });
 
 export const $ = __dollar as $;

@@ -41,10 +41,16 @@ const inequalityTernary = U.ConditionalExpression({
  * x == y ? alternate : consequent
  * ```
  */
+const flipOp: Record<string, string> = { "!==": "===", "!=": "==" };
+
 export const normalizeTernaryOrder = U.or(negatedTernary, inequalityTernary)
   .with(({ consequent: alternate, alternate: consequent }) => ({
     consequent,
     alternate,
   }))
-  .with((bag) => ({ test: U.BinaryExpression(bag) }))
+  .with((bag: any) => ({
+    test: bag.condition
+      ? bag.condition
+      : U.BinaryExpression({ operator: flipOp[bag.operator] ?? bag.operator, left: bag.left, right: bag.right } as any),
+  }))
   .to((bag) => U.ConditionalExpression(bag));

@@ -12,6 +12,8 @@ export function reify(value: any, sourceCode?: any): any {
     const args = node.args[0] ?? {};
     const result: any = { type: node.tag };
     for (const [k, v] of Object.entries(args)) {
+      // The `type` is always determined by the tag, never by the bag
+      if (k === "type") continue;
       result[k] = reify(v, sourceCode);
     }
     return result;

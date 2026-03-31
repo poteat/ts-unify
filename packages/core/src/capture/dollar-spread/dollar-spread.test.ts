@@ -1,5 +1,5 @@
 import type { DollarObjectSpread, Spread } from "@/capture";
-import { $ } from "@/capture";
+import { $, REST_CAPTURE } from "@/capture";
 import { assertType } from "@/test-utils/assert-type";
 
 describe("$ object/sequence spread semantics", () => {
@@ -13,8 +13,10 @@ describe("$ object/sequence spread semantics", () => {
     assertType<IterOK, true>(0);
   });
 
-  it("spread in object context produces no runtime props", () => {
-    expect({ ...$ }).toEqual({});
+  it("spread in object context produces only the REST_CAPTURE marker", () => {
+    const spread = { ...$ };
+    expect(Object.keys(spread)).toEqual([]);
+    expect((spread as any)[REST_CAPTURE]).toBe(true);
   });
 
   it("spreading $ in sequences yields a single item at runtime", () => {
