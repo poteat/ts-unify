@@ -59,12 +59,15 @@ const __dollar = (<const Name extends string, Value = unknown>(name: Name) => {
     },
   });
   return Object.freeze(obj) as Capture<Name, Value> & Iterable<Spread<Name, Value>>;
-}) as any;
+// The intermediate type is `unknown` because __dollar must satisfy a complex
+// intersection (DollarObjectSpread & Iterable & FluentOps) that cannot be
+// expressed as a function literal.  The final export re-casts to `$`.
+}) as unknown;
 
 // Also allow anonymous sequence spread with `...$` by making the function itself
 // iterable. The yielded spread has an empty name which is re-keyed by
 // type-level binders using the containing property key.
-Object.defineProperty(__dollar as any, Symbol.iterator, {
+Object.defineProperty(__dollar as object, Symbol.iterator, {
   enumerable: false,
   configurable: false,
   writable: false,
@@ -76,7 +79,7 @@ Object.defineProperty(__dollar as any, Symbol.iterator, {
 
 // Mark `$` with an enumerable Symbol property so that `{ ...$ }` copies
 // the REST_CAPTURE marker into the resulting pattern object.
-Object.defineProperty(__dollar as any, REST_CAPTURE, {
+Object.defineProperty(__dollar as object, REST_CAPTURE, {
   enumerable: true,
   configurable: false,
   writable: false,

@@ -1,35 +1,41 @@
 import { NODE } from "@/ast/builder-map";
-import type { ProxyNode } from "@/ast/builder-map";
+import type { ProxyNode, ChainEntry } from "@/ast/builder-map";
+
+/** Read a symbol-keyed property from any value (avoids double-cast boilerplate). */
+function symGet(v: unknown, s: symbol): unknown {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (v as any)[s];
+}
 
 /**
  * Extract all entry patterns from a rule's proxy trace.
  * Handles top-level `U.or(...)` and `U.fromNode(...)` as well as plain
  * single-node patterns.
  */
-export function extractPatterns(rule: any): {
+export function extractPatterns(rule: unknown): {
   tag: string;
-  pattern: any;
-  chain: { method: string; args: any[] }[];
+  pattern: Record<string, unknown>;
+  chain: ChainEntry[];
 }[] {
-  const proxyNode: ProxyNode | undefined = rule[NODE];
+  const proxyNode = symGet(rule, NODE) as ProxyNode | undefined;
   if (!proxyNode?.tag) return [];
   if (proxyNode.tag === "or") {
-    return proxyNode.args.flatMap((arg: any) => {
-      if (typeof arg === "function" && arg[NODE]) {
-        const inner: ProxyNode = arg[NODE];
-        return [{ tag: inner.tag, pattern: inner.args[0] ?? {}, chain: inner.chain }];
+    return proxyNode.args.flatMap((arg: unknown) => {
+      if (typeof arg === "function" && symGet(arg, NODE)) {
+        const inner = symGet(arg, NODE) as ProxyNode;
+        return [{ tag: inner.tag, pattern: (inner.args[0] ?? {}) as Record<string, unknown>, chain: inner.chain }];
       }
       return [];
     });
   }
   if (proxyNode.tag === "fromNode") {
-    const pattern = proxyNode.args[0] ?? {};
+    const pattern = (proxyNode.args[0] ?? {}) as Record<string, unknown>;
     const typeField = pattern.type;
-    if (typeof typeField === "function" && typeField[NODE]) {
-      const typeNode: ProxyNode = typeField[NODE];
+    if (typeof typeField === "function" && symGet(typeField, NODE)) {
+      const typeNode = symGet(typeField, NODE) as ProxyNode;
       if (typeNode.tag === "or") {
         const { type: _type, ...rest } = pattern;
-        return typeNode.args.map((t: string) => ({ tag: t, pattern: rest, chain: proxyNode.chain }));
+        return typeNode.args.map((t: unknown) => ({ tag: t as string, pattern: rest, chain: proxyNode.chain }));
       }
     }
     if (typeof typeField === "string") {
@@ -38,13 +44,13 @@ export function extractPatterns(rule: any): {
     }
     return [];
   }
-  return [{ tag: proxyNode.tag, pattern: proxyNode.args[0] ?? {}, chain: proxyNode.chain }];
+  return [{ tag: proxyNode.tag, pattern: (proxyNode.args[0] ?? {}) as Record<string, unknown>, chain: proxyNode.chain }];
 }
 
 /** Extract the first entry pattern from a rule's proxy trace. */
-function extractPattern(rule: any): {
+function extractPattern(rule: unknown): {
   tag: string;
-  pattern: any;
+  pattern: Record<string, unknown>;
 } | null {
   const patterns = extractPatterns(rule);
   return patterns[0] ?? null;

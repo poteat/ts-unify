@@ -1,11 +1,15 @@
 import { NODE, match, reify, extractPatterns, CONFIG_BRAND } from "@ts-unify/core";
-import type { ProxyNode } from "@ts-unify/core";
+import type { ProxyNode, ChainEntry } from "@ts-unify/core";
 import type { TSESTree } from "@typescript-eslint/types";
 import type { RuleModule } from "../rule-module";
 import type { TransformLike } from "../transform-like";
 import { print } from "recast";
 
-type ChainEntry = { method: string; args: unknown[] };
+/** Read a symbol-keyed property from any value (avoids double-cast boilerplate). */
+function symGet(v: unknown, s: symbol): unknown {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (v as any)[s];
+}
 
 /**
  * Resolve config slot values in an imports map against config defaults.
@@ -28,7 +32,7 @@ function resolveImports(
     } else if (
       value &&
       typeof value === "object" &&
-      (value as any)[CONFIG_BRAND] === true
+      symGet(value, CONFIG_BRAND) === true
     ) {
       const slotName = (value as { name: string }).name;
       const defaultVal = configDefaults[slotName];
@@ -67,7 +71,7 @@ export function createRule(
   const entries = extractPatterns(transform);
   const message = opts.message ?? "Matches a ts-unify pattern";
 
-  const proxyNode: ProxyNode | undefined = (transform as any)[NODE];
+  const proxyNode = symGet(transform, NODE) as ProxyNode | undefined;
   const toEntry = proxyNode?.chain?.find(
     (c: ChainEntry) => c.method === "to"
   );
@@ -130,7 +134,10 @@ export function createRule(
                     }
                     const output = factory(transformedBag);
                     const ast = reify(output, sourceCode);
-                    const text = print(ast).code;
+                    // reify returns an ESTree-shaped plain object; recast's
+                    // print() expects its own ASTNode type which is
+                    // structurally compatible but not identical.
+                    const text = print(ast as Parameters<typeof print>[0]).code;
 
                     // If imports are specified, prepend missing ones to the file
                     if (importMap) {
@@ -150,7 +157,7 @@ export function createRule(
                         return [
                           fixer.insertTextBeforeRange([0, 0], insertText),
                           fixer.replaceText(node, text),
-                        ] as any;
+                        ];
                       }
                     }
 

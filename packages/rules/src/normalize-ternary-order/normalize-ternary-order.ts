@@ -1,6 +1,8 @@
 import { $ } from "@/capture";
 import { U } from "@/ast";
 
+const flipOp = { "!==": "===", "!=": "==" } as const;
+
 const negatedTernary = U.ConditionalExpression({
   test: U.UnaryExpression({ operator: "!", argument: $("condition") }),
   ...$,
@@ -9,7 +11,7 @@ const negatedTernary = U.ConditionalExpression({
 const inequalityTernary = U.ConditionalExpression({
   test: U.BinaryExpression($),
   ...$,
-}).when(({ operator }) => operator === "!=" || operator === "!==");
+}).when(({ operator }) => operator in flipOp);
 
 /**
  * Normalize ternary expressions to have positive conditions first
@@ -41,16 +43,19 @@ const inequalityTernary = U.ConditionalExpression({
  * x == y ? alternate : consequent
  * ```
  */
-const flipOp: Record<string, string> = { "!==": "===", "!=": "==" };
 
 export const normalizeTernaryOrder = U.or(negatedTernary, inequalityTernary)
   .with(({ consequent: alternate, alternate: consequent }) => ({
     consequent,
     alternate,
   }))
-  .with((bag: any) => ({
+  .with((bag) => ({
     test: bag.condition
       ? bag.condition
-      : U.BinaryExpression({ operator: flipOp[bag.operator] ?? bag.operator, left: bag.left, right: bag.right } as any),
+      : U.BinaryExpression({
+          operator: flipOp[bag.operator as keyof typeof flipOp] ?? bag.operator,
+          left: bag.left,
+          right: bag.right,
+        }),
   }))
   .to((bag) => U.ConditionalExpression(bag));

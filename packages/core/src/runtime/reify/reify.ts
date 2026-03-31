@@ -1,16 +1,22 @@
 import { NODE } from "@/ast/builder-map";
 import type { ProxyNode } from "@/ast/builder-map";
 
+/** Read a symbol-keyed property from any value (avoids double-cast boilerplate). */
+function symGet(v: unknown, s: symbol): unknown {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (v as any)[s];
+}
+
 /**
  * Convert a proxy tree (or real AST node) into a plain ESTree object
  * suitable for recast's `print()`.
  */
-export function reify(value: any, sourceCode?: any): any {
+export function reify(value: unknown, sourceCode?: unknown): unknown {
   // Proxy node -- convert tag + args into ESTree
-  if (typeof value === "function" && value[NODE]) {
-    const node: ProxyNode = value[NODE];
-    const args = node.args[0] ?? {};
-    const result: any = { type: node.tag };
+  if (typeof value === "function" && symGet(value, NODE)) {
+    const node = symGet(value, NODE) as ProxyNode;
+    const args = (node.args[0] ?? {}) as Record<string, unknown>;
+    const result: Record<string, unknown> = { type: node.tag };
     for (const [k, v] of Object.entries(args)) {
       // The `type` is always determined by the tag, never by the bag
       if (k === "type") continue;
@@ -21,7 +27,7 @@ export function reify(value: any, sourceCode?: any): any {
 
   // Arrays
   if (Array.isArray(value)) {
-    return value.map((v: any) => reify(v, sourceCode));
+    return value.map((v: unknown) => reify(v, sourceCode));
   }
 
   // Primitives and plain values

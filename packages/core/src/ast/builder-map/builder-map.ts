@@ -12,12 +12,19 @@ export type BuilderMap = {
 
 export const NODE = Symbol.for("ts-unify.node");
 
+export type ChainEntry = { method: string; args: unknown[] };
+
 export type ProxyNode = {
   tag: string;
-  args: any[];
-  chain: { method: string; args: any[] }[];
+  args: unknown[];
+  chain: ChainEntry[];
 };
 
+// The proxy is inherently untyped: it intercepts arbitrary property access and
+// function calls to build up a ProxyNode descriptor at runtime.  TypeScript's
+// Proxy typing cannot express this dynamic shape, so `any` on the return type
+// and spread args is unavoidable.  The cast to `BuilderMap` at the export site
+// restores type safety for callers.
 function makeProxy(node?: ProxyNode): any {
   return new Proxy(function () {}, {
     get(_, prop) {
@@ -26,12 +33,12 @@ function makeProxy(node?: ProxyNode): any {
       if (node) {
         // Fluent method on an existing node — return callable that appends to chain
         const method = prop as string;
-        return (...args: any[]) =>
+        return (...args: unknown[]) =>
           makeProxy({ ...node, chain: [...node.chain, { method, args }] });
       }
       // Builder access on root — return callable that creates a node
       const tag = prop as string;
-      return (...args: any[]) => makeProxy({ tag, args, chain: [] });
+      return (...args: unknown[]) => makeProxy({ tag, args, chain: [] });
     },
     apply(_, __, args) {
       return makeProxy({ tag: "", args, chain: [] });
