@@ -1,24 +1,33 @@
 # ts-unify
 
-Heavy WIP
+This is a library for writing type-safe AST transformations.
 
-## Contributing & Docs
+## Installation
 
-For repository conventions and agent rules, see AGENTS.md. It links to the
-current set of documents under `.agent/`.
+```sh
+npm i @ts-unify/eslint @ts-unify/rules
+```
 
-## Scripts
+## Usage
 
-- `npm run build` — Builds library output using `tsconfig.build.json` (excludes
-  tests).
-- `npm run typecheck` — Type-checks everything in `src` (includes tests), no
-  emit.
-- `npm test` — Runs Jest test suites.
-- `npm run test:watch` — Runs Jest in watch mode.
-- `npm run test:coverage` — Runs Jest with coverage output.
-- `npm run lint` — ESLint over `src/**/*.ts`.
-- `npm run prepublishOnly` — Builds before publishing.
+```js
+import { createPlugin } from "@ts-unify/eslint";
+import * as rules from "@ts-unify/rules";
 
-## License
+export default [
+  {
+    plugins: { "ts-unify": createPlugin(rules) },
+    rules: {},
+  },
+];
+```
 
-MIT. See LICENSE.md for full text.
+## Design
+
+We use the concept of unification to pattern-match on AST structure and emit
+transformed structure, which encodes the AST constraints we desire.
+
+## Type Safety
+
+We infer the type holes of matched patterns to prove that the resultant AST is
+syntactically well-typed.

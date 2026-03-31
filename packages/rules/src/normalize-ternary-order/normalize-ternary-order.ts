@@ -58,4 +58,5 @@ export const normalizeTernaryOrder = U.or(negatedTernary, inequalityTernary)
           right: bag.right,
         }),
   }))
-  .to((bag) => U.ConditionalExpression(bag));
+  .to((bag) => U.ConditionalExpression(bag))
+  .recommended();

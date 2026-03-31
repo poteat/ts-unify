@@ -27,4 +27,5 @@ export type AstTransform<In, Out, Cfg extends Record<string, unknown> = {}> = {
     map: M
   ): AstTransform<In, Out, Cfg & ExtractConfigFromImports<M>>;
   config<D extends Cfg>(defaults: D): AstTransform<In, Out, D>;
+  recommended(): AstTransform<In, Out, Cfg>;
 };

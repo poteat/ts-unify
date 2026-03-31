@@ -36,4 +36,4 @@ export const ifReturnToTernary = U.IfStatement({
   test: $,
   consequent: anyReturnForm,
   alternate: anyReturnForm,
-}).to((bag) => U.ReturnStatement({ argument: U.ConditionalExpression(bag) }));
+}).to((bag) => U.ReturnStatement({ argument: U.ConditionalExpression(bag) })).recommended();

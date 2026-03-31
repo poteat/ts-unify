@@ -71,4 +71,4 @@ export const collapseNullGuard = U.BlockStatement({
   });
 
   return block;
-});
+}).recommended();

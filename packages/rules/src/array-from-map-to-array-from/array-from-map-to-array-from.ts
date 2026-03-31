@@ -42,4 +42,4 @@ export const arrayFromMapToArrayFrom = U.CallExpression({
     arguments: [iterable, mapFn],
     optional: false,
   })
-);
+).recommended();

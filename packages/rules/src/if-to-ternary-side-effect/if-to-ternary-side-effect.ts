@@ -39,4 +39,4 @@ export const ifToTernarySideEffect = U.IfStatement({
   U.ExpressionStatement({
     expression: U.ConditionalExpression(bag),
   })
-);
+).recommended();

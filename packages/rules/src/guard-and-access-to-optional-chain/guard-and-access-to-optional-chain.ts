@@ -31,4 +31,4 @@ export const guardAndAccessToOptionalChain = U.LogicalExpression({
       optional: true,
     }),
   })
-);
+).recommended();

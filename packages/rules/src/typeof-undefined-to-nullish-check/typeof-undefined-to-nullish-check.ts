@@ -26,4 +26,4 @@ export const typeofUndefinedToNullishCheck = U.BinaryExpression({
     left: expr,
     right: U.Literal({ value: null }),
   })
-);
+).recommended();

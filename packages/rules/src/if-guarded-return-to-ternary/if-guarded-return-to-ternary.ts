@@ -49,4 +49,4 @@ export const ifGuardedReturnToTernary = U.BlockStatement({
       }),
     ],
   })
-);
+).recommended();

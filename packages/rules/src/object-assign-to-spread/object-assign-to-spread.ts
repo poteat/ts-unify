@@ -28,4 +28,4 @@ export const objectAssignToSpread = U.CallExpression({
       U.SpreadElement({ argument: src })
     ),
   })
-);
+).recommended();
