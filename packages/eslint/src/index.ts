@@ -1,12 +1,7 @@
-import { NODE, match, reify, extractPatterns, _extractPattern } from "@ts-unify/core";
+import { NODE, match, reify, extractPatterns } from "@ts-unify/core";
 import type { ProxyNode } from "@ts-unify/core";
 import type { TSESTree } from "@typescript-eslint/types";
 import { print } from "recast";
-
-// Re-export engine-agnostic runtime functions so existing consumers
-// (e.g. e2e tests) that import from @ts-unify/eslint continue to work.
-export { match, reify, extractPatterns };
-export { _extractPattern as extractPattern };
 
 type RuleModule = {
   meta: { type: "suggestion"; fixable?: "code"; messages: Record<string, string> };

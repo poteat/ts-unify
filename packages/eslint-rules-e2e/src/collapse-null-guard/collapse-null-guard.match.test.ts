@@ -1,8 +1,8 @@
-import { match, extractPattern } from "@ts-unify/eslint";
+import { match, extractPatterns } from "@ts-unify/core";
 import { collapseNullGuard } from "@ts-unify/rules";
 
 describe("collapseNullGuard matching", () => {
-  const rule = extractPattern(collapseNullGuard)!;
+  const rule = extractPatterns(collapseNullGuard)[0]!;
 
   it("extracts as a BlockStatement pattern", () => {
     expect(rule.tag).toBe("BlockStatement");

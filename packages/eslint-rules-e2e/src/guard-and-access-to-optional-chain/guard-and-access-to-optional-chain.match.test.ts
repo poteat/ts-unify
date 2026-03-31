@@ -1,8 +1,8 @@
-import { match, extractPattern } from "@ts-unify/eslint";
+import { match, extractPatterns } from "@ts-unify/core";
 import { guardAndAccessToOptionalChain } from "@ts-unify/rules";
 
 describe("guardAndAccessToOptionalChain matching", () => {
-  const rule = extractPattern(guardAndAccessToOptionalChain)!;
+  const rule = extractPatterns(guardAndAccessToOptionalChain)[0]!;
 
   it("matches obj && obj.prop", () => {
     const obj = { type: "Identifier", name: "obj" };

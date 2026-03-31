@@ -1,4 +1,4 @@
-import { match, extractPatterns } from "@ts-unify/eslint";
+import { match, extractPatterns } from "@ts-unify/core";
 import { normalizeTernaryOrder } from "@ts-unify/rules";
 
 describe("normalizeTernaryOrder matching", () => {

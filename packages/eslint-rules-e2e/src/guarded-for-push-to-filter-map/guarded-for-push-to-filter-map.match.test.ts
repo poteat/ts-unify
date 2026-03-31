@@ -1,8 +1,8 @@
-import { match, extractPattern } from "@ts-unify/eslint";
+import { match, extractPatterns } from "@ts-unify/core";
 import { guardedForPushToFilterMap } from "@ts-unify/rules";
 
 describe("guardedForPushToFilterMap matching", () => {
-  const rule = extractPattern(guardedForPushToFilterMap)!;
+  const rule = extractPatterns(guardedForPushToFilterMap)[0]!;
 
   it("extracts as a BlockStatement pattern", () => {
     expect(rule.tag).toBe("BlockStatement");

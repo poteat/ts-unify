@@ -1,8 +1,8 @@
-import { match, extractPattern } from "@ts-unify/eslint";
+import { match, extractPatterns } from "@ts-unify/core";
 import { elideBracesForReturn } from "@ts-unify/rules";
 
 describe("elideBracesForReturn matching", () => {
-  const rule = extractPattern(elideBracesForReturn)!;
+  const rule = extractPatterns(elideBracesForReturn)[0]!;
 
   it("extracts as a BlockStatement pattern", () => {
     expect(rule.tag).toBe("BlockStatement");

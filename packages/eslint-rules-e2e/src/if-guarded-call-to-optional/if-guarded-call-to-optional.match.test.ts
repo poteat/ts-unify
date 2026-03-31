@@ -1,8 +1,8 @@
-import { match, extractPattern } from "@ts-unify/eslint";
+import { match, extractPatterns } from "@ts-unify/core";
 import { ifGuardedCallToOptional } from "@ts-unify/rules";
 
 describe("ifGuardedCallToOptional matching", () => {
-  const rule = extractPattern(ifGuardedCallToOptional)!;
+  const rule = extractPatterns(ifGuardedCallToOptional)[0]!;
 
   it("extracts as an IfStatement pattern", () => {
     expect(rule.tag).toBe("IfStatement");

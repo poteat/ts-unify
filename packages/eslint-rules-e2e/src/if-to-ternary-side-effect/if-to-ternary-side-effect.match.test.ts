@@ -1,8 +1,8 @@
-import { match, extractPattern } from "@ts-unify/eslint";
+import { match, extractPatterns } from "@ts-unify/core";
 import { ifToTernarySideEffect } from "@ts-unify/rules";
 
 describe("ifToTernarySideEffect matching", () => {
-  const rule = extractPattern(ifToTernarySideEffect)!;
+  const rule = extractPatterns(ifToTernarySideEffect)[0]!;
 
   it("extracts as an IfStatement pattern", () => {
     expect(rule.tag).toBe("IfStatement");

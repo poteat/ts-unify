@@ -1,8 +1,8 @@
-import { match, extractPattern } from "@ts-unify/eslint";
+import { match, extractPatterns } from "@ts-unify/core";
 import { typeofUndefinedToNullishCheck } from "@ts-unify/rules";
 
 describe("typeofUndefinedToNullishCheck matching", () => {
-  const rule = extractPattern(typeofUndefinedToNullishCheck)!;
+  const rule = extractPatterns(typeofUndefinedToNullishCheck)[0]!;
 
   it("matches typeof x === 'undefined'", () => {
     const ast = {

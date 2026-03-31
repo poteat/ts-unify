@@ -1,8 +1,8 @@
-import { match, extractPattern } from "@ts-unify/eslint";
+import { match, extractPatterns } from "@ts-unify/core";
 import { ifReturnToTernary } from "@ts-unify/rules";
 
 describe("ifReturnToTernary matching", () => {
-  const rule = extractPattern(ifReturnToTernary)!;
+  const rule = extractPatterns(ifReturnToTernary)[0]!;
 
   it("extracts as an IfStatement pattern", () => {
     expect(rule.tag).toBe("IfStatement");

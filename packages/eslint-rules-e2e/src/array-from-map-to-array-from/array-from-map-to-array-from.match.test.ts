@@ -1,8 +1,8 @@
-import { match, extractPattern } from "@ts-unify/eslint";
+import { match, extractPatterns } from "@ts-unify/core";
 import { arrayFromMapToArrayFrom } from "@ts-unify/rules";
 
 describe("arrayFromMapToArrayFrom matching", () => {
-  const rule = extractPattern(arrayFromMapToArrayFrom)!;
+  const rule = extractPatterns(arrayFromMapToArrayFrom)[0]!;
 
   it("extracts as a CallExpression pattern", () => {
     expect(rule.tag).toBe("CallExpression");

@@ -1,8 +1,8 @@
-import { match, extractPattern } from "@ts-unify/eslint";
+import { match, extractPatterns } from "@ts-unify/core";
 import { objectAssignToSpread } from "@ts-unify/rules";
 
 describe("objectAssignToSpread matching", () => {
-  const rule = extractPattern(objectAssignToSpread)!;
+  const rule = extractPatterns(objectAssignToSpread)[0]!;
 
   it("extracts as a CallExpression pattern", () => {
     expect(rule.tag).toBe("CallExpression");

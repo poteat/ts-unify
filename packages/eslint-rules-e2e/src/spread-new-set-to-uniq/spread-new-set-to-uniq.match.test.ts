@@ -1,8 +1,8 @@
-import { match, extractPattern } from "@ts-unify/eslint";
+import { match, extractPatterns } from "@ts-unify/core";
 import { spreadNewSetToUniq } from "@ts-unify/rules";
 
 describe("spreadNewSetToUniq matching", () => {
-  const rule = extractPattern(spreadNewSetToUniq)!;
+  const rule = extractPatterns(spreadNewSetToUniq)[0]!;
 
   it("matches [...new Set(arr)]", () => {
     const ast = {
