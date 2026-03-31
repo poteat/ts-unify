@@ -1,15 +1,9 @@
-import { NODE, match, reify, extractPatterns, CONFIG_BRAND } from "@ts-unify/core";
+import { NODE, match, reify, extractPatterns, CONFIG_BRAND, symGet } from "@ts-unify/core";
 import type { ProxyNode, ChainEntry } from "@ts-unify/core";
 import type { TSESTree } from "@typescript-eslint/types";
 import type { RuleModule } from "../rule-module";
 import type { TransformLike } from "../transform-like";
 import { print } from "recast";
-
-/** Read a symbol-keyed property from any value (avoids double-cast boilerplate). */
-function symGet(v: unknown, s: symbol): unknown {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (v as any)[s];
-}
 
 /**
  * Resolve config slot values in an imports map against config defaults.

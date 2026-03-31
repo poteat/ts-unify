@@ -1,11 +1,6 @@
 import { NODE } from "@/ast/builder-map";
 import type { ProxyNode } from "@/ast/builder-map";
-
-/** Read a symbol-keyed property from any value (avoids double-cast boilerplate). */
-function symGet(v: unknown, s: symbol): unknown {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (v as any)[s];
-}
+import { symGet } from "@/runtime/sym-get";
 
 /**
  * Convert a proxy tree (or real AST node) into a plain ESTree object

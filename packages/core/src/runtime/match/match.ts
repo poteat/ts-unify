@@ -4,14 +4,9 @@ import { CAPTURE_BRAND } from "@/capture/capture-type";
 import { SPREAD_BRAND } from "@/capture/spread/spread";
 import { $ as dollarSentinel, REST_CAPTURE } from "@/capture/dollar";
 import { CONFIG_BRAND } from "@/config/config-type";
+import { symGet } from "@/runtime/sym-get";
 
 type NamedBinding = { name: string; value: unknown };
-
-/** Read a symbol-keyed property from any value (avoids double-cast boilerplate). */
-function symGet(v: unknown, s: symbol): unknown {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (v as any)[s];
-}
 
 /**
  * Match an AST node against a pattern object, extracting captures.
