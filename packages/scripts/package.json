@@ -1,0 +1,8 @@
+{
+  "name": "@ts-unify/scripts",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "set-version": "npx tsx src/set-version/set-version.ts"
+  }
+}

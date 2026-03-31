@@ -42,6 +42,7 @@ transform your AST.
 ```ts
 import { U, $ } from "@ts-unify/core";
 
+// typeof x === "undefined" --> x == null
 export const typeofUndefinedToNullishCheck = U.BinaryExpression({
   operator: U.or("===", "=="),
   left: U.UnaryExpression({

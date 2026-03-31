@@ -2,11 +2,15 @@
   "name": "ts-unify",
   "version": "0.0.1",
   "private": true,
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "tsc --build packages/core",
-    "test": "jest --config packages/core/jest.config.js"
+    "test": "jest --config packages/core/jest.config.js",
+    "version:set": "npm run set-version --workspace=packages/scripts --",
+    "publish:all": "npm run build && npm publish --workspace=packages/core --access=public && npm publish --workspace=packages/rules --access=public && npm publish --workspace=packages/eslint --access=public"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
