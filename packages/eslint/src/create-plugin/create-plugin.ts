@@ -1,8 +1,6 @@
-import type { ProxyNode } from "@ts-unify/core";
 import type { RuleModule } from "../rule-module";
+import type { TransformLike } from "../transform-like";
 import { createRule } from "../create-rule";
-
-type TransformLike = { readonly [k: symbol]: ProxyNode };
 
 /** Create an ESLint plugin from a map of rule names to AstTransform values. */
 export function createPlugin(

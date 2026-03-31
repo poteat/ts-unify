@@ -2,9 +2,8 @@ import { NODE, match, reify, extractPatterns } from "@ts-unify/core";
 import type { ProxyNode } from "@ts-unify/core";
 import type { TSESTree } from "@typescript-eslint/types";
 import type { RuleModule } from "../rule-module";
+import type { TransformLike } from "../transform-like";
 import { print } from "recast";
-
-type TransformLike = { readonly [k: symbol]: ProxyNode };
 
 type ChainEntry = { method: string; args: unknown[] };
 
