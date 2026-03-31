@@ -3,7 +3,7 @@ import * as path from "path";
 
 const ROOT = path.resolve(__dirname, "../../../..");
 const SCOPE = "@ts-unify/";
-const PACKAGES = ["packages/core", "packages/rules", "packages/eslint", "packages/eslint-rules-e2e"];
+const PACKAGES_DIR = path.join(ROOT, "packages");
 
 const version = process.argv[2];
 if (!version) {
@@ -11,8 +11,14 @@ if (!version) {
   process.exit(1);
 }
 
-for (const pkg of PACKAGES) {
-  const file = path.join(ROOT, pkg, "package.json");
+const packageDirs = fs
+  .readdirSync(PACKAGES_DIR, { withFileTypes: true })
+  .filter((d) => d.isDirectory())
+  .map((d) => path.join(PACKAGES_DIR, d.name))
+  .filter((d) => fs.existsSync(path.join(d, "package.json")));
+
+for (const dir of packageDirs) {
+  const file = path.join(dir, "package.json");
   const json = JSON.parse(fs.readFileSync(file, "utf-8"));
   json.version = version;
 
