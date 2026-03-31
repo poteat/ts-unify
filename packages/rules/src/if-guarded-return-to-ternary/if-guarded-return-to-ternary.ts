@@ -40,13 +40,15 @@ export const ifGuardedReturnToTernary = U.BlockStatement({
     }),
     U.ReturnStatement({ argument: $("alternate") }).defaultUndefined(),
   ],
-}).to(({ body, ...bag }) =>
-  U.BlockStatement({
-    body: [
-      ...body,
-      U.ReturnStatement({
-        argument: U.ConditionalExpression(bag),
-      }),
-    ],
-  })
-).recommended();
+})
+  .to(({ body, ...bag }) =>
+    U.BlockStatement({
+      body: [
+        ...body,
+        U.ReturnStatement({
+          argument: U.ConditionalExpression(bag),
+        }),
+      ],
+    }),
+  )
+  .recommended();

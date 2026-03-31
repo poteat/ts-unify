@@ -1,9 +1,7 @@
 import { $ } from "@/capture";
 import { U } from "@/ast";
 
-const anyExprForm = U.maybeBlock(
-  U.ExpressionStatement({ expression: $ })
-).seal();
+const anyExprForm = U.maybeBlock(U.ExpressionStatement({ expression: $ })).seal();
 
 /**
  * If both branches are side-effect expressions, convert to a single expression
@@ -35,8 +33,10 @@ export const ifToTernarySideEffect = U.IfStatement({
   test: $,
   consequent: anyExprForm,
   alternate: anyExprForm,
-}).to((bag) =>
-  U.ExpressionStatement({
-    expression: U.ConditionalExpression(bag),
-  })
-).recommended();
+})
+  .to((bag) =>
+    U.ExpressionStatement({
+      expression: U.ConditionalExpression(bag),
+    }),
+  )
+  .recommended();

@@ -22,13 +22,15 @@ export const guardAndAccessToOptionalChain = U.LogicalExpression({
     computed: false,
     optional: false,
   }),
-}).to(({ obj, prop }) =>
-  U.ChainExpression({
-    expression: U.MemberExpression({
-      object: obj,
-      property: prop,
-      computed: false,
-      optional: true,
+})
+  .to(({ obj, prop }) =>
+    U.ChainExpression({
+      expression: U.MemberExpression({
+        object: obj,
+        property: prop,
+        computed: false,
+        optional: true,
+      }),
     }),
-  })
-).recommended();
+  )
+  .recommended();

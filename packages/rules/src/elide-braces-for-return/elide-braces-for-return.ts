@@ -16,4 +16,6 @@ import { U } from "@/ast";
 export const elideBracesForReturn = U.BlockStatement({
   parent: U.ArrowFunctionExpression(),
   body: [U.ReturnStatement({ argument: $ }).defaultUndefined()],
-}).to().recommended();
+})
+  .to()
+  .recommended();

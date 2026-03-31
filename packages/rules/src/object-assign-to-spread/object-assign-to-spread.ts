@@ -22,10 +22,10 @@ export const objectAssignToSpread = U.CallExpression({
   }),
   arguments: [U.ObjectExpression({ properties: [] }), ...$("sources")],
   optional: false,
-}).to(({ sources }) =>
-  U.ObjectExpression({
-    properties: sources.map((src) =>
-      U.SpreadElement({ argument: src })
-    ),
-  })
-).recommended();
+})
+  .to(({ sources }) =>
+    U.ObjectExpression({
+      properties: sources.map((src) => U.SpreadElement({ argument: src })),
+    }),
+  )
+  .recommended();

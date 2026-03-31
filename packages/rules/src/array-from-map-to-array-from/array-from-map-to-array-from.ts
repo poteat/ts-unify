@@ -31,15 +31,17 @@ export const arrayFromMapToArrayFrom = U.CallExpression({
   }),
   arguments: [$("mapFn")],
   optional: false,
-}).to(({ iterable, mapFn }) =>
-  U.CallExpression({
-    callee: U.MemberExpression({
-      object: U.Identifier({ name: "Array" }),
-      property: U.Identifier({ name: "from" }),
-      computed: false,
+})
+  .to(({ iterable, mapFn }) =>
+    U.CallExpression({
+      callee: U.MemberExpression({
+        object: U.Identifier({ name: "Array" }),
+        property: U.Identifier({ name: "from" }),
+        computed: false,
+        optional: false,
+      }),
+      arguments: [iterable, mapFn],
       optional: false,
     }),
-    arguments: [iterable, mapFn],
-    optional: false,
-  })
-).recommended();
+  )
+  .recommended();

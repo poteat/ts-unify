@@ -7,7 +7,7 @@ const callConsequent = U.maybeBlock(
       callee: $,
       arguments: $("args"),
     }),
-  })
+  }),
 );
 
 /**
@@ -28,14 +28,16 @@ export const ifGuardedCallToOptional = U.IfStatement({
   test: $("callee"),
   consequent: callConsequent,
   alternate: null,
-}).to(({ callee, args }) =>
-  U.ExpressionStatement({
-    expression: U.ChainExpression({
-      expression: U.CallExpression({
-        callee,
-        arguments: args,
-        optional: true,
+})
+  .to(({ callee, args }) =>
+    U.ExpressionStatement({
+      expression: U.ChainExpression({
+        expression: U.CallExpression({
+          callee,
+          arguments: args,
+          optional: true,
+        }),
       }),
     }),
-  })
-).recommended();
+  )
+  .recommended();

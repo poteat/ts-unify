@@ -20,10 +20,12 @@ export const typeofUndefinedToNullishCheck = U.BinaryExpression({
     argument: $("expr"),
   }),
   right: U.Literal({ value: "undefined" }),
-}).to(({ expr }) =>
-  U.BinaryExpression({
-    operator: "==",
-    left: expr,
-    right: U.Literal({ value: null }),
-  })
-).recommended();
+})
+  .to(({ expr }) =>
+    U.BinaryExpression({
+      operator: "==",
+      left: expr,
+      right: U.Literal({ value: null }),
+    }),
+  )
+  .recommended();

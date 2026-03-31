@@ -50,25 +50,27 @@ const returnOfValue = U.ReturnStatement({
  */
 export const collapseNullGuard = U.BlockStatement({
   body: [...$, nullCheck, returnOfValue],
-}).to(({ body, value: left, fallback: right, typeAnnotation }) => {
-  const coalesce = U.LogicalExpression({
-    operator: "??",
-    left,
-    right,
-  });
+})
+  .to(({ body, value: left, fallback: right, typeAnnotation }) => {
+    const coalesce = U.LogicalExpression({
+      operator: "??",
+      left,
+      right,
+    });
 
-  const argument = typeAnnotation
-    ? U.TSAsExpression({ expression: coalesce, typeAnnotation })
-    : coalesce;
+    const argument = typeAnnotation
+      ? U.TSAsExpression({ expression: coalesce, typeAnnotation })
+      : coalesce;
 
-  const block = U.BlockStatement({
-    body: [
-      ...body,
-      U.ReturnStatement({
-        argument,
-      }),
-    ],
-  });
+    const block = U.BlockStatement({
+      body: [
+        ...body,
+        U.ReturnStatement({
+          argument,
+        }),
+      ],
+    });
 
-  return block;
-}).recommended();
+    return block;
+  })
+  .recommended();

@@ -11,7 +11,7 @@ const pushStatement = U.maybeBlock(
       }),
       arguments: [$("pushValue")],
     }),
-  })
+  }),
 );
 
 // for (const loopVar of source) { if (condition) { result.push(value) } }
@@ -26,7 +26,7 @@ const guardedFor = U.ForOfStatement({
       test: $("condition"),
       consequent: pushStatement,
       alternate: null,
-    })
+    }),
   ),
 });
 
@@ -68,9 +68,7 @@ export const guardedForPushToFilterMap = U.BlockStatement({
       object: source,
       property: U.Identifier({ name: "filter" }),
     }),
-    arguments: [
-      U.ArrowFunctionExpression({ params: [loopVar], body: condition }),
-    ],
+    arguments: [U.ArrowFunctionExpression({ params: [loopVar], body: condition })],
   });
 
   const mapCall = U.CallExpression({
@@ -78,9 +76,7 @@ export const guardedForPushToFilterMap = U.BlockStatement({
       object: filterCall,
       property: U.Identifier({ name: "map" }),
     }),
-    arguments: [
-      U.ArrowFunctionExpression({ params: [loopVar], body: pushValue }),
-    ],
+    arguments: [U.ArrowFunctionExpression({ params: [loopVar], body: pushValue })],
   });
 
   const newDecl = U.VariableDeclaration({

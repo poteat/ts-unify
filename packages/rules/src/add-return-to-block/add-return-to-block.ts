@@ -4,7 +4,7 @@ import { U } from "@/ast";
 const functionParent = U.or(
   U.FunctionDeclaration(),
   U.FunctionExpression(),
-  U.ArrowFunctionExpression()
+  U.ArrowFunctionExpression(),
 );
 
 /**
@@ -23,6 +23,4 @@ const functionParent = U.or(
 export const addReturnToBlock = U.BlockStatement({
   parent: functionParent,
   body: [U.ExpressionStatement({ expression: $ })],
-}).to(({ expression: argument }) =>
-  U.BlockStatement({ body: [U.ReturnStatement({ argument })] })
-);
+}).to(({ expression: argument }) => U.BlockStatement({ body: [U.ReturnStatement({ argument })] }));
