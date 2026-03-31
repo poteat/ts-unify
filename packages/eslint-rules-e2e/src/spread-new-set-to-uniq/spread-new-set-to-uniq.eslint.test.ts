@@ -25,7 +25,7 @@ tester.run(
       {
         code: "const x = [...new Set(arr)];",
         errors: [{ messageId: "match" }],
-        output: "const x = uniq(arr);",
+        output: 'import { uniq } from "lodash";\nconst x = uniq(arr);',
       },
     ],
   }

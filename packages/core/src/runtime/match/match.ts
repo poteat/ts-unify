@@ -3,6 +3,7 @@ import type { ProxyNode } from "@/ast/builder-map";
 import { CAPTURE_BRAND } from "@/capture/capture-type";
 import { SPREAD_BRAND } from "@/capture/spread/spread";
 import { $ as dollarSentinel } from "@/capture/dollar";
+import { CONFIG_BRAND } from "@/config/config-type";
 
 /**
  * Match an AST node against a pattern object, extracting captures.
@@ -13,8 +14,9 @@ export function match(
   pattern: any,
   chain?: { method: string; args: any[] }[]
 ): Record<string, any> | null {
+  const configDefaults = chain ? extractConfigDefaults(chain) : {};
   const namedBindings: { name: string; value: any }[] = [];
-  const bag = matchInner(node, pattern, namedBindings);
+  const bag = matchInner(node, pattern, namedBindings, configDefaults);
   if (!bag) return null;
 
   // Validate duplicate named captures have equal values
@@ -36,7 +38,8 @@ export function match(
 function matchInner(
   node: any,
   pattern: any,
-  namedBindings: { name: string; value: any }[]
+  namedBindings: { name: string; value: any }[],
+  configDefaults: Record<string, any> = {}
 ): Record<string, any> | null {
   // When the entire pattern is $, capture all own non-meta properties of the node
   if (pattern === dollarSentinel) {
@@ -65,33 +68,22 @@ function matchInner(
       continue;
     }
 
+    // Config slot: match against the config default value for the slot name
+    if (isConfigSlot(expected)) {
+      const defaultVal = configDefaults[expected.name];
+      if (actual !== defaultVal) return null;
+      continue;
+    }
+
     if (isProxyNode(expected)) {
-      const inner: ProxyNode = (expected as any)[NODE];
-      if (inner.tag === "or") {
-        const orBag = matchOrInner(actual, inner.args, namedBindings);
-        if (!orBag) return null;
-        if (!applyWhenGuards(inner.chain, orBag)) return null;
-        Object.assign(bag, orBag);
-        continue;
-      }
-      if (inner.tag === "maybeBlock") {
-        const maybeBlockBag = matchMaybeBlockInner(actual, inner.args[0], namedBindings);
-        if (!maybeBlockBag) return null;
-        if (!applyWhenGuards(inner.chain, maybeBlockBag)) return null;
-        Object.assign(bag, maybeBlockBag);
-        continue;
-      }
-      if (actual?.type !== inner.tag) return null;
-      const innerPattern = inner.args[0] ?? {};
-      const innerBag = matchInner(actual, innerPattern, namedBindings);
-      if (!innerBag) return null;
-      if (!applyWhenGuards(inner.chain, innerBag)) return null;
-      Object.assign(bag, innerBag);
+      const proxyBag = matchProxyNode(actual, expected, namedBindings, configDefaults, key);
+      if (!proxyBag) return null;
+      Object.assign(bag, proxyBag);
       continue;
     }
 
     if (typeof expected === "object" && expected !== null && !Array.isArray(expected)) {
-      const innerBag = matchInner(actual, expected, namedBindings);
+      const innerBag = matchInner(actual, expected, namedBindings, configDefaults);
       if (!innerBag) return null;
       Object.assign(bag, innerBag);
       continue;
@@ -99,7 +91,7 @@ function matchInner(
 
     if (Array.isArray(expected)) {
       if (!Array.isArray(actual)) return null;
-      const arrayBag = matchArrayInner(actual, expected, key, namedBindings);
+      const arrayBag = matchArrayInner(actual, expected, key, namedBindings, configDefaults);
       if (!arrayBag) return null;
       Object.assign(bag, arrayBag);
       continue;
@@ -111,10 +103,47 @@ function matchInner(
   return bag;
 }
 
+/**
+ * Match a proxy node pattern value against an actual AST value.
+ * Handles or, maybeBlock, seal, and bind chain entries.
+ * Note: defaultUndefined is a type-level-only modifier -- the bare `$`
+ * sentinel already captures null/undefined at runtime.
+ */
+function matchProxyNode(
+  actual: any,
+  expected: any,
+  namedBindings: { name: string; value: any }[],
+  configDefaults: Record<string, any>,
+  parentKey?: string
+): Record<string, any> | null {
+  const inner: ProxyNode = (expected as any)[NODE];
+
+  if (inner.tag === "or") {
+    // Pass parentKey to or branches so seal/bind on branches can re-key properly
+    const orBag = matchOrInner(actual, inner.args, namedBindings, configDefaults, parentKey);
+    if (!orBag) return null;
+    if (!applyWhenGuards(inner.chain, orBag)) return null;
+    return applyChainModifiers(inner.chain, orBag, actual, parentKey);
+  }
+  if (inner.tag === "maybeBlock") {
+    const maybeBlockBag = matchMaybeBlockInner(actual, inner.args[0], namedBindings, configDefaults);
+    if (!maybeBlockBag) return null;
+    if (!applyWhenGuards(inner.chain, maybeBlockBag)) return null;
+    return applyChainModifiers(inner.chain, maybeBlockBag, actual, parentKey);
+  }
+  if (actual?.type !== inner.tag) return null;
+  const innerPattern = inner.args[0] ?? {};
+  const innerBag = matchInner(actual, innerPattern, namedBindings, configDefaults);
+  if (!innerBag) return null;
+  if (!applyWhenGuards(inner.chain, innerBag)) return null;
+  return applyChainModifiers(inner.chain, innerBag, actual, parentKey);
+}
+
 function matchValueInner(
   actual: any,
   expected: any,
   namedBindings: { name: string; value: any }[],
+  configDefaults: Record<string, any> = {},
   key?: string
 ): Record<string, any> | null {
   if (expected === dollarSentinel) {
@@ -124,28 +153,15 @@ function matchValueInner(
     namedBindings.push({ name: expected.name, value: actual });
     return { [expected.name]: actual };
   }
+  if (isConfigSlot(expected)) {
+    const defaultVal = configDefaults[expected.name];
+    return actual === defaultVal ? {} : null;
+  }
   if (isProxyNode(expected)) {
-    const inner: ProxyNode = (expected as any)[NODE];
-    if (inner.tag === "or") {
-      const orBag = matchOrInner(actual, inner.args, namedBindings);
-      if (!orBag) return null;
-      if (!applyWhenGuards(inner.chain, orBag)) return null;
-      return orBag;
-    }
-    if (inner.tag === "maybeBlock") {
-      const maybeBlockBag = matchMaybeBlockInner(actual, inner.args[0], namedBindings);
-      if (!maybeBlockBag) return null;
-      if (!applyWhenGuards(inner.chain, maybeBlockBag)) return null;
-      return maybeBlockBag;
-    }
-    if (actual?.type !== inner.tag) return null;
-    const innerBag = matchInner(actual, inner.args[0] ?? {}, namedBindings);
-    if (!innerBag) return null;
-    if (!applyWhenGuards(inner.chain, innerBag)) return null;
-    return innerBag;
+    return matchProxyNode(actual, expected, namedBindings, configDefaults, key);
   }
   if (typeof expected === "object" && expected !== null) {
-    return matchInner(actual, expected, namedBindings);
+    return matchInner(actual, expected, namedBindings, configDefaults);
   }
   return actual === expected ? {} : null;
 }
@@ -158,9 +174,10 @@ function matchArrayInner(
   actual: any[],
   expected: any[],
   parentKey: string,
-  namedBindings: { name: string; value: any }[]
+  namedBindings: { name: string; value: any }[],
+  configDefaults: Record<string, any> = {}
 ): Record<string, any> | null {
-  const mv = (a: any, e: any, k?: string) => matchValueInner(a, e, namedBindings, k);
+  const mv = (a: any, e: any, k?: string) => matchValueInner(a, e, namedBindings, configDefaults, k);
 
   const spreadIndices: number[] = [];
   for (let i = 0; i < expected.length; i++) {
@@ -247,9 +264,9 @@ function matchArrayInner(
   return null;
 }
 
-function matchOrInner(actual: any, args: any[], namedBindings: { name: string; value: any }[]): Record<string, any> | null {
+function matchOrInner(actual: any, args: any[], namedBindings: { name: string; value: any }[], configDefaults: Record<string, any> = {}, parentKey?: string): Record<string, any> | null {
   for (const arg of args) {
-    const result = matchValueInner(actual, arg, namedBindings);
+    const result = matchValueInner(actual, arg, namedBindings, configDefaults, parentKey);
     if (result) return result;
   }
   return null;
@@ -258,13 +275,14 @@ function matchOrInner(actual: any, args: any[], namedBindings: { name: string; v
 function matchMaybeBlockInner(
   actual: any,
   stmtPattern: any,
-  namedBindings: { name: string; value: any }[]
+  namedBindings: { name: string; value: any }[],
+  configDefaults: Record<string, any> = {}
 ): Record<string, any> | null {
   if (actual?.type === "BlockStatement" && Array.isArray(actual.body) && actual.body.length === 1) {
-    const result = matchValueInner(actual.body[0], stmtPattern, namedBindings);
+    const result = matchValueInner(actual.body[0], stmtPattern, namedBindings, configDefaults);
     if (result) return result;
   }
-  return matchValueInner(actual, stmtPattern, namedBindings);
+  return matchValueInner(actual, stmtPattern, namedBindings, configDefaults);
 }
 
 const SKIP_KEYS = new Set(["parent", "loc", "range"]);
@@ -306,6 +324,59 @@ function isCapture(v: any): v is { name: string } {
   return v && typeof v === "object" && v[CAPTURE_BRAND] === true;
 }
 
+function isConfigSlot(v: any): v is { name: string } {
+  return v && typeof v === "object" && v[CONFIG_BRAND] === true;
+}
+
 function isProxyNode(v: any): v is ProxyNode {
   return typeof v === "function" && v[NODE] != null;
+}
+
+function chainHas(chain: { method: string; args: any[] }[], method: string): boolean {
+  return chain.some((e) => e.method === method);
+}
+
+function chainGet(chain: { method: string; args: any[] }[], method: string): { method: string; args: any[] } | undefined {
+  return chain.find((e) => e.method === method);
+}
+
+/**
+ * Resolve config defaults from a chain. The `.config({ key: value })` entry
+ * carries the default values for config slots used in the pattern and output.
+ */
+function extractConfigDefaults(chain: { method: string; args: any[] }[]): Record<string, any> {
+  const configEntry = chainGet(chain, "config");
+  return configEntry?.args[0] ?? {};
+}
+
+/**
+ * Apply seal/bind post-processing to a capture bag.
+ *
+ * - `seal`: collapse all inner captures into one, re-keyed to `parentKey`
+ * - `bind("name")`: replace all captures with `{ name: actual }`
+ * - `bind()` (zero-arg): replace all captures with `{ node: actual }` + seal
+ */
+function applyChainModifiers(
+  chain: { method: string; args: any[] }[],
+  bag: Record<string, any>,
+  actual: any,
+  parentKey?: string
+): Record<string, any> {
+  const bindEntry = chainGet(chain, "bind");
+  if (bindEntry) {
+    const name = bindEntry.args[0] ?? "node";
+    return { [name]: actual };
+  }
+  if (chainHas(chain, "seal") && parentKey) {
+    const keys = Object.keys(bag);
+    if (keys.length === 1) {
+      return { [parentKey]: bag[keys[0]] };
+    }
+    if (keys.length === 0) {
+      return {};
+    }
+    // Multiple captures: just pass them through (type system should prevent this)
+    return bag;
+  }
+  return bag;
 }

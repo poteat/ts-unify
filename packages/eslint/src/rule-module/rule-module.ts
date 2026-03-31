@@ -1,18 +1,19 @@
 import type { TSESTree } from "@typescript-eslint/types";
 
 type RuleContext = {
-  sourceCode?: { getText(node: TSESTree.Node): string };
-  getSourceCode?(): { getText(node: TSESTree.Node): string };
+  sourceCode?: { getText(node?: TSESTree.Node): string };
+  getSourceCode?(): { getText(node?: TSESTree.Node): string };
   report(descriptor: {
     node: TSESTree.Node;
     messageId: string;
     data?: Record<string, string>;
-    fix?: (fixer: RuleFixer) => RuleFix;
+    fix?: (fixer: RuleFixer) => RuleFix | RuleFix[];
   }): void;
 };
 
 type RuleFixer = {
   replaceText(node: TSESTree.Node, text: string): RuleFix;
+  insertTextBeforeRange(range: [number, number], text: string): RuleFix;
 };
 
 type RuleFix = { range: [number, number]; text: string };
