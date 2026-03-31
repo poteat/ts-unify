@@ -7,6 +7,13 @@ coverage/
 .env.local
 .env.*.local
 *.tsbuildinfo
+*.js.map
+*.d.ts.map
+
+# Don't ignore config JS files
+!jest.config.js
+!alias-replacer.js
+
 .vscode/
 .idea/
 *.swp

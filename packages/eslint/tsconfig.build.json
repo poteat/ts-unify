@@ -4,12 +4,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "declaration": true,
-    "declarationMap": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["../core/dist/*"],
-      "@": ["../core/dist/index"]
-    }
+    "declarationMap": true
   },
   "include": ["src/**/*"],
   "exclude": [

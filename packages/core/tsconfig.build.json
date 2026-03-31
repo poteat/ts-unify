@@ -4,7 +4,6 @@
     "node_modules",
     "dist",
     "**/*.test.ts",
-    "**/*.spec.ts",
-    "**/test-utils"
+    "**/*.spec.ts"
   ]
 }
