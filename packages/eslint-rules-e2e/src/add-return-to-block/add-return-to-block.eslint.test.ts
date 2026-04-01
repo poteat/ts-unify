@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { RuleTester } = require("@typescript-eslint/rule-tester");
-import { createRule } from "@ts-unify/eslint";
+import { createRule } from "@ts-unify/eslint/internal";
 import { addReturnToBlock } from "@ts-unify/rules";
 
 const tester = new RuleTester({

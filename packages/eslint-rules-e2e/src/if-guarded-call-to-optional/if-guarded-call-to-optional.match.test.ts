@@ -1,4 +1,4 @@
-import { match, extractPatterns } from "@ts-unify/core";
+import { match, extractPatterns } from "@ts-unify/engine";
 import { ifGuardedCallToOptional } from "@ts-unify/rules";
 
 describe("ifGuardedCallToOptional matching", () => {

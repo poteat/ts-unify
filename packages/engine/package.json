@@ -1,0 +1,20 @@
+{
+  "name": "@ts-unify/engine",
+  "version": "0.0.1",
+  "description": "Runtime matching engine for ts-unify",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@ts-unify/core": "0.0.1"
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "MIT"
+}

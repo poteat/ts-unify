@@ -1,6 +1,6 @@
-import { NODE } from "@/ast/builder-map";
-import type { ProxyNode, ChainEntry } from "@/ast/builder-map";
-import { symGet } from "@/runtime/sym-get";
+import { NODE } from "@ts-unify/core/internal";
+import type { ProxyNode, ChainEntry } from "@ts-unify/core/internal";
+import { symGet } from "../sym-get";
 
 /**
  * Extract all entry patterns from a rule's proxy trace.

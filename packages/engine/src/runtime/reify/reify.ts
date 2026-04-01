@@ -1,6 +1,6 @@
-import { NODE } from "@/ast/builder-map";
-import type { ProxyNode } from "@/ast/builder-map";
-import { symGet } from "@/runtime/sym-get";
+import { NODE } from "@ts-unify/core/internal";
+import type { ProxyNode } from "@ts-unify/core/internal";
+import { symGet } from "../sym-get";
 
 /**
  * Convert a proxy tree (or real AST node) into a plain ESTree object

@@ -1,10 +1,6 @@
-import { NODE } from "@/ast/builder-map";
-import type { ProxyNode, ChainEntry } from "@/ast/builder-map";
-import { CAPTURE_BRAND } from "@/capture/capture-type";
-import { SPREAD_BRAND } from "@/capture/spread/spread";
-import { $ as dollarSentinel, REST_CAPTURE } from "@/capture/dollar";
-import { CONFIG_BRAND } from "@/config/config-type";
-import { symGet } from "@/runtime/sym-get";
+import { NODE, CAPTURE_BRAND, SPREAD_BRAND, $ as dollarSentinel, REST_CAPTURE, CONFIG_BRAND } from "@ts-unify/core/internal";
+import type { ProxyNode, ChainEntry } from "@ts-unify/core/internal";
+import { symGet } from "../sym-get";
 
 type NamedBinding = { name: string; value: unknown };
 

@@ -1,4 +1,4 @@
-import { match, extractPatterns } from "@ts-unify/core";
+import { match, extractPatterns } from "@ts-unify/engine";
 import { typeofUndefinedToNullishCheck } from "@ts-unify/rules";
 
 describe("typeofUndefinedToNullishCheck matching", () => {

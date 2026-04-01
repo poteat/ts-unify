@@ -1,4 +1,4 @@
-import { match, extractPatterns } from "@ts-unify/core";
+import { match, extractPatterns } from "@ts-unify/engine";
 import { collapseNullGuard } from "@ts-unify/rules";
 
 describe("collapseNullGuard matching", () => {

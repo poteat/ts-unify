@@ -1,7 +1,5 @@
 import { match } from "./match";
-import { U, NODE } from "@/ast/builder-map/builder-map";
-import { $ } from "@/capture/dollar/dollar";
-import { C } from "@/config/config-slot/config-slot";
+import { U, NODE, $, C } from "@ts-unify/core/internal";
 
 function extractFirstPattern(proxy: any) {
   const node = proxy[NODE];

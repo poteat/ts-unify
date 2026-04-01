@@ -1,5 +1,6 @@
-import { NODE, symGet } from "@ts-unify/core";
-import type { ProxyNode, ChainEntry } from "@ts-unify/core";
+import { NODE } from "@ts-unify/core/internal";
+import type { ProxyNode, ChainEntry } from "@ts-unify/core/internal";
+import { symGet } from "@ts-unify/engine";
 import type { RuleModule } from "../rule-module";
 import type { TransformLike } from "../transform-like";
 import { createRule } from "../create-rule";

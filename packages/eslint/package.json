@@ -9,8 +9,19 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./internal": {
+      "types": "./dist/internal.d.ts",
+      "default": "./dist/internal.js"
+    }
+  },
   "dependencies": {
     "@ts-unify/core": "0.0.1",
+    "@ts-unify/engine": "0.0.1",
     "@typescript-eslint/utils": "^8.57.2",
     "eslint": "^10.1.0",
     "recast": "^0.23.11"

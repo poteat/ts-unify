@@ -1,6 +1,6 @@
 import { extractPatterns } from "./extract-patterns";
-import { NODE } from "@/ast/builder-map/builder-map";
-import type { ProxyNode } from "@/ast/builder-map";
+import { NODE } from "@ts-unify/core/internal";
+import type { ProxyNode } from "@ts-unify/core/internal";
 
 /** Helper: create a minimal proxy-shaped function carrying a NODE descriptor. */
 function makeProxy(node: ProxyNode): unknown {

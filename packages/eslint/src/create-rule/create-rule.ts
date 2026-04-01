@@ -1,5 +1,6 @@
-import { NODE, match, reify, extractPatterns, CONFIG_BRAND, symGet } from "@ts-unify/core";
-import type { ProxyNode, ChainEntry } from "@ts-unify/core";
+import { NODE, CONFIG_BRAND } from "@ts-unify/core/internal";
+import type { ProxyNode, ChainEntry } from "@ts-unify/core/internal";
+import { match, reify, extractPatterns, symGet } from "@ts-unify/engine";
 import type { TSESTree } from "@typescript-eslint/types";
 import type { RuleModule } from "../rule-module";
 import type { TransformLike } from "../transform-like";

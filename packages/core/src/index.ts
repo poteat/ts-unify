@@ -1,7 +1,6 @@
-export * from "./ast";
-export * from "./capture";
-export * from "./config";
-export * from "./pattern";
-export * from "./runtime";
-export * from "./test-utils";
-export * from "./type-utils";
+// Public API — stable, safe to depend on.
+export { U } from "./ast/builder-map";
+export type { BuilderMap } from "./ast/builder-map";
+export type { AstTransform } from "./ast/ast-transform";
+export { $ } from "./capture/dollar";
+export { C } from "./config/config-slot";
