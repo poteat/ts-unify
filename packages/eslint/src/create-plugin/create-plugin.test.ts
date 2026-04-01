@@ -12,22 +12,26 @@ describe("createPlugin", () => {
     expect(typeof plugin.rules).toBe("object");
   });
 
-  it("uses unqualified rule names in the rules object", () => {
-    const plugin = createPlugin({ "my-rule": idPattern });
-    expect(plugin.rules).toHaveProperty("my-rule");
-    expect(plugin.rules).not.toHaveProperty("ts-unify/my-rule");
+  it("converts camelCase export names to kebab-case rule names", () => {
+    const plugin = createPlugin({ myFancyRule: idPattern });
+    expect(plugin.rules).toHaveProperty("my-fancy-rule");
+    expect(plugin.rules).not.toHaveProperty("myFancyRule");
   });
 
-  it("uses qualified names in the recommended config", () => {
+  it("preserves already-kebab names", () => {
     const plugin = createPlugin({ "my-rule": idPattern });
-    // idPattern isn't recommended, so it won't be in recommended rules
+    expect(plugin.rules).toHaveProperty("my-rule");
+  });
+
+  it("uses qualified kebab names in the recommended config", () => {
+    const plugin = createPlugin({ "my-rule": idPattern });
     expect(plugin.configs.recommended.rules).not.toHaveProperty("ts-unify/my-rule");
   });
 
   it("creates a valid RuleModule for each entry", () => {
     const plugin = createPlugin({
-      "find-id": idPattern,
-      "find-if": ifPattern,
+      findId: idPattern,
+      findIf: ifPattern,
     });
 
     const findId = plugin.rules["find-id"];
@@ -39,8 +43,8 @@ describe("createPlugin", () => {
     expect(typeof findIf.create).toBe("function");
   });
 
-  it("sets the message to 'ts-unify: <name>' for each rule", () => {
-    const plugin = createPlugin({ "my-rule": idPattern });
+  it("sets the message using kebab-case name", () => {
+    const plugin = createPlugin({ myRule: idPattern });
     const rule = plugin.rules["my-rule"];
     expect(rule.meta.messages.match).toBe("ts-unify: my-rule");
   });

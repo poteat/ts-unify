@@ -4,6 +4,10 @@ import type { RuleModule } from "../rule-module";
 import type { TransformLike } from "../transform-like";
 import { createRule } from "../create-rule";
 
+function toKebab(name: string): string {
+  return name.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
+}
+
 function isRecommended(transform: TransformLike): boolean {
   const node = symGet(transform, NODE) as ProxyNode | undefined;
   return node?.chain?.some((c: ChainEntry) => c.method === "recommended") ?? false;
@@ -22,11 +26,12 @@ export function createPlugin(
   const recommendedRules: Record<string, string> = {};
 
   for (const [name, transform] of Object.entries(rules)) {
-    ruleModules[name] = createRule(transform, {
-      message: `ts-unify: ${name}`,
+    const kebab = toKebab(name);
+    ruleModules[kebab] = createRule(transform, {
+      message: `ts-unify: ${kebab}`,
     });
     if (isRecommended(transform)) {
-      recommendedRules[`${prefix}/${name}`] = "warn";
+      recommendedRules[`${prefix}/${kebab}`] = "warn";
     }
   }
 
