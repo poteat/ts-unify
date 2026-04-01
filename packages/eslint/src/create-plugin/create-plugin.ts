@@ -22,12 +22,11 @@ export function createPlugin(
   const recommendedRules: Record<string, string> = {};
 
   for (const [name, transform] of Object.entries(rules)) {
-    const qualifiedName = `${prefix}/${name}`;
-    ruleModules[qualifiedName] = createRule(transform, {
+    ruleModules[name] = createRule(transform, {
       message: `ts-unify: ${name}`,
     });
     if (isRecommended(transform)) {
-      recommendedRules[qualifiedName] = "warn";
+      recommendedRules[`${prefix}/${name}`] = "warn";
     }
   }
 
