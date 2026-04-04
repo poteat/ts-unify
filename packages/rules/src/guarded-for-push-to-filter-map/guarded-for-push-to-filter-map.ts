@@ -85,4 +85,4 @@ export const guardedForPushToFilterMap = U.BlockStatement({
   });
 
   return U.BlockStatement({ body: [...before, newDecl, ...after] });
-});
+}).message("Replace guarded for-loop with push with filter().map()");

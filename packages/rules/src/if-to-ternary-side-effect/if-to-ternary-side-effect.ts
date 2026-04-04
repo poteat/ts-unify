@@ -39,4 +39,5 @@ export const ifToTernarySideEffect = U.IfStatement({
       expression: U.ConditionalExpression(bag),
     }),
   )
+  .message("Collapse if/else side-effect into ternary expression")
   .recommended();

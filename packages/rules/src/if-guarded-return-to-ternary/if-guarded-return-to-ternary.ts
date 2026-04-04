@@ -51,4 +51,5 @@ export const ifGuardedReturnToTernary = U.BlockStatement({
       ],
     }),
   )
+  .message("Collapse if-guarded return into ternary")
   .recommended();

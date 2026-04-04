@@ -18,4 +18,5 @@ export const elideBracesForReturn = U.BlockStatement({
   body: [U.ReturnStatement({ argument: $ }).defaultUndefined()],
 })
   .to()
+  .message("Elide braces for single-return arrow functions")
   .recommended();

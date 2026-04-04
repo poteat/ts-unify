@@ -44,4 +44,5 @@ export const arrayFromMapToArrayFrom = U.CallExpression({
       optional: false,
     }),
   )
+  .message("Collapse Array.from().map() into Array.from(_, mapFn)")
   .recommended();

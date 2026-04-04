@@ -38,4 +38,5 @@ export const ifReturnToTernary = U.IfStatement({
   alternate: anyReturnForm,
 })
   .to((bag) => U.ReturnStatement({ argument: U.ConditionalExpression(bag) }))
+  .message("Collapse if/else return into ternary")
   .recommended();

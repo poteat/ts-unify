@@ -73,4 +73,5 @@ export const collapseNullGuard = U.BlockStatement({
 
     return block;
   })
+  .message("Collapse null guard with early return into nullish coalescing")
   .recommended();

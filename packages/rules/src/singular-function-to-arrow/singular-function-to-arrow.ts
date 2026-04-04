@@ -65,4 +65,5 @@ export const functionDeclReturnToArrow = U.fromNode({
           ],
         })
       : init,
-  );
+  )
+  .message("Convert single-statement function to arrow function");

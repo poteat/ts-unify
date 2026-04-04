@@ -40,4 +40,5 @@ export const ifGuardedCallToOptional = U.IfStatement({
       }),
     }),
   )
+  .message("Use optional call instead of if-guarded function call")
   .recommended();

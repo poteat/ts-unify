@@ -59,4 +59,5 @@ export const normalizeTernaryOrder = U.or(negatedTernary, inequalityTernary)
         }),
   }))
   .to((bag) => U.ConditionalExpression(bag))
+  .message("Normalize ternary to use positive condition")
   .recommended();

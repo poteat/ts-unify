@@ -28,4 +28,5 @@ export const objectAssignToSpread = U.CallExpression({
       properties: sources.map((src) => U.SpreadElement({ argument: src })),
     }),
   )
+  .message("Use object spread instead of Object.assign()")
   .recommended();

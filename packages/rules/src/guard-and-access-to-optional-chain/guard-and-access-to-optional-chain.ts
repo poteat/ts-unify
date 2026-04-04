@@ -33,4 +33,5 @@ export const guardAndAccessToOptionalChain = U.LogicalExpression({
       }),
     }),
   )
+  .message("Use optional chaining instead of guard-and-access")
   .recommended();
