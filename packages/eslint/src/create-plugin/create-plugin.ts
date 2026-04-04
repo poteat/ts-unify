@@ -28,9 +28,7 @@ export function createPlugin(
 
   for (const [name, transform] of Object.entries(rules)) {
     const kebab = toKebab(name);
-    ruleModules[kebab] = createRule(transform, {
-      message: `ts-unify: ${kebab}`,
-    });
+    ruleModules[kebab] = createRule(transform);
     if (isRecommended(transform)) {
       recommendedRules[`${prefix}/${kebab}`] = "warn";
     }

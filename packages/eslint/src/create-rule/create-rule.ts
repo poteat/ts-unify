@@ -64,9 +64,13 @@ export function createRule(
   opts: { message?: string; fix?: boolean } = {}
 ): RuleModule {
   const entries = extractPatterns(transform);
-  const message = opts.message ?? "Matches a ts-unify pattern";
 
   const proxyNode = symGet(transform, NODE) as ProxyNode | undefined;
+  const messageEntry = proxyNode?.chain?.find(
+    (c: ChainEntry) => c.method === "message"
+  );
+  const message =
+    opts.message ?? (messageEntry?.args[0] as string | undefined) ?? "Matches a ts-unify pattern";
   const toEntry = proxyNode?.chain?.find(
     (c: ChainEntry) => c.method === "to"
   );

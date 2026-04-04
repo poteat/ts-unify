@@ -43,10 +43,10 @@ describe("createPlugin", () => {
     expect(typeof findIf.create).toBe("function");
   });
 
-  it("sets the message using kebab-case name", () => {
+  it("uses default message when rule has no .message()", () => {
     const plugin = createPlugin({ myRule: idPattern });
     const rule = plugin.rules["my-rule"];
-    expect(rule.meta.messages.match).toBe("ts-unify: my-rule");
+    expect(rule.meta.messages.match).toBe("Matches a ts-unify pattern");
   });
 
   it("handles an empty rules map", () => {

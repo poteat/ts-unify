@@ -31,4 +31,5 @@ export const spreadNewSetToUniq = U.ArrayExpression({
     }),
   )
   .imports({ uniq: C("from") })
-  .config({ from: "lodash" });
+  .config({ from: "lodash" })
+  .message("Use uniq() instead of [...new Set()]");

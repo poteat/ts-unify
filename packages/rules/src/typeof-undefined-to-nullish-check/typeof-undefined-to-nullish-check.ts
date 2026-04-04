@@ -28,4 +28,5 @@ export const typeofUndefinedToNullishCheck = U.BinaryExpression({
       right: U.Literal({ value: null }),
     }),
   )
+  .message("Use == null instead of typeof === 'undefined'")
   .recommended();
