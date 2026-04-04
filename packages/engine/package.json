@@ -4,7 +4,12 @@
   "description": "Runtime matching engine for ts-unify",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "private": true,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
