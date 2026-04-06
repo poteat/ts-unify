@@ -1,5 +1,4 @@
-import { $ } from "@/capture";
-import { U } from "@/ast";
+import { U, $ } from "@ts-unify/core";
 
 /**
  * Elide braces for arrow functions that return a single expression.

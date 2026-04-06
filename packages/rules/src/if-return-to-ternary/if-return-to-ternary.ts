@@ -1,5 +1,4 @@
-import { U } from "@/ast";
-import { $ } from "@/capture";
+import { U, $ } from "@ts-unify/core";
 
 const anyReturnForm = U.maybeBlock(U.ReturnStatement({ argument: $ }))
   .defaultUndefined()

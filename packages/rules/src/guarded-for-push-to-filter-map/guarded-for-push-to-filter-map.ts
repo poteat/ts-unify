@@ -1,5 +1,4 @@
-import { $ } from "@/capture";
-import { U } from "@/ast";
+import { U, $ } from "@ts-unify/core";
 
 // `result.push(value)` as a statement (allow block or bare via maybeBlock)
 const pushStatement = U.maybeBlock(

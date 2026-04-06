@@ -2,16 +2,16 @@
   "name": "@ts-unify/engine",
   "version": "0.0.1",
   "description": "Runtime matching engine for ts-unify",
-  "main": "dist/index.js",
+  "main": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "default": "./dist/index.mjs"
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsup src/index.ts --format esm --external @ts-unify/core && tsc -p tsconfig.build.json --emitDeclarationOnly",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "jest"
   },

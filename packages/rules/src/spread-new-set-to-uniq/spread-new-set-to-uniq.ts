@@ -1,6 +1,4 @@
-import { $ } from "@/capture";
-import { C } from "@/config";
-import { U } from "@/ast";
+import { U, $, C } from "@ts-unify/core";
 
 /**
  * Replace [...new Set(array)] with uniq(array)

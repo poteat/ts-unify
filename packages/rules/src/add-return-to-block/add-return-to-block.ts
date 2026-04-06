@@ -1,5 +1,4 @@
-import { $ } from "@/capture";
-import { U } from "@/ast";
+import { U, $ } from "@ts-unify/core";
 
 const functionParent = U.or(
   U.FunctionDeclaration(),

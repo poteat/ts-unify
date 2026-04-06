@@ -1,6 +1,5 @@
-import { $ } from "@/capture";
+import { U, $ } from "@ts-unify/core";
 import { AST_NODE_TYPES } from "@typescript-eslint/types";
-import { U } from "@/ast";
 
 const returnBlock = U.BlockStatement({
   body: [U.ReturnStatement({ argument: $ }).defaultUndefined()],

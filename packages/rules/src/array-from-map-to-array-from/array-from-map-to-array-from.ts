@@ -1,5 +1,4 @@
-import { $ } from "@/capture";
-import { U } from "@/ast";
+import { U, $ } from "@ts-unify/core";
 
 /**
  * Collapse Array.from(x).map(fn) into Array.from(x, fn)

@@ -2,20 +2,20 @@
   "name": "@ts-unify/core",
   "version": "0.0.1",
   "description": "Declarative AST pattern matching and transforms for TypeScript",
-  "main": "dist/index.js",
+  "main": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "default": "./dist/index.mjs"
     },
     "./internal": {
       "types": "./dist/internal.d.ts",
-      "default": "./dist/internal.js"
+      "default": "./dist/internal.mjs"
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "build": "tsup src/index.ts src/internal.ts --format esm && tsc -p tsconfig.build.json --emitDeclarationOnly",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "jest",
     "test:coverage": "jest --coverage"
@@ -29,5 +29,8 @@
   "files": [
     "dist"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "tsup": "^8.5.1"
+  }
 }

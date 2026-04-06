@@ -2,13 +2,12 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
-    "declaration": true,
-    "declarationMap": true,
+    "declaration": false,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["../core/dist/*"],
-      "@": ["../core/dist/index"]
+      "@ts-unify/core": ["../core/src/index.ts"],
+      "@/*": ["../core/src/*"],
+      "@": ["../core/src/index.ts"]
     }
   },
   "include": ["src/**/*"],

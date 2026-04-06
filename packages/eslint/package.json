@@ -2,20 +2,20 @@
   "name": "@ts-unify/eslint",
   "version": "0.0.1",
   "description": "ESLint integration for ts-unify",
-  "main": "dist/index.js",
+  "main": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsup src/index.ts src/internal.ts --format esm --external @ts-unify/core --external @ts-unify/engine --external recast --external @typescript-eslint/types && tsc -p tsconfig.build.json --emitDeclarationOnly",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "default": "./dist/index.mjs"
     },
     "./internal": {
       "types": "./dist/internal.d.ts",
-      "default": "./dist/internal.js"
+      "default": "./dist/internal.mjs"
     }
   },
   "dependencies": {
