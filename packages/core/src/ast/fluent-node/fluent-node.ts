@@ -9,13 +9,18 @@ import type { NodeWithBind } from "@/ast/node-with-bind";
 import type { NodeWithUntil } from "@/ast/node-with-until";
 import type { NodeWithWhere } from "@/ast/node-with-where";
 import type { NodeWithNone } from "@/ast/node-with-none";
+import type { NodeWithSome } from "@/ast/node-with-some";
+import type { NodeWithAtLeast } from "@/ast/node-with-at-least";
+import type { NodeWithAtMost } from "@/ast/node-with-at-most";
+import type { NodeWithExactly } from "@/ast/node-with-exactly";
 
 export declare const FLUENT_INNER: unique symbol;
 
 /**
  * A node shape `N` augmented with fluent pattern helpers:
  * `.when()`, `.with()`, `.bind()`, `.seal()`, `.to()`,
- * `.where()`, `.until()`, `.none()`, etc.
+ * `.where()`, `.until()`, `.none()`, `.some()`,
+ * `.atLeast()`, `.atMost()`, `.exactly()`, etc.
  */
 export type FluentNode<N> = { readonly [FLUENT_INNER]: N } &
   NodeWithWhen<N> &
@@ -28,4 +33,8 @@ export type FluentNode<N> = { readonly [FLUENT_INNER]: N } &
   NodeWithBind<N> &
   NodeWithUntil<N> &
   NodeWithWhere<N> &
-  NodeWithNone<N>;
+  NodeWithNone<N> &
+  NodeWithSome<N> &
+  NodeWithAtLeast<N> &
+  NodeWithAtMost<N> &
+  NodeWithExactly<N>;

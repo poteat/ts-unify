@@ -342,13 +342,8 @@ function applyWhenGuards(
 /**
  * Enforce `.where()` chain entries. Each entry carries one or more
  * constraint patterns. Each pattern's chain carries a quantifier
- * (`.none()`, `.some()`, etc.) and an optional scope modifier
- * (`.until()`, `.global()`, `.project()`).
- *
- * Currently supports:
- * - `.none()` quantifier with subtree scope (+ `.until()` boundaries).
- *
- * Implements CTL formula A[!P U B] per node-with-where.spec.md.
+ * (`.none()`, `.some()`, `.atLeast(N)`, `.atMost(N)`, `.exactly(N)`)
+ * and an optional scope modifier (`.until()` for subtree boundaries).
  */
 function applyWhere(chain: ChainEntry[], actual: unknown): boolean {
   for (const entry of chain) {
@@ -357,82 +352,108 @@ function applyWhere(chain: ChainEntry[], actual: unknown): boolean {
       if (!isProxyNode(constraint)) continue;
       const cNode = symGet(constraint, NODE) as ProxyNode;
 
-      // Read quantifier from the constraint's chain.
-      const quantifier = chainHas(cNode.chain, "none") ? "none" : null;
-      if (!quantifier) continue; // Unknown quantifier — skip.
-
-      // Extract the .until() boundary pattern (if any).
       const untilEntry = chainGet(cNode.chain, "until");
       const boundary = untilEntry?.args[0] ?? null;
 
-      if (quantifier === "none") {
-        if (subtreeContains(actual, cNode, boundary)) return false;
+      const q = readQuantifier(cNode.chain);
+      if (!q) continue;
+
+      // For .none(), short-circuit on first match (optimization).
+      if (q.kind === "none") {
+        if (subtreeCount(actual, cNode, boundary, 1) > 0) return false;
+        continue;
       }
+
+      const count = subtreeCount(actual, cNode, boundary);
+      if (!q.test(count)) return false;
     }
   }
   return true;
 }
 
+type Quantifier = { kind: string; test: (n: number) => boolean };
+
+function readQuantifier(chain: ChainEntry[]): Quantifier | null {
+  if (chainHas(chain, "none")) return { kind: "none", test: (n) => n === 0 };
+  if (chainHas(chain, "some")) return { kind: "some", test: (n) => n > 0 };
+  const atLeast = chainGet(chain, "atLeast");
+  if (atLeast) { const k = (atLeast.args[0] ?? 0) as number; return { kind: "atLeast", test: (n) => n >= k }; }
+  const atMost = chainGet(chain, "atMost");
+  if (atMost) { const k = (atMost.args[0] ?? 0) as number; return { kind: "atMost", test: (n) => n <= k }; }
+  const exactly = chainGet(chain, "exactly");
+  if (exactly) { const k = (exactly.args[0] ?? 0) as number; return { kind: "exactly", test: (n) => n === k }; }
+  return null;
+}
+
 /**
- * Walk a subtree top-down checking whether any descendant matches the
- * excluded proxy node. Stops recursion at nodes matching the boundary
- * pattern (if provided). The root node itself is NOT checked (it's the
- * matched node, not a descendant).
+ * Count how many descendants of `root` match the pattern, respecting
+ * `.until()` boundaries. The root itself is NOT checked.
+ * @param limit Stop counting early once this limit is reached (optimization).
  */
-function subtreeContains(
+function subtreeCount(
   root: unknown,
-  excluded: ProxyNode,
-  boundary: unknown
-): boolean {
+  pattern: ProxyNode,
+  boundary: unknown,
+  limit?: number
+): number {
   const rootRec = root as Record<string, unknown> | null | undefined;
-  if (!rootRec || typeof rootRec !== "object") return false;
+  if (!rootRec || typeof rootRec !== "object") return 0;
+  let count = 0;
 
   for (const key of Object.keys(rootRec)) {
     if (SKIP_KEYS.has(key)) continue;
     const child = rootRec[key];
     if (Array.isArray(child)) {
       for (const item of child) {
-        if (descendantMatches(item, excluded, boundary)) return true;
+        count += countDescendant(item, pattern, boundary, limit ? limit - count : undefined);
+        if (limit && count >= limit) return count;
       }
     } else if (child && typeof child === "object" && (child as Record<string, unknown>).type) {
-      if (descendantMatches(child, excluded, boundary)) return true;
+      count += countDescendant(child, pattern, boundary, limit ? limit - count : undefined);
+      if (limit && count >= limit) return count;
     }
   }
-  return false;
+  return count;
 }
 
 /**
- * Check a single descendant node: does it match the excluded pattern?
- * If it's a boundary, check it but don't recurse further.
+ * Check a single descendant and recurse. Returns the number of matches
+ * found in this node and its subtree.
  */
-function descendantMatches(
+function countDescendant(
   node: unknown,
-  excluded: ProxyNode,
-  boundary: unknown
-): boolean {
+  pattern: ProxyNode,
+  boundary: unknown,
+  limit?: number
+): number {
   const nodeRec = node as Record<string, unknown> | null | undefined;
-  if (!nodeRec || typeof nodeRec !== "object" || !nodeRec.type) return false;
+  if (!nodeRec || typeof nodeRec !== "object" || !nodeRec.type) return 0;
+  let count = 0;
 
-  // Check if this node matches the excluded pattern (type + inner args).
-  // Handle U.or() by checking each alternative.
-  if (excluded.tag === "or") {
-    for (const alt of excluded.args) {
+  // Check if this node matches the pattern. Handle U.or().
+  if (pattern.tag === "or") {
+    for (const alt of pattern.args) {
       if (!isProxyNode(alt)) continue;
       const inner = symGet(alt, NODE) as ProxyNode;
       if (nodeRec.type === inner.tag) {
         const innerPattern = inner.args[0] ?? {};
-        const innerBag = matchInner(node, innerPattern as Record<string, unknown>, [], {});
-        if (innerBag) return true;
+        if (matchInner(node, innerPattern as Record<string, unknown>, [], {})) {
+          count++;
+          break; // One match per node is enough
+        }
       }
     }
-  } else if (nodeRec.type === excluded.tag) {
-    const innerPattern = excluded.args[0] ?? {};
-    const innerBag = matchInner(node, innerPattern as Record<string, unknown>, [], {});
-    if (innerBag) return true;
+  } else if (nodeRec.type === pattern.tag) {
+    const innerPattern = pattern.args[0] ?? {};
+    if (matchInner(node, innerPattern as Record<string, unknown>, [], {})) {
+      count++;
+    }
   }
 
-  // If this node is a boundary, don't recurse into its children.
-  if (boundary && isBoundaryNode(nodeRec, boundary)) return false;
+  if (limit && count >= limit) return count;
+
+  // If this node is a boundary, don't recurse.
+  if (boundary && isBoundaryNode(nodeRec, boundary)) return count;
 
   // Recurse into children.
   for (const key of Object.keys(nodeRec)) {
@@ -440,13 +461,15 @@ function descendantMatches(
     const child = nodeRec[key];
     if (Array.isArray(child)) {
       for (const item of child) {
-        if (descendantMatches(item, excluded, boundary)) return true;
+        count += countDescendant(item, pattern, boundary, limit ? limit - count : undefined);
+        if (limit && count >= limit) return count;
       }
     } else if (child && typeof child === "object" && (child as Record<string, unknown>).type) {
-      if (descendantMatches(child, excluded, boundary)) return true;
+      count += countDescendant(child, pattern, boundary, limit ? limit - count : undefined);
+      if (limit && count >= limit) return count;
     }
   }
-  return false;
+  return count;
 }
 
 /**

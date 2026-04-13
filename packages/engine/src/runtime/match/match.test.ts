@@ -699,3 +699,95 @@ describe("match - where + none", () => {
     expect(match(ast4, pattern, chain)).not.toBeNull();
   });
 });
+
+describe("match - where + quantifiers (some, atLeast, atMost, exactly)", () => {
+  // AST with 3 ReturnStatements
+  const ast = {
+    type: "Program",
+    name: "p",
+    body: [
+      { type: "ReturnStatement", argument: { type: "Literal", value: 1 } },
+      { type: "ReturnStatement", argument: { type: "Literal", value: 2 } },
+      { type: "ReturnStatement", argument: { type: "Literal", value: 3 } },
+      { type: "ExpressionStatement", expression: { type: "Literal", value: 4 } },
+    ],
+  };
+  const pattern = { name: $ };
+
+  it(".some() accepts when at least one match exists", () => {
+    const chain = [{ method: "where", args: [(U as any).ReturnStatement().some()] }];
+    expect(match(ast, pattern, chain)).not.toBeNull();
+  });
+
+  it(".some() rejects when zero matches", () => {
+    const chain = [{ method: "where", args: [(U as any).ThisExpression().some()] }];
+    expect(match(ast, pattern, chain)).toBeNull();
+  });
+
+  it(".atLeast(3) accepts with exactly 3", () => {
+    const chain = [{ method: "where", args: [(U as any).ReturnStatement().atLeast(3)] }];
+    expect(match(ast, pattern, chain)).not.toBeNull();
+  });
+
+  it(".atLeast(4) rejects with only 3", () => {
+    const chain = [{ method: "where", args: [(U as any).ReturnStatement().atLeast(4)] }];
+    expect(match(ast, pattern, chain)).toBeNull();
+  });
+
+  it(".atMost(3) accepts with exactly 3", () => {
+    const chain = [{ method: "where", args: [(U as any).ReturnStatement().atMost(3)] }];
+    expect(match(ast, pattern, chain)).not.toBeNull();
+  });
+
+  it(".atMost(2) rejects with 3", () => {
+    const chain = [{ method: "where", args: [(U as any).ReturnStatement().atMost(2)] }];
+    expect(match(ast, pattern, chain)).toBeNull();
+  });
+
+  it(".atMost(0) accepts with zero matches (like .none())", () => {
+    const chain = [{ method: "where", args: [(U as any).ThisExpression().atMost(0)] }];
+    expect(match(ast, pattern, chain)).not.toBeNull();
+  });
+
+  it(".exactly(3) accepts with exactly 3", () => {
+    const chain = [{ method: "where", args: [(U as any).ReturnStatement().exactly(3)] }];
+    expect(match(ast, pattern, chain)).not.toBeNull();
+  });
+
+  it(".exactly(2) rejects with 3", () => {
+    const chain = [{ method: "where", args: [(U as any).ReturnStatement().exactly(2)] }];
+    expect(match(ast, pattern, chain)).toBeNull();
+  });
+
+  it(".exactly(0) accepts with zero matches", () => {
+    const chain = [{ method: "where", args: [(U as any).ThisExpression().exactly(0)] }];
+    expect(match(ast, pattern, chain)).not.toBeNull();
+  });
+
+  it("quantifiers respect .until() boundaries", () => {
+    const nested = {
+      type: "Program",
+      name: "p",
+      body: [
+        { type: "ReturnStatement", argument: { type: "Literal", value: 1 } },
+        {
+          type: "FunctionExpression",
+          body: {
+            type: "BlockStatement",
+            body: [
+              { type: "ReturnStatement", argument: { type: "Literal", value: 2 } },
+              { type: "ReturnStatement", argument: { type: "Literal", value: 3 } },
+            ],
+          },
+        },
+      ],
+    };
+    // Only 1 ReturnStatement before the FunctionExpression boundary.
+    const chain = [
+      { method: "where", args: [
+        (U as any).ReturnStatement().until((U as any).FunctionExpression()).exactly(1)
+      ] },
+    ];
+    expect(match(nested, pattern, chain)).not.toBeNull();
+  });
+});

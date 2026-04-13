@@ -63,8 +63,15 @@ entries are evaluated. Each entry carries one or more constraint patterns.
 Each pattern's chain carries a quantifier (`.none()`, `.some()`, etc.) and
 an optional scope modifier (`.until()`, `.global()`, `.project()`).
 
-Currently supports the `.none()` quantifier with subtree scope (+ `.until()`
-boundaries). Implements CTL formula `A[!P U B]` per `node-with-where.spec.md`.
+Supports the following quantifiers with subtree scope (+ `.until()` boundaries):
+
+- `.none()` — reject if count > 0 (short-circuits on first match)
+- `.some()` — reject if count = 0
+- `.atLeast(n)` — reject if count < n
+- `.atMost(n)` — reject if count > n
+- `.exactly(n)` — reject if count ≠ n
+
+Implements CTL formula `A[!P U B]` (for `.none()`) per `node-with-where.spec.md`.
 
 ### Walk behavior
 
@@ -80,8 +87,11 @@ boundaries). Implements CTL formula `A[!P U B]` per `node-with-where.spec.md`.
 ### Helpers
 
 - `applyWhere(chain, actual)` -- entry point; iterates where entries.
-- `subtreeContains(root, pattern, boundary)` -- walks root's children.
-- `descendantMatches(node, pattern, boundary)` -- checks one node + recurses.
+- `readQuantifier(chain)` -- extracts the quantifier kind and test predicate.
+- `subtreeCount(root, pattern, boundary, limit?)` -- counts matches in root's
+  children. Accepts an optional `limit` for early exit (used by `.none()`).
+- `countDescendant(node, pattern, boundary, limit?)` -- checks one node +
+  recurses, returning the match count.
 - `isBoundaryNode(node, boundary)` -- type-checks against boundary pattern.
 
 ## Examples
