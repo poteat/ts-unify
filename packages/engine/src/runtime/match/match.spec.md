@@ -30,8 +30,59 @@ success, or `null` on mismatch.
 - `matchOrInner` -- left-to-right disjunction over branches.
 - `matchMaybeBlockInner` -- unwraps single-statement `BlockStatement` or matches
   directly.
+- `applyChainModifiers` -- post-processes a nested sub-pattern's bag based on
+  chain entries `seal` and `bind`. See "Seal and bind" below.
 - `deepEqual` -- structural equality ignoring `parent`, `loc`, `range` keys.
 - `isCapture`, `isProxyNode`, `isSpread` -- brand checks.
+
+## Seal and bind
+
+Sub-patterns can carry `.seal()` and `.bind()` chain entries that post-process
+their local capture bag after matching. These are runtime counterparts to the
+type-level brands defined in `sealed.spec.md` and `node-with-bind.spec.md`.
+`applyChainModifiers` receives the inner bag plus the embedding property key
+(`parentKey`) and returns the bag the parent pattern sees.
+
+- `.seal()`: if the inner bag has exactly one capture and a `parentKey` is
+  present, re-key that single capture to `parentKey`. At the root (no
+  `parentKey`) or with zero/multi captures, the bag is unchanged.
+
+- `.bind("name")`: discard inner captures and return `{ [name]: actual }`,
+  where `actual` is the matched node.
+
+- `.bind()` (zero-arg): equivalent to `.bind("node")` + `.seal()`. Because the
+  produced bag has exactly one key, the seal rule collapses this to
+  `{ [parentKey]: actual }` when embedded under a property, and leaves
+  `{ node: actual }` at the root. Implementation shortcut: resolve the key in
+  one step as `parentKey ?? "node"`.
+
+## Where (quantified constraints)
+
+After structural matching and `.when()` guards succeed, `.where()` chain
+entries are evaluated. Each entry carries one or more constraint patterns.
+Each pattern's chain carries a quantifier (`.none()`, `.some()`, etc.) and
+an optional scope modifier (`.until()`, `.global()`, `.project()`).
+
+Currently supports the `.none()` quantifier with subtree scope (+ `.until()`
+boundaries). Implements CTL formula `A[!P U B]` per `node-with-where.spec.md`.
+
+### Walk behavior
+
+- The walk starts at the matched node's children (the matched node itself
+  is not checked — it's the root, not a descendant).
+- Depth-first, pre-order: each descendant is checked against `P` before
+  its children are visited.
+- If `P` carries a `.until(B)` boundary (from `node-with-until.spec.md`),
+  the walk does not recurse into descendants whose `type` matches `B`.
+  The boundary node itself IS checked against `P` before being pruned.
+- Keys in `SKIP_KEYS` (`parent`, `loc`, `range`) are not traversed.
+
+### Helpers
+
+- `applyWhere(chain, actual)` -- entry point; iterates where entries.
+- `subtreeContains(root, pattern, boundary)` -- walks root's children.
+- `descendantMatches(node, pattern, boundary)` -- checks one node + recurses.
+- `isBoundaryNode(node, boundary)` -- type-checks against boundary pattern.
 
 ## Examples
 

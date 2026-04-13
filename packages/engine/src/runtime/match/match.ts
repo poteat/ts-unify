@@ -31,6 +31,10 @@ export function match(
   // Enforce top-level .when() guards
   if (chain && !applyWhenGuards(chain, bag)) return null;
 
+  // Enforce .where() constraints: quantified pattern searches over scoped
+  // subtrees. Currently supports .none() quantifier (subtree scope).
+  if (chain && !applyWhere(chain, node)) return null;
+
   return bag;
 }
 
@@ -335,6 +339,139 @@ function applyWhenGuards(
   return true;
 }
 
+/**
+ * Enforce `.where()` chain entries. Each entry carries one or more
+ * constraint patterns. Each pattern's chain carries a quantifier
+ * (`.none()`, `.some()`, etc.) and an optional scope modifier
+ * (`.until()`, `.global()`, `.project()`).
+ *
+ * Currently supports:
+ * - `.none()` quantifier with subtree scope (+ `.until()` boundaries).
+ *
+ * Implements CTL formula A[!P U B] per node-with-where.spec.md.
+ */
+function applyWhere(chain: ChainEntry[], actual: unknown): boolean {
+  for (const entry of chain) {
+    if (entry.method !== "where") continue;
+    for (const constraint of entry.args) {
+      if (!isProxyNode(constraint)) continue;
+      const cNode = symGet(constraint, NODE) as ProxyNode;
+
+      // Read quantifier from the constraint's chain.
+      const quantifier = chainHas(cNode.chain, "none") ? "none" : null;
+      if (!quantifier) continue; // Unknown quantifier — skip.
+
+      // Extract the .until() boundary pattern (if any).
+      const untilEntry = chainGet(cNode.chain, "until");
+      const boundary = untilEntry?.args[0] ?? null;
+
+      if (quantifier === "none") {
+        if (subtreeContains(actual, cNode, boundary)) return false;
+      }
+    }
+  }
+  return true;
+}
+
+/**
+ * Walk a subtree top-down checking whether any descendant matches the
+ * excluded proxy node. Stops recursion at nodes matching the boundary
+ * pattern (if provided). The root node itself is NOT checked (it's the
+ * matched node, not a descendant).
+ */
+function subtreeContains(
+  root: unknown,
+  excluded: ProxyNode,
+  boundary: unknown
+): boolean {
+  const rootRec = root as Record<string, unknown> | null | undefined;
+  if (!rootRec || typeof rootRec !== "object") return false;
+
+  for (const key of Object.keys(rootRec)) {
+    if (SKIP_KEYS.has(key)) continue;
+    const child = rootRec[key];
+    if (Array.isArray(child)) {
+      for (const item of child) {
+        if (descendantMatches(item, excluded, boundary)) return true;
+      }
+    } else if (child && typeof child === "object" && (child as Record<string, unknown>).type) {
+      if (descendantMatches(child, excluded, boundary)) return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Check a single descendant node: does it match the excluded pattern?
+ * If it's a boundary, check it but don't recurse further.
+ */
+function descendantMatches(
+  node: unknown,
+  excluded: ProxyNode,
+  boundary: unknown
+): boolean {
+  const nodeRec = node as Record<string, unknown> | null | undefined;
+  if (!nodeRec || typeof nodeRec !== "object" || !nodeRec.type) return false;
+
+  // Check if this node matches the excluded pattern (type + inner args).
+  // Handle U.or() by checking each alternative.
+  if (excluded.tag === "or") {
+    for (const alt of excluded.args) {
+      if (!isProxyNode(alt)) continue;
+      const inner = symGet(alt, NODE) as ProxyNode;
+      if (nodeRec.type === inner.tag) {
+        const innerPattern = inner.args[0] ?? {};
+        const innerBag = matchInner(node, innerPattern as Record<string, unknown>, [], {});
+        if (innerBag) return true;
+      }
+    }
+  } else if (nodeRec.type === excluded.tag) {
+    const innerPattern = excluded.args[0] ?? {};
+    const innerBag = matchInner(node, innerPattern as Record<string, unknown>, [], {});
+    if (innerBag) return true;
+  }
+
+  // If this node is a boundary, don't recurse into its children.
+  if (boundary && isBoundaryNode(nodeRec, boundary)) return false;
+
+  // Recurse into children.
+  for (const key of Object.keys(nodeRec)) {
+    if (SKIP_KEYS.has(key)) continue;
+    const child = nodeRec[key];
+    if (Array.isArray(child)) {
+      for (const item of child) {
+        if (descendantMatches(item, excluded, boundary)) return true;
+      }
+    } else if (child && typeof child === "object" && (child as Record<string, unknown>).type) {
+      if (descendantMatches(child, excluded, boundary)) return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Check if a node matches a boundary pattern. The boundary can be a
+ * proxy node (single type) or an or-proxy (multiple types).
+ */
+function isBoundaryNode(
+  node: Record<string, unknown>,
+  boundary: unknown
+): boolean {
+  if (!isProxyNode(boundary)) return false;
+  const bNode = symGet(boundary, NODE) as ProxyNode;
+  if (bNode.tag === "or") {
+    return bNode.args.some((arg: unknown) => {
+      if (typeof arg === "string") return node.type === arg;
+      if (isProxyNode(arg)) {
+        const inner = symGet(arg, NODE) as ProxyNode;
+        return node.type === inner.tag;
+      }
+      return false;
+    });
+  }
+  return node.type === bNode.tag;
+}
+
 function isCapture(v: unknown): v is { name: string } {
   return v != null && typeof v === "object" && symGet(v, CAPTURE_BRAND) === true;
 }
@@ -369,7 +506,12 @@ function extractConfigDefaults(chain: ChainEntry[]): Record<string, unknown> {
  *
  * - `seal`: collapse all inner captures into one, re-keyed to `parentKey`
  * - `bind("name")`: replace all captures with `{ name: actual }`
- * - `bind()` (zero-arg): replace all captures with `{ node: actual }` + seal
+ * - `bind()` (zero-arg): per `node-with-bind.spec.md`, this is "bind under
+ *   the canonical name `node` + Sealed". The seal half is what makes the
+ *   bag re-key to the embedding property key when placed under a field;
+ *   at the root (no `parentKey`) seal is a no-op so the bag stays
+ *   `{ node: actual }`. We collapse both halves into a single key
+ *   resolution: `parentKey` if embedded, else `"node"`.
  */
 function applyChainModifiers(
   chain: ChainEntry[],
@@ -379,7 +521,8 @@ function applyChainModifiers(
 ): Record<string, unknown> {
   const bindEntry = chainGet(chain, "bind");
   if (bindEntry) {
-    const name = (bindEntry.args[0] ?? "node") as string;
+    const explicitName = bindEntry.args[0] as string | undefined;
+    const name = explicitName ?? parentKey ?? "node";
     return { [name]: actual };
   }
   if (chainHas(chain, "seal") && parentKey) {

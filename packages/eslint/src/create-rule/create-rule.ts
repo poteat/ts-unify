@@ -74,10 +74,14 @@ export function createRule(
   const toEntry = proxyNode?.chain?.find(
     (c: ChainEntry) => c.method === "to"
   );
-  const factory =
-    opts.fix !== false && toEntry?.args[0]
+  // Per node-with-to.spec.md: zero-arg .to() means "output is the
+  // single capture value". Synthesize an identity factory for it.
+  let factory: ((bag: Record<string, unknown>) => unknown) | null = null;
+  if (opts.fix !== false && toEntry) {
+    factory = toEntry.args[0]
       ? (toEntry.args[0] as (bag: Record<string, unknown>) => unknown)
-      : null;
+      : (bag: Record<string, unknown>) => Object.values(bag)[0];
+  }
 
   // Collect .with() entries that appear before .to() in the chain
   const withEntries: ChainEntry[] = [];

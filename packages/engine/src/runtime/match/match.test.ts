@@ -117,7 +117,11 @@ describe("match - seal", () => {
 });
 
 describe("match - bind", () => {
-  it("captures the whole node under 'node' with zero-arg bind()", () => {
+  it("zero-arg bind() embedded under a property re-keys to that property", () => {
+    // Per node-with-bind.spec.md: `.bind()` is sugar for `.bind("node")`
+    // + Sealed. The Sealed half re-keys the single-key bag to the
+    // embedding property name. Net effect: under `body: exprBlock`, the
+    // captured value lands under `body`.
     const exprBlock = (U as any)
       .BlockStatement({
         body: [(U as any).ExpressionStatement({ expression: $ })],
@@ -137,16 +141,17 @@ describe("match - bind", () => {
     const extracted = extractFirstPattern(exprBlock);
     expect(extracted.tag).toBe("BlockStatement");
 
-    // When used as a value in a parent pattern
     const parentPattern = { body: exprBlock };
     const parentAst = { type: "SomeNode", body: ast };
     const bag = match(parentAst, parentPattern);
     expect(bag).not.toBeNull();
-    // bind() zero-arg captures under "node"
-    expect(bag!.node).toBe(ast);
-    // Inner captures (expression) should NOT leak
+    // Re-keyed from "node" to the embedding property "body".
+    expect(bag!.body).toBe(ast);
+    expect(bag!.node).toBeUndefined();
+    // Inner captures (expression) should NOT leak.
     expect(bag!.expression).toBeUndefined();
   });
+
 
   it("captures the whole node under a custom name with bind('name')", () => {
     const namedBind = (U as any)
@@ -356,7 +361,341 @@ describe("match - combined seal + bind + or", () => {
     const parentAst2 = { type: "SomeNode", body: exprAst };
     const bag2 = match(parentAst2, parentPattern2);
     expect(bag2).not.toBeNull();
-    // bind() captures whole node under "node"
-    expect(bag2!.node).toBe(exprAst);
+    // Zero-arg bind() = bind("node") + seal; the seal collapses the
+    // single-key bag to the embedding property ("body"), matching the
+    // seal branch above. This is what singular-function-to-arrow relies
+    // on: its .with() destructures `body` regardless of which branch
+    // matched.
+    expect(bag2!.body).toBe(exprAst);
+    expect(bag2!.node).toBeUndefined();
+  });
+});
+
+describe("match - where + none", () => {
+  // Helper: build a chain with a where entry from patterns that carry .none().
+  function whereChain(...patterns: unknown[]): { method: string; args: unknown[] }[] {
+    return [{ method: "where", args: patterns }];
+  }
+
+  it("rejects when pattern appears in subtree (.none())", () => {
+    const pattern = { name: $ };
+    const chain = whereChain((U as any).ThisExpression().none());
+
+    const ast = {
+      type: "FunctionDeclaration",
+      name: "f",
+      body: {
+        type: "BlockStatement",
+        body: [
+          { type: "ReturnStatement", argument: { type: "ThisExpression" } },
+        ],
+      },
+    };
+    const bag = match(ast, pattern, chain);
+    expect(bag).toBeNull();
+  });
+
+  it("accepts when pattern is absent (.none())", () => {
+    const pattern = { name: $ };
+    const chain = whereChain((U as any).ThisExpression().none());
+
+    const ast = {
+      type: "FunctionDeclaration",
+      name: "f",
+      body: {
+        type: "BlockStatement",
+        body: [
+          { type: "ReturnStatement", argument: { type: "Literal", value: 1 } },
+        ],
+      },
+    };
+    const bag = match(ast, pattern, chain);
+    expect(bag).not.toBeNull();
+    expect(bag!.name).toBe("f");
+  });
+
+  it("respects .until() boundary — does not reject when pattern is behind boundary", () => {
+    const pattern = { name: $ };
+    const constraint = (U as any)
+      .ThisExpression()
+      .until((U as any).FunctionExpression())
+      .none();
+    const chain = whereChain(constraint);
+
+    const ast = {
+      type: "FunctionDeclaration",
+      name: "outer",
+      body: {
+        type: "BlockStatement",
+        body: [
+          {
+            type: "ReturnStatement",
+            argument: {
+              type: "FunctionExpression",
+              body: {
+                type: "BlockStatement",
+                body: [
+                  {
+                    type: "ReturnStatement",
+                    argument: { type: "ThisExpression" },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      },
+    };
+    const bag = match(ast, pattern, chain);
+    expect(bag).not.toBeNull();
+    expect(bag!.name).toBe("outer");
+  });
+
+  it("rejects when pattern is BEFORE the boundary", () => {
+    const pattern = { name: $ };
+    const constraint = (U as any)
+      .ThisExpression()
+      .until((U as any).FunctionExpression())
+      .none();
+    const chain = whereChain(constraint);
+
+    const ast = {
+      type: "FunctionDeclaration",
+      name: "f",
+      body: {
+        type: "BlockStatement",
+        body: [
+          {
+            type: "ExpressionStatement",
+            expression: { type: "ThisExpression" },
+          },
+        ],
+      },
+    };
+    const bag = match(ast, pattern, chain);
+    expect(bag).toBeNull();
+  });
+
+  it("boundary node itself is checked against the pattern before pruning", () => {
+    const pattern = { name: $ };
+    const constraint = (U as any)
+      .FunctionExpression()
+      .until((U as any).FunctionExpression())
+      .none();
+    const chain = whereChain(constraint);
+
+    const ast = {
+      type: "FunctionDeclaration",
+      name: "f",
+      body: {
+        type: "BlockStatement",
+        body: [
+          {
+            type: "ExpressionStatement",
+            expression: {
+              type: "FunctionExpression",
+              body: { type: "BlockStatement", body: [] },
+            },
+          },
+        ],
+      },
+    };
+    const bag = match(ast, pattern, chain);
+    expect(bag).toBeNull();
+  });
+
+  it("handles U.or() boundary with multiple types", () => {
+    const pattern = { name: $ };
+    const constraint = (U as any)
+      .ThisExpression()
+      .until(
+        (U as any).or(
+          (U as any).FunctionDeclaration(),
+          (U as any).FunctionExpression()
+        )
+      )
+      .none();
+    const chain = whereChain(constraint);
+
+    const ast = {
+      type: "Program",
+      name: "p",
+      body: [
+        {
+          type: "FunctionDeclaration",
+          body: {
+            type: "BlockStatement",
+            body: [
+              {
+                type: "ReturnStatement",
+                argument: { type: "ThisExpression" },
+              },
+            ],
+          },
+        },
+      ],
+    };
+    const bag = match(ast, pattern, chain);
+    expect(bag).not.toBeNull();
+  });
+
+  it("multiple .where() entries compose (all must pass)", () => {
+    const pattern = { name: $ };
+    const chain = [
+      { method: "where", args: [(U as any).ThisExpression().none()] },
+      {
+        method: "where",
+        args: [(U as any).Identifier({ name: "arguments" }).none()],
+      },
+    ];
+
+    const ast = {
+      type: "FunctionDeclaration",
+      name: "f",
+      body: {
+        type: "BlockStatement",
+        body: [
+          {
+            type: "ReturnStatement",
+            argument: { type: "Identifier", name: "arguments" },
+          },
+        ],
+      },
+    };
+    const bag = match(ast, pattern, chain);
+    expect(bag).toBeNull();
+  });
+
+  it("structural inner pattern (not just type)", () => {
+    const pattern = { name: $ };
+    const chain = whereChain(
+      (U as any).Identifier({ name: "arguments" }).none()
+    );
+
+    // Has Identifier "x" but not "arguments" → accepted.
+    const ast = {
+      type: "FunctionDeclaration",
+      name: "f",
+      body: {
+        type: "BlockStatement",
+        body: [
+          {
+            type: "ReturnStatement",
+            argument: { type: "Identifier", name: "x" },
+          },
+        ],
+      },
+    };
+    const bag = match(ast, pattern, chain);
+    expect(bag).not.toBeNull();
+  });
+
+  it("checks default parameter values (not just body)", () => {
+    const pattern = { name: $ };
+    const constraint = (U as any)
+      .ThisExpression()
+      .until((U as any).FunctionExpression())
+      .none();
+    const chain = whereChain(constraint);
+
+    // ThisExpression is in a default param value — should be caught.
+    const ast = {
+      type: "FunctionDeclaration",
+      name: "f",
+      params: [
+        {
+          type: "AssignmentPattern",
+          left: { type: "Identifier", name: "x" },
+          right: {
+            type: "MemberExpression",
+            object: { type: "ThisExpression" },
+            property: { type: "Identifier", name: "foo" },
+          },
+        },
+      ],
+      body: {
+        type: "BlockStatement",
+        body: [
+          {
+            type: "ReturnStatement",
+            argument: { type: "Identifier", name: "x" },
+          },
+        ],
+      },
+    };
+    const bag = match(ast, pattern, chain);
+    expect(bag).toBeNull();
+  });
+
+  it("handles U.or() in the excluded pattern", () => {
+    const pattern = { name: $ };
+    const constraint = (U as any)
+      .or((U as any).ThisExpression(), (U as any).Identifier({ name: "arguments" }))
+      .until((U as any).FunctionExpression())
+      .none();
+    const chain = whereChain(constraint);
+
+    // Has ThisExpression → rejected
+    const ast1 = {
+      type: "FunctionDeclaration",
+      name: "f",
+      body: {
+        type: "BlockStatement",
+        body: [
+          { type: "ReturnStatement", argument: { type: "ThisExpression" } },
+        ],
+      },
+    };
+    expect(match(ast1, pattern, chain)).toBeNull();
+
+    // Has arguments → rejected
+    const ast2 = {
+      type: "FunctionDeclaration",
+      name: "f",
+      body: {
+        type: "BlockStatement",
+        body: [
+          { type: "ReturnStatement", argument: { type: "Identifier", name: "arguments" } },
+        ],
+      },
+    };
+    expect(match(ast2, pattern, chain)).toBeNull();
+
+    // Has neither → accepted
+    const ast3 = {
+      type: "FunctionDeclaration",
+      name: "f",
+      body: {
+        type: "BlockStatement",
+        body: [
+          { type: "ReturnStatement", argument: { type: "Literal", value: 1 } },
+        ],
+      },
+    };
+    expect(match(ast3, pattern, chain)).not.toBeNull();
+
+    // Has ThisExpression but behind boundary → accepted
+    const ast4 = {
+      type: "FunctionDeclaration",
+      name: "f",
+      body: {
+        type: "BlockStatement",
+        body: [
+          {
+            type: "ReturnStatement",
+            argument: {
+              type: "FunctionExpression",
+              body: {
+                type: "BlockStatement",
+                body: [
+                  { type: "ReturnStatement", argument: { type: "ThisExpression" } },
+                ],
+              },
+            },
+          },
+        ],
+      },
+    };
+    expect(match(ast4, pattern, chain)).not.toBeNull();
   });
 });

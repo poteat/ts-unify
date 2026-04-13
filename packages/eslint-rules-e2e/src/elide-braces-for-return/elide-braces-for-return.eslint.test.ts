@@ -25,10 +25,12 @@ tester.run(
       {
         code: "const f = (x) => { return x + 1; };",
         errors: [{ messageId: "match" }],
+        output: "const f = (x) => x + 1;",
       },
       {
         code: "const g = () => { return 42; };",
         errors: [{ messageId: "match" }],
+        output: "const g = () => 42;",
       },
     ],
   }
