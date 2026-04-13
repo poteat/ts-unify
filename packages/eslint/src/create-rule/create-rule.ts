@@ -1,6 +1,7 @@
 import { NODE, CONFIG_BRAND } from "@ts-unify/core/internal";
 import type { ProxyNode, ChainEntry } from "@ts-unify/core/internal";
-import { match, reify, extractPatterns, symGet } from "@ts-unify/engine";
+import { match, reify, symGet } from "@ts-unify/engine";
+import { extractRuleMeta } from "@ts-unify/runner";
 import type { TSESTree } from "@typescript-eslint/types";
 import type { RuleModule } from "../rule-module";
 import type { TransformLike } from "../transform-like";
@@ -63,34 +64,13 @@ export function createRule(
   transform: TransformLike,
   opts: { message?: string; fix?: boolean } = {}
 ): RuleModule {
-  const entries = extractPatterns(transform);
+  const meta = extractRuleMeta("", transform);
+  const entries = meta.patterns;
+  const message = opts.message ?? meta.message;
+  const factory = opts.fix === false ? null : meta.factory;
+  const withEntries = meta.withs;
 
   const proxyNode = symGet(transform, NODE) as ProxyNode | undefined;
-  const messageEntry = proxyNode?.chain?.find(
-    (c: ChainEntry) => c.method === "message"
-  );
-  const message =
-    opts.message ?? (messageEntry?.args[0] as string | undefined) ?? "Matches a ts-unify pattern";
-  const toEntry = proxyNode?.chain?.find(
-    (c: ChainEntry) => c.method === "to"
-  );
-  // Per node-with-to.spec.md: zero-arg .to() means "output is the
-  // single capture value". Synthesize an identity factory for it.
-  let factory: ((bag: Record<string, unknown>) => unknown) | null = null;
-  if (opts.fix !== false && toEntry) {
-    factory = toEntry.args[0]
-      ? (toEntry.args[0] as (bag: Record<string, unknown>) => unknown)
-      : (bag: Record<string, unknown>) => Object.values(bag)[0];
-  }
-
-  // Collect .with() entries that appear before .to() in the chain
-  const withEntries: ChainEntry[] = [];
-  if (factory && proxyNode?.chain) {
-    for (const entry of proxyNode.chain) {
-      if (entry.method === "to") break;
-      if (entry.method === "with") withEntries.push(entry);
-    }
-  }
 
   // Pre-resolve imports from the top-level chain
   const importMap = proxyNode?.chain
@@ -130,8 +110,7 @@ export function createRule(
               ? {
                   fix(fixer) {
                     let transformedBag: Record<string, unknown> = bag;
-                    for (const withEntry of withEntries) {
-                      const withFn = withEntry.args[0] as (bag: Record<string, unknown>) => Record<string, unknown>;
+                    for (const withFn of withEntries) {
                       const newEntries = withFn(transformedBag);
                       transformedBag = { ...transformedBag, ...newEntries };
                     }

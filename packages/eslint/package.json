@@ -5,7 +5,7 @@
   "main": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsup src/index.ts src/internal.ts --format esm --external @ts-unify/core --external @ts-unify/engine --external recast --external @typescript-eslint/types && tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "build": "tsup src/index.ts src/internal.ts --format esm --external @ts-unify/core --external @ts-unify/engine --external @ts-unify/runner --external recast --external @typescript-eslint/types && tsc -p tsconfig.build.json --emitDeclarationOnly",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "exports": {
@@ -21,6 +21,7 @@
   "dependencies": {
     "@ts-unify/core": "0.0.1",
     "@ts-unify/engine": "0.0.1",
+    "@ts-unify/runner": "0.0.1",
     "@typescript-eslint/utils": "^8.57.2",
     "eslint": "^10.1.0",
     "recast": "^0.23.11"

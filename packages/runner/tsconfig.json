@@ -2,13 +2,11 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
+    "types": ["jest", "node"],
     "paths": {
-      "@ts-unify/core": ["../core/src/index.ts"],
       "@ts-unify/core/internal": ["../core/src/internal.ts"],
-      "@ts-unify/engine": ["../engine/src/index.ts"],
-      "@ts-unify/runner": ["../runner/src/index.ts"],
-      "@/*": ["../core/src/*"],
-      "@": ["../core/src/index.ts"]
+      "@ts-unify/core": ["../core/src/index.ts"],
+      "@ts-unify/engine": ["../engine/src/index.ts"]
     }
   },
   "include": ["src/**/*"],
