@@ -19,6 +19,12 @@ tester.run(
       "const f = (x) => x + 1;",
       "function foo(x) { const y = x + 1; return y; }",
       "function* gen() { return 1; }",
+      // Uses `this` — unsafe to convert to arrow.
+      "function foo() { return this.x; }",
+      // Uses `arguments` — unsafe to convert to arrow.
+      "function foo() { return arguments[0]; }",
+      // `this` in a default param value.
+      "function foo(x = this.y) { return x; }",
     ],
     invalid: [
       {

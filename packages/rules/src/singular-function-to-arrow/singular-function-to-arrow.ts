@@ -9,15 +9,11 @@ const exprBlock = U.BlockStatement({
   body: [U.ExpressionStatement({ expression: $ })],
 }).bind();
 
+const fnBoundary = U.or(U.FunctionDeclaration(), U.FunctionExpression());
+
 /**
  * Convert function declarations and expressions with single-statement bodies to
- * arrow functions
- *
- * WARNING: This transformation is potentially unsafe because arrow functions
- * don't have their own `this` binding. Code that relies on dynamic `this`
- * (e.g., object methods, event handlers, or functions using `call`/`apply`)
- * may break after this transformation. It also changes hoisting behavior for
- * function declarations (const assignments are not hoisted like declarations).
+ * arrow functions. Skips functions that use `this` or `arguments`.
  *
  * @example
  * ```ts
@@ -45,11 +41,17 @@ export const functionDeclReturnToArrow = U.fromNode({
   generator: false,
   ...$,
 })
-  .with(({ async, params, body }) => ({
+  .where(
+    U.or(U.ThisExpression(), U.Identifier({ name: "arguments" }))
+      .until(fnBoundary)
+      .none(),
+  )
+  .with(({ async, params, body, returnType }) => ({
     init: U.ArrowFunctionExpression({
       async,
       params,
       body,
+      returnType,
     }),
   }))
   .to(({ id, init }) =>
