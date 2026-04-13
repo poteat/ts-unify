@@ -5,6 +5,7 @@ export * from "./elide-braces-for-return";
 export * from "./guard-and-access-to-optional-chain";
 export * from "./guarded-for-push-to-filter-map";
 export * from "./if-guarded-call-to-optional";
+export * from "./inline-single-use-const";
 export * from "./if-guarded-return-to-ternary";
 export * from "./if-return-to-ternary";
 export * from "./if-to-ternary-side-effect";
