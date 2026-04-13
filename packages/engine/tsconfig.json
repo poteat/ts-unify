@@ -2,12 +2,12 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
-    "baseUrl": "../core/src",
+    "types": ["jest"],
     "paths": {
-      "@ts-unify/core/internal": ["internal.ts"],
-      "@ts-unify/core": ["index.ts"],
-      "@/*": ["*"],
-      "@": ["index.ts"]
+      "@ts-unify/core/internal": ["../core/src/internal.ts"],
+      "@ts-unify/core": ["../core/src/index.ts"],
+      "@/*": ["../core/src/*"],
+      "@": ["../core/src/index.ts"]
     }
   },
   "include": ["src/**/*"],

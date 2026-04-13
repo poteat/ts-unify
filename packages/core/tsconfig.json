@@ -4,10 +4,10 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "composite": true,
-    "baseUrl": "./src",
+    "types": ["jest"],
     "paths": {
-      "@/*": ["*"],
-      "@": ["index.ts"]
+      "@/*": ["./src/*"],
+      "@": ["./src/index.ts"]
     }
   },
   "include": ["src/**/*"],

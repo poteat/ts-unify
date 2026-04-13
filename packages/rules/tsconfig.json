@@ -3,11 +3,10 @@
   "compilerOptions": {
     "noEmit": true,
     "declaration": false,
-    "baseUrl": "../core/src",
     "paths": {
-      "@/*": ["*"],
-      "@": ["index.ts"],
-      "@ts-unify/core": ["index.ts"]
+      "@/*": ["../core/src/*"],
+      "@": ["../core/src/index.ts"],
+      "@ts-unify/core": ["../core/src/index.ts"]
     }
   },
   "include": ["src/**/*"],

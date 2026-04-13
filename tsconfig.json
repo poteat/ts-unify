@@ -3,13 +3,12 @@
   "compilerOptions": {
     "noEmit": true,
     "declaration": false,
-    "baseUrl": "./packages/core/src",
     "paths": {
-      "@/*": ["*"],
-      "@": ["index.ts"],
-      "@ts-unify/core": ["index.ts"],
-      "@ts-unify/core/internal": ["internal.ts"],
-      "@ts-unify/engine": ["../../engine/src/index.ts"]
+      "@/*": ["./packages/core/src/*"],
+      "@": ["./packages/core/src/index.ts"],
+      "@ts-unify/core": ["./packages/core/src/index.ts"],
+      "@ts-unify/core/internal": ["./packages/core/src/internal.ts"],
+      "@ts-unify/engine": ["./packages/engine/src/index.ts"]
     }
   },
   "include": ["packages/core/src/**/*", "packages/engine/src/**/*", "packages/rules/src/**/*"],
