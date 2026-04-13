@@ -1,11 +1,11 @@
 import type { ExtractCaptures } from "@/pattern";
 import { assertType } from "@/test-utils/assert-type";
 import type { TSESTree } from "@typescript-eslint/types";
-import { functionDeclReturnToArrow } from "./singular-function-to-arrow";
+import { singularFunctionToArrow } from "./singular-function-to-arrow";
 
-describe("functionDeclReturnToArrow (type-level)", () => {
+describe("singularFunctionToArrow (type-level)", () => {
   it("captures function components and derived init", () => {
-    type Bag = ExtractCaptures<(typeof functionDeclReturnToArrow)["from"]>;
+    type Bag = ExtractCaptures<(typeof singularFunctionToArrow)["from"]>;
     assertType<Bag["async"], boolean>(0);
     assertType<Bag["declare"], boolean>(0);
     assertType<Bag["expression"], false>(0);

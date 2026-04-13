@@ -1,4 +1,4 @@
-# functionDeclReturnToArrow
+# singularFunctionToArrow
 
 ## Overview
 
@@ -33,5 +33,5 @@ function(x) { return x + 1; }
 
 ## Notes
 
-- This transformation is potentially unsafe because arrow functions do not have their own `this` binding. Code that relies on dynamic `this` (e.g., object methods, event handlers, or functions using `call`/`apply`) may break.
-- It also changes hoisting behavior: `const` assignments are not hoisted like function declarations.
+- Functions that use `this` or `arguments` are excluded via `.where()` + `.until()`.
+- Hoisting behavior changes: `const` assignments are not hoisted like function declarations.

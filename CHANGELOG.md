@@ -7,6 +7,7 @@
 - Fix zero-arg `.to()` to return the single capture value (was treated as no-op)
 - `singular-function-to-arrow` now skips functions using `this`/`arguments`
 - `elide-braces-for-return` now autofixes
+- Publish `@ts-unify/runner` to manage rule lifecycles
 
 ## 0.0.1
 

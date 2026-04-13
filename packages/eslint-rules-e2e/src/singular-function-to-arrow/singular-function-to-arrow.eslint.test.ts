@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { RuleTester } = require("@typescript-eslint/rule-tester");
 import { createRule } from "@ts-unify/eslint/internal";
-import { functionDeclReturnToArrow } from "@ts-unify/rules";
+import { singularFunctionToArrow } from "@ts-unify/rules";
 
 const tester = new RuleTester({
   languageOptions: {
@@ -11,7 +11,7 @@ const tester = new RuleTester({
 
 tester.run(
   "singular-function-to-arrow",
-  createRule(functionDeclReturnToArrow, {
+  createRule(singularFunctionToArrow, {
     message: "Convert single-statement function to arrow function",
   }),
   {

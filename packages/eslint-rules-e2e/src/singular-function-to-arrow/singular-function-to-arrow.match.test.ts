@@ -1,8 +1,8 @@
 import { match, extractPatterns } from "@ts-unify/engine";
-import { functionDeclReturnToArrow } from "@ts-unify/rules";
+import { singularFunctionToArrow } from "@ts-unify/rules";
 
-describe("functionDeclReturnToArrow matching", () => {
-  const patterns = extractPatterns(functionDeclReturnToArrow);
+describe("singularFunctionToArrow matching", () => {
+  const patterns = extractPatterns(singularFunctionToArrow);
 
   it("extracts two branches: FunctionDeclaration and FunctionExpression", () => {
     expect(patterns).toHaveLength(2);

@@ -35,7 +35,7 @@ const fnBoundary = U.or(U.FunctionDeclaration(), U.FunctionExpression());
  * (x) => x + 1
  * ```
  */
-export const functionDeclReturnToArrow = U.fromNode({
+export const singularFunctionToArrow = U.fromNode({
   type: U.or(AST_NODE_TYPES.FunctionDeclaration, AST_NODE_TYPES.FunctionExpression),
   body: U.or(returnBlock, exprBlock),
   generator: false,
