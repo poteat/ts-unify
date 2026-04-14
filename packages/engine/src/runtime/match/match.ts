@@ -4,6 +4,22 @@ import { symGet } from "../sym-get";
 
 type NamedBinding = { name: string; value: unknown };
 
+/** Symbol key for storing seq rewrite info in the capture bag. */
+export const SEQ_REWRITES = Symbol.for("ts-unify.seq-rewrites");
+
+export type SeqRewrite = {
+  /** Factory from the seq's .to() chain. */
+  factory: (bag: Record<string, unknown>) => unknown;
+  /** The capture bag snapshot at the time the seq matched. */
+  bag: Record<string, unknown>;
+  /** Array field path where the seq lives (for applying rewrites). */
+  parentKey: string;
+  /** Index range in the ORIGINAL (pre-expansion) array. */
+  originalIndex: number;
+  /** How many elements the seq consumed. */
+  consumedCount: number;
+};
+
 /**
  * Match an AST node against a pattern object, extracting captures.
  * Returns the capture bag on match, or null on mismatch.
@@ -186,6 +202,70 @@ function isSpread(v: unknown): v is { name: string } {
   return v != null && typeof v === "object" && symGet(v, SPREAD_BRAND) === true;
 }
 
+type SeqInfo = {
+  /** Index range in the expanded array that this seq occupies. */
+  start: number;
+  length: number;
+  /** The seq proxy's chain (may contain .to()). */
+  chain: ChainEntry[];
+};
+
+/**
+ * Expand seq proxies in an expected array pattern into their constituent
+ * elements, tracking seq boundaries for inline rewrites.
+ */
+function expandSeqs(expected: unknown[]): {
+  expanded: unknown[];
+  seqs: SeqInfo[];
+} {
+  const expanded: unknown[] = [];
+  const seqs: SeqInfo[] = [];
+  for (const elem of expected) {
+    if (isProxyNode(elem)) {
+      const pn = symGet(elem, NODE) as ProxyNode;
+      if (pn.tag === "seq") {
+        const start = expanded.length;
+        for (const arg of pn.args) expanded.push(arg);
+        seqs.push({ start, length: pn.args.length, chain: pn.chain });
+        continue;
+      }
+    }
+    expanded.push(elem);
+  }
+  return { expanded, seqs };
+}
+
+/**
+ * After a successful array match, record any seq rewrite info in the bag.
+ * Seq rewrites are stored as a non-enumerable symbol property so they
+ * don't interfere with capture iteration.
+ */
+function attachSeqRewrites(
+  bag: Record<string, unknown>,
+  seqs: SeqInfo[]
+): Record<string, unknown> {
+  if (seqs.length === 0) return bag;
+  const rewrites: SeqRewrite[] = [];
+  for (const seq of seqs) {
+    const toEntry = seq.chain.find((c: ChainEntry) => c.method === "to");
+    if (!toEntry?.args[0]) continue;
+    rewrites.push({
+      factory: toEntry.args[0] as (bag: Record<string, unknown>) => unknown,
+      bag: { ...bag },
+      parentKey: "",
+      originalIndex: seq.start,
+      consumedCount: seq.length,
+    });
+  }
+  if (rewrites.length > 0) {
+    // Enumerable so Object.assign propagates it up the match recursion.
+    // Symbol keys are invisible to Object.keys() / Object.entries() so
+    // this won't interfere with capture iteration.
+    Object.defineProperty(bag, SEQ_REWRITES, { value: rewrites, enumerable: true });
+  }
+  return bag;
+}
+
 function matchArrayInner(
   actual: unknown[],
   expected: unknown[],
@@ -193,6 +273,12 @@ function matchArrayInner(
   namedBindings: NamedBinding[],
   configDefaults: Record<string, unknown> = {}
 ): Record<string, unknown> | null {
+  // Expand any U.seq() proxies into their constituents before matching.
+  const { expanded, seqs } = expandSeqs(expected);
+  if (seqs.length > 0) {
+    expected = expanded;
+  }
+
   const mv = (a: unknown, e: unknown, k?: string) => matchValueInner(a, e, namedBindings, configDefaults, k);
 
   const spreadIndices: number[] = [];
@@ -208,7 +294,7 @@ function matchArrayInner(
       if (!elemBag) return null;
       Object.assign(bag, elemBag);
     }
-    return bag;
+    return attachSeqRewrites(bag, seqs);
   }
 
   if (spreadIndices.length === 1) {
@@ -232,7 +318,7 @@ function matchArrayInner(
     const spread = expected[si] as { name: string };
     const name = spread.name || parentKey;
     if (name) bag[name] = actual.slice(before.length, actual.length - after.length);
-    return bag;
+    return attachSeqRewrites(bag, seqs);
   }
 
   if (spreadIndices.length === 2) {
@@ -271,7 +357,7 @@ function matchArrayInner(
         const s2 = expected[si2] as { name: string };
         if (s1.name || parentKey) bag[s1.name || parentKey] = actual.slice(before.length, pos);
         if (s2.name) bag[s2.name] = actual.slice(pos + middle.length, mEnd);
-        return bag;
+        return attachSeqRewrites(bag, seqs);
       }
     }
     return null;

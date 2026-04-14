@@ -4,6 +4,7 @@ import type { Spread } from "@/capture";
 import type { DollarObjectSpread } from "@/capture";
 import type { NodeByKind } from "@/ast/node-by-kind";
 import type { NodeKind } from "@/ast/node-kind";
+import type { SEQ_BRAND } from "@/ast/seq-brand";
 
 // For object shapes, allow specifying any subset of keys.
 // Omitted keys are treated as "don't care" by consumers.
@@ -11,7 +12,8 @@ type PatternChildren<T> = {
   [K in keyof T]?: Pattern<T[K]>;
 };
 
-type SequenceItem<E> = Pattern<E> | CaptureLike<E> | Spread<string, any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SequenceItem<E> = Pattern<E> | CaptureLike<E> | Spread<string, any> | { readonly [SEQ_BRAND]: unknown };
 
 type SequencePattern<S extends readonly unknown[]> = ReadonlyArray<
   SequenceItem<S[number]>

@@ -1,6 +1,7 @@
 import { NODE, CONFIG_BRAND } from "@ts-unify/core/internal";
 import type { ProxyNode, ChainEntry } from "@ts-unify/core/internal";
-import { match, reify, symGet } from "@ts-unify/engine";
+import { match, reify, symGet, SEQ_REWRITES } from "@ts-unify/engine";
+import type { SeqRewrite } from "@ts-unify/engine";
 import { extractRuleMeta } from "@ts-unify/runner";
 import type { TSESTree } from "@typescript-eslint/types";
 import type { RuleModule } from "../rule-module";
@@ -59,6 +60,25 @@ function buildImportStatements(imports: Record<string, string>): string {
   return stmts.join("");
 }
 
+/** Check if any pattern entry contains a seq proxy with .to(). */
+function patternContainsSeqTo(
+  entries: { tag: string; pattern: Record<string, unknown>; chain: ChainEntry[] }[]
+): boolean {
+  function walk(v: unknown): boolean {
+    if (v == null) return false;
+    // Proxy nodes are functions — check before the typeof === "object" gate.
+    if (typeof v === "function" && symGet(v, NODE)) {
+      const pn = symGet(v, NODE) as ProxyNode;
+      if (pn.tag === "seq" && pn.chain.some((c: ChainEntry) => c.method === "to")) return true;
+      return pn.args.some(walk);
+    }
+    if (typeof v !== "object") return false;
+    if (Array.isArray(v)) return v.some(walk);
+    return Object.values(v as Record<string, unknown>).some(walk);
+  }
+  return entries.some((e) => walk(e.pattern));
+}
+
 /** Compile an AstTransform into an ESLint rule module. */
 export function createRule(
   transform: TransformLike,
@@ -72,6 +92,10 @@ export function createRule(
 
   const proxyNode = symGet(transform, NODE) as ProxyNode | undefined;
 
+  // Check if the pattern contains seq proxies with .to() — these produce
+  // fixes even without a top-level factory.
+  const hasSeqRewrites = patternContainsSeqTo(entries);
+
   // Pre-resolve imports from the top-level chain
   const importMap = proxyNode?.chain
     ? resolveImports(proxyNode.chain)
@@ -80,7 +104,7 @@ export function createRule(
   return {
     meta: {
       type: "suggestion",
-      ...(factory ? { fixable: "code" as const } : {}),
+      ...(factory || hasSeqRewrites ? { fixable: "code" as const } : {}),
       messages: { match: message },
     },
     create(context) {
@@ -102,11 +126,16 @@ export function createRule(
                 ? String(v.name)
                 : String(v);
           }
+          // Check for seq rewrites in the bag (produced by U.seq().to()).
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const seqRewrites = (bag as any)[SEQ_REWRITES] as SeqRewrite[] | undefined;
+          const canFix = factory || (seqRewrites && seqRewrites.length > 0);
+
           context.report({
             node,
             messageId: "match",
             data,
-            ...(factory
+            ...(canFix
               ? {
                   fix(fixer) {
                     let transformedBag: Record<string, unknown> = bag;
@@ -114,7 +143,30 @@ export function createRule(
                       const newEntries = withFn(transformedBag);
                       transformedBag = { ...transformedBag, ...newEntries };
                     }
-                    const output = factory(transformedBag);
+
+                    // Seq rewrite path: apply seq .to() factories to the
+                    // matched node, producing a modified clone.
+                    if (!factory && seqRewrites) {
+                      const clone = JSON.parse(JSON.stringify(node, (k, v) => k === "parent" ? undefined : v));
+                      for (const sr of seqRewrites) {
+                        const result = sr.factory(transformedBag);
+                        const reified = reify(result, sourceCode);
+                        // Rebuild the array from captures: [...before, result, ...after].
+                        // The bag's spread captures + seq result reconstruct the array.
+                        for (const key of Object.keys(clone)) {
+                          if (!Array.isArray(clone[key])) continue;
+                          const before = transformedBag.before as unknown[] ?? [];
+                          const after = transformedBag.after as unknown[] ?? [];
+                          const replacement = Array.isArray(reified) ? reified : [reified];
+                          clone[key] = [...before, ...replacement, ...after];
+                          break;
+                        }
+                      }
+                      const text = print(clone as Parameters<typeof print>[0]).code;
+                      return fixer.replaceText(node, text);
+                    }
+
+                    const output = factory!(transformedBag);
                     const ast = reify(output, sourceCode);
                     // reify returns an ESTree-shaped plain object; recast's
                     // print() expects its own ASTNode type which is

@@ -37,4 +37,8 @@ export type FluentNode<N> = { readonly [FLUENT_INNER]: N } &
   NodeWithSome<N> &
   NodeWithAtLeast<N> &
   NodeWithAtMost<N> &
-  NodeWithExactly<N>;
+  NodeWithExactly<N> & {
+    /** Rule metadata — available on FluentNode for rules with seq rewrites (no top-level .to()). */
+    message(text: string): FluentNode<N>;
+    recommended(): FluentNode<N>;
+  };

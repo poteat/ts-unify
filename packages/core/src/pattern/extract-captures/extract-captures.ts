@@ -7,6 +7,8 @@ import type { SingleKeyOf } from "@/type-utils/single-key-of";
 import type { Sealed } from "@/ast/sealed";
 import type { Overwrite } from "@/type-utils";
 import type { OR_BRAND } from "@/ast/or";
+import type { SEQ_BRAND } from "@/ast/seq-brand";
+import type { FLUENT_INNER } from "@/ast/fluent-node";
 import type { TSESTree } from "@typescript-eslint/types";
 import type { StripSeal } from "@/pattern/strip-seal";
 import type { StripOr } from "@/pattern/strip-or";
@@ -50,6 +52,18 @@ type ExtractCapturesFromPattern<P, Key extends string = ""> =
         ? ExtractCapturesFromPattern<U, Key>
         : never
       : never
+    : // Seq combinator: merge captures from all constituent elements
+    P extends { readonly [SEQ_BRAND]: infer Elements }
+    ? Elements extends readonly unknown[]
+      ? UnionToIntersection<
+          {
+            [K in keyof Elements]: ExtractCapturesFromPattern<
+              Elements[K] extends { readonly [FLUENT_INNER]: infer N } ? N : Elements[K],
+              `${K & string}`
+            >;
+          }[number]
+        >
+      : {}
     : // Merge in branded bag additions from `.with(...)` if present
     P extends { readonly __with: infer WB }
     ? Overwrite<ExtractCapturesFromPattern<StripWith<P>, Key>, WB & {}>

@@ -1,5 +1,4 @@
 import { U, $ } from "@ts-unify/core";
-import type { TSESTree } from "@typescript-eslint/types";
 import { sub, contains } from "@ts-unify/engine";
 
 /**
@@ -16,21 +15,20 @@ import { sub, contains } from "@ts-unify/engine";
  * config.onError?.(err);
  * ```
  */
+const seqRewrite = U.seq(
+  U.VariableDeclaration({
+    kind: "const",
+    declarations: [U.VariableDeclarator({ id: $("id"), init: $("init") })],
+  }),
+  $("stmt"),
+).to(({ stmt, id, init }) => sub(stmt, id, init));
+
 export const inlineSingleUseConst = U.BlockStatement({
   body: [
     ...$("before"),
-    U.VariableDeclaration({
-      kind: "const",
-      declarations: [U.VariableDeclarator({ id: $("id"), init: $("init") })],
-    }),
-    $("stmt"),
+    seqRewrite,
     ...$("after"),
   ],
 })
   .when(({ id, after }) => !contains(after, id))
-  .to(({ before, after, id, init, stmt }) =>
-    U.BlockStatement({
-      body: [...(before as TSESTree.Statement[]), sub(stmt, id, init) as TSESTree.Statement, ...(after as TSESTree.Statement[])],
-    })
-  )
   .message("Inline single-use const");

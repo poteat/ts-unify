@@ -6,6 +6,7 @@ import type { Spread } from "@/capture/spread/spread";
 import type { TSESTree } from "@typescript-eslint/types";
 import type { Sealed } from "@/ast/sealed";
 import type { OR_BRAND } from "@/ast/or";
+import type { SEQ_BRAND } from "@/ast/seq-brand";
 import type { CAPTURE_MODS_BRAND } from "@/capture/capture-mods/capture-mods";
 import type { Falsy, Truthy } from "@/ast/builder-helpers";
 import type { StripSeal } from "@/pattern/strip-seal";
@@ -154,9 +155,12 @@ type BindValue<P, S, Key extends string> =
       P;
 
 // ————— Main dispatcher —————
-type BindNode<P, S, Key extends string> = P extends {
-  readonly [OR_BRAND]: true;
-}
+type BindNode<P, S, Key extends string> =
+  // Seq combinator: pass through unchanged. Captures inside seq elements
+  // are already bound by their respective PatternBuilder calls.
+  P extends { readonly [SEQ_BRAND]: unknown }
+  ? P
+  : P extends { readonly [OR_BRAND]: true }
   ? BindNode<StripOr<P>, S, Key>
   : P extends Sealed<infer _Inner>
   ? Sealed<BindValue<StripSeal<P>, S, Key>>

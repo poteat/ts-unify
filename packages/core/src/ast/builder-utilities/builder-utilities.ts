@@ -2,6 +2,7 @@ import type { TruthyGuard } from "@/ast/builder-helpers";
 import type { OrCombinator } from "@/ast/or";
 import type { FromNode } from "@/ast/from-node";
 import type { MaybeBlockCombinator } from "@/ast/maybe-block";
+import type { SeqCombinator } from "@/ast/node-with-seq";
 
 /**
  * BuilderUtilities
@@ -15,4 +16,5 @@ export type BuilderUtilities = {
   or: OrCombinator;
   maybeBlock: MaybeBlockCombinator;
   fromNode: FromNode;
+  seq: SeqCombinator;
 };
