@@ -24,19 +24,15 @@ import type { StripOr } from "@/pattern/strip-or";
 type KeyStr<K> = K & string;
 type ShapeAt<S, K extends PropertyKey> = K extends keyof S ? S[K] : unknown;
 
-type IsTuple<S extends readonly any[]> = number extends S["length"]
-  ? false
-  : true;
+type IsTuple<S extends readonly any[]> = number extends S["length"] ? false : true;
 type ArrayElem<S extends readonly any[]> = S[number];
-type ElemAt<
-  S extends readonly any[],
-  I extends keyof any
-> = IsTuple<S> extends true ? S[I & number] : ArrayElem<S>;
+type ElemAt<S extends readonly any[], I extends keyof any> =
+  IsTuple<S> extends true ? S[I & number] : ArrayElem<S>;
 
 // Build a tuple of captures from a tuple shape `S`, preserving per-index types.
 type TupleCaptures<
   S extends readonly unknown[],
-  Acc extends readonly unknown[] = []
+  Acc extends readonly unknown[] = [],
 > = S extends readonly [infer H, ...infer R]
   ? TupleCaptures<
       R extends readonly unknown[] ? R : never,
@@ -51,10 +47,10 @@ type PatternKeys<P extends object> = {
   [K in keyof P]-?: K extends "parent"
     ? never
     : P[K] extends (...args: any) => any
-    ? P[K] extends $
-      ? KeyStr<K>
-      : never
-    : KeyStr<K>;
+      ? P[K] extends $
+        ? KeyStr<K>
+        : never
+      : KeyStr<K>;
 }[keyof P];
 
 // Sequence item binder: spreads refine with S, non-spreads bind against ElemAt
@@ -62,18 +58,17 @@ type BindSequenceItem<
   Item,
   S extends readonly any[],
   I extends keyof any,
-  ParentKey extends string
-> = Item extends Spread<infer Name, infer Elem>
-  ? Spread<
-      (Name extends "" ? ParentKey : Name) & string,
-      unknown extends Elem ? ArrayElem<S> : Extract<Elem, ArrayElem<S>>
-    >
-  : BindNode<Item, ElemAt<S, I>, `${I & string}`>;
+  ParentKey extends string,
+> =
+  Item extends Spread<infer Name, infer Elem>
+    ? Spread<
+        (Name extends "" ? ParentKey : Name) & string,
+        unknown extends Elem ? ArrayElem<S> : Extract<Elem, ArrayElem<S>>
+      >
+    : BindNode<Item, ElemAt<S, I>, `${I & string}`>;
 
 // ————— Value binder (leaves concrete nodes untouched) —————
-type ExtractMods<P> = P extends { readonly [CAPTURE_MODS_BRAND]: infer M }
-  ? M
-  : {};
+type ExtractMods<P> = P extends { readonly [CAPTURE_MODS_BRAND]: infer M } ? M : {};
 
 type ApplyMods<Base, Mods> = Mods extends infer M
   ? // Default substitution takes precedence
@@ -81,9 +76,9 @@ type ApplyMods<Base, Mods> = Mods extends infer M
       M extends { default: infer D }
         ? Exclude<Base, Falsy> | D
         : // Map substitution next
-        M extends { map: infer New }
-        ? New
-        : Base
+          M extends { map: infer New }
+          ? New
+          : Base
     ) extends infer V0
     ? // When guard narrowing
       (M extends { when: infer Narrow } ? Narrow : V0) extends infer V1
@@ -100,70 +95,76 @@ type BindValue<P, S, Key extends string> =
   P extends TSESTree.Node
     ? P
     : // Placeholder becomes named capture using key context
-    P extends $
-    ? Key extends ""
-      ? S extends readonly any[]
-        ? IsTuple<S> extends true
-          ? Readonly<TupleCaptures<S>>
-          : ReadonlyArray<Capture<`${number}`, ArrayElem<S>>>
-        : S extends object
-        ? { [K in keyof S]: Capture<K & string, S[K]> }
-        : never
-      : Capture<Key, ApplyMods<S, ExtractMods<P>>>
-    : // Config slot: bind value type from the position in the AST shape
-    P extends ConfigSlot<infer Name, infer V>
-    ? ConfigSlot<Name & string, unknown extends V ? S : V>
-    : // Explicit capture: upgrade unknown value type to the shape at position
-    P extends Capture<infer Name, infer V>
-    ? Capture<
-        Name & string,
-        ApplyMods<unknown extends V ? S : V, ExtractMods<P>>
-      >
-    : // Spread in sequences: refine element using array element type
-    P extends Spread<infer Name, infer Elem>
-    ? S extends readonly any[]
-      ? Spread<
-          Name & string,
-          unknown extends Elem ? ArrayElem<S> : Extract<Elem, ArrayElem<S>>
-        >
-      : Spread<Name & string, Elem>
-    : // Sequences (tuples/arrays)
-    P extends readonly [...infer Items]
-    ? S extends readonly any[]
-      ? Readonly<{
-          [I in keyof Items]: BindSequenceItem<Items[I], S, I & keyof any, Key>;
-        }>
-      : Readonly<{
-          [I in keyof Items]: BindNode<Items[I], unknown, `${I & string}`>;
-        }>
-    : // Objects — map over filtered keys and spread extras in one mapped type
-    P extends object
-    ? {
-        [K in
-          | PatternKeys<P>
-          | (P extends { readonly [OBJECT_SPREAD_BRAND]: true }
-              ? Exclude<keyof S, keyof P | "type"> & string
-              : never)]: K extends PatternKeys<P>
-          ? BindNode<
-              P[Extract<K, keyof P>],
-              ShapeAt<S, Extract<K, keyof any>>,
-              KeyStr<K>
-            >
-          : Capture<KeyStr<K>, K extends keyof S ? S[K] : never>;
-      }
-    : // Primitives and other types are left as-is
-      P;
+      P extends $
+      ? Key extends ""
+        ? S extends readonly any[]
+          ? IsTuple<S> extends true
+            ? Readonly<TupleCaptures<S>>
+            : ReadonlyArray<Capture<`${number}`, ArrayElem<S>>>
+          : S extends object
+            ? { [K in keyof S]: Capture<K & string, S[K]> }
+            : never
+        : Capture<Key, ApplyMods<S, ExtractMods<P>>>
+      : // Config slot: bind value type from the position in the AST shape
+        P extends ConfigSlot<infer Name, infer V>
+        ? ConfigSlot<Name & string, unknown extends V ? S : V>
+        : // Explicit capture: upgrade unknown value type to the shape at position
+          P extends Capture<infer Name, infer V>
+          ? Capture<Name & string, ApplyMods<unknown extends V ? S : V, ExtractMods<P>>>
+          : // Spread in sequences: refine element using array element type
+            P extends Spread<infer Name, infer Elem>
+            ? S extends readonly any[]
+              ? Spread<
+                  Name & string,
+                  unknown extends Elem ? ArrayElem<S> : Extract<Elem, ArrayElem<S>>
+                >
+              : Spread<Name & string, Elem>
+            : // Sequences (tuples/arrays)
+              P extends readonly [...infer Items]
+              ? S extends readonly any[]
+                ? Readonly<{
+                    [I in keyof Items]: BindSequenceItem<Items[I], S, I & keyof any, Key>;
+                  }>
+                : Readonly<{
+                    [I in keyof Items]: BindNode<Items[I], unknown, `${I & string}`>;
+                  }>
+              : // Objects — map over filtered keys and spread extras in one mapped type
+                P extends object
+                ? {
+                    [K in
+                      | PatternKeys<P>
+                      | (P extends { readonly [OBJECT_SPREAD_BRAND]: true }
+                          ? Exclude<keyof S, keyof P | "type"> & string
+                          : never)]: K extends PatternKeys<P>
+                      ? BindNode<
+                          P[Extract<K, keyof P>],
+                          ShapeAt<S, Extract<K, keyof any>>,
+                          KeyStr<K>
+                        >
+                      : Capture<KeyStr<K>, K extends keyof S ? S[K] : never>;
+                  }
+                : // Primitives and other types are left as-is
+                  P;
+
+type BindSeqElements<Elements extends readonly unknown[], ElemShape> = {
+  [I in keyof Elements]: BindNode<Elements[I], ElemShape, `${I & string}`>;
+};
 
 // ————— Main dispatcher —————
 type BindNode<P, S, Key extends string> =
-  // Seq combinator: pass through unchanged. Captures inside seq elements
-  // are already bound by their respective PatternBuilder calls.
-  P extends { readonly [SEQ_BRAND]: unknown }
-  ? P
-  : P extends { readonly [OR_BRAND]: true }
-  ? BindNode<StripOr<P>, S, Key>
-  : P extends Sealed<infer _Inner>
-  ? Sealed<BindValue<StripSeal<P>, S, Key>>
-  : BindValue<P, S, Key>;
+  // Seq combinator: bind each constituent element against the array
+  // element shape, preserving the SEQ_BRAND wrapper.
+  P extends { readonly [SEQ_BRAND]: infer Elements }
+    ? Elements extends readonly unknown[]
+      ? {
+          readonly [SEQ_BRAND]: BindSeqElements<Elements, S>;
+          to: P extends { to: infer T } ? T : never;
+        }
+      : P
+    : P extends { readonly [OR_BRAND]: true }
+      ? BindNode<StripOr<P>, S, Key>
+      : P extends Sealed<infer _Inner>
+        ? Sealed<BindValue<StripSeal<P>, S, Key>>
+        : BindValue<P, S, Key>;
 
 export type BindCaptures<P, Shape> = BindNode<P, Shape, "">;
