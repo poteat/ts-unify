@@ -15,18 +15,16 @@ import { sub, contains } from "@ts-unify/engine";
  * config.onError?.(err);
  * ```
  */
-const seqRewrite = U.seq(
-  U.VariableDeclaration({
-    kind: "const",
-    declarations: [U.VariableDeclarator({ id: $("id"), init: $("init") })],
-  }),
-  $("stmt"),
-).to(({ stmt, id, init }) => sub(stmt, id, init));
-
 export const inlineSingleUseConst = U.BlockStatement({
   body: [
     ...$("before"),
-    seqRewrite,
+    U.seq(
+      U.VariableDeclaration({
+        kind: "const",
+        declarations: [U.VariableDeclarator({ id: $("id"), init: $("init") })],
+      }),
+      $("stmt"),
+    ).to(({ stmt, id, init }) => sub(stmt, id, init)),
     ...$("after"),
   ],
 })
