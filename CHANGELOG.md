@@ -11,7 +11,7 @@
 - Add `U.seq()` — match consecutive array elements as a group
 - Add `sub()` and `contains()` AST utilities in `@ts-unify/engine`
 - Add `inline-single-use-const` rule
-- `.to()` may now be attached at any sub-pattern position; rewrites compose bottom-up via `applyRewrites`. Seq's `.to()` is a special case (a site with `span > 1`)
+- Allow `.to()` at any sub-pattern position; rewrites compose bottom-up
 
 ## 0.0.1
 
