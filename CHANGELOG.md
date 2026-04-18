@@ -6,11 +6,11 @@
 - Fix zero-arg `.bind()` to re-key to parent field (was hardcoded to `"node"`)
 - Fix zero-arg `.to()` to return the single capture value (was treated as no-op)
 - Skip functions using `this`/`arguments` in `singular-function-to-arrow`
-- Add autofix to `elide-braces-for-return`
-- Publish `@ts-unify/runner` to manage rule lifecycles
-- Add `U.seq()` — match consecutive array elements as a group
-- Add `sub()` and `contains()` AST utilities in `@ts-unify/engine`
-- Add `inline-single-use-const` rule
+- Add autofix to `elide-braces-for-return` for single-return arrow bodies
+- Publish `@ts-unify/runner` — shared lint/fix logic, used by the playground
+- Add `U.seq()` — match contiguous array elements; optional `.to()` rewrite
+- Add `sub()` (structural substitution) and `contains()` to `@ts-unify/engine`
+- Add `inline-single-use-const` rule — inline a const into the next statement
 - Allow `.to()` at any sub-pattern position; rewrites compose bottom-up
 
 ## 0.0.1
