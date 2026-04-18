@@ -8,10 +8,10 @@
 - `singular-function-to-arrow` now skips functions using `this`/`arguments`
 - `elide-braces-for-return` now autofixes
 - Publish `@ts-unify/runner` to manage rule lifecycles
-- Add `U.seq()` — match consecutive array elements as a group with a scoped `.to()` rewrite
+- Add `U.seq()` — match consecutive array elements as a group
 - Add `sub()` and `contains()` AST utilities in `@ts-unify/engine`
 - Add `inline-single-use-const` rule
-- Inner `.to()` at any sub-position; rewrites compose bottom-up via `applyRewrites`. Seq becomes a special case
+- `.to()` may now be attached at any sub-pattern position; rewrites compose bottom-up via `applyRewrites`. Seq's `.to()` is a special case (a site with `span > 1`)
 
 ## 0.0.1
 
