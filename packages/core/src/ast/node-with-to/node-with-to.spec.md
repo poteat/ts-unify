@@ -2,23 +2,31 @@
 
 ## Overview
 
-`NodeWithTo<N>` adds a terminal `.to` method to a builder‑returned node so you
-can attach a rewrite at the point you define the pattern. The `.to` callback
-receives the node’s capture bag and returns an arbitrary result type (commonly
-another builder‑produced node). The result is an `AstTransform` with `from` and
-`to` fields, suitable for later runtime processing.
+`NodeWithTo<N>` adds a `.to` method to a builder‑returned node so you can attach
+a rewrite at the point you define the pattern. The `.to` callback receives the
+node’s capture bag and returns an arbitrary result type (commonly another
+builder‑produced node). The result is a value that is both structurally an
+`AstTransform` (carries `from`, `to`, `message`, etc.) AND embeddable as a
+`Pattern<N>`, so `.to(...)` can appear at any sub-position of a pattern — not
+only at a rule's root.
+
+When `.to(...)` appears at a sub-position, it declares an inner rewrite; the
+runtime applies all rewrites bottom-up. See `apply-rewrites.spec.md` for the
+rewrite application semantics.
 
 ## Scope
 
-- Provider type used by builder‑returned nodes. Defines `.to` typing only; no
-  runtime behavior is prescribed here.
-- Root‑only usage is enforced by types: `.to` returns a semantic descriptor that
-  is not a `Pattern<…>`, so it cannot be embedded in other patterns.
+- Provider type used by builder‑returned nodes. Defines `.to` typing only;
+  rewrite application happens in the engine's `apply-rewrites` module.
 
 ## Design
 
-- Terminalization: `.to` returns `AstTransform<In, Out>`, ensuring that
-  finalized nodes are not accepted where a `Pattern` is expected.
+- `.to` returns `Node & AstTransform<In, Out>`. The `Node` half makes the result
+  embeddable wherever `Pattern<Node>` is expected (same mechanism
+  `FluentNode<Node>` uses); the `AstTransform` half supplies the chainable
+  rule-level helpers (`.message`, `.recommended`, `.config`, `.imports`) for
+  top-level rule definitions and the `.from`/`.to` fields read by consumers like
+  the runner and the ESLint plugin.
 
 ### Zero-arg Sugar (Single Capture)
 
@@ -32,8 +40,8 @@ another builder‑produced node). The result is an `AstTransform` with `from` an
 - The `bag` parameter reflects `ExtractCaptures<N>` and includes any narrowing
   applied by preceding `.when` calls.
 - The `.to` result is intentionally unconstrained here. You may return a
-  builder‑produced node (e.g., `U.Kind({...})`) or any other value your
-  pipeline expects. Downstream consumers can constrain this further.
+  builder‑produced node (e.g., `U.Kind({...})`) or any other value your pipeline
+  expects. Downstream consumers can constrain this further.
 
 ### Builder Overload Safety
 

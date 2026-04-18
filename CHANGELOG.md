@@ -11,6 +11,7 @@
 - Add `U.seq()` — match consecutive array elements as a group with a scoped `.to()` rewrite
 - Add `sub()` and `contains()` AST utilities in `@ts-unify/engine`
 - Add `inline-single-use-const` rule
+- Inner `.to()` at any sub-position; rewrites compose bottom-up via `applyRewrites`. Seq becomes a special case
 
 ## 0.0.1
 

@@ -1,7 +1,6 @@
 import { NODE, CONFIG_BRAND } from "@ts-unify/core/internal";
 import type { ProxyNode, ChainEntry } from "@ts-unify/core/internal";
-import { match, reify, symGet, SEQ_REWRITES } from "@ts-unify/engine";
-import type { SeqRewrite } from "@ts-unify/engine";
+import { matchWithSites, applyRewrites, symGet } from "@ts-unify/engine";
 import { extractRuleMeta } from "@ts-unify/runner";
 import type { TSESTree } from "@typescript-eslint/types";
 import type { RuleModule } from "../rule-module";
@@ -12,25 +11,20 @@ import { print } from "recast";
  * Resolve config slot values in an imports map against config defaults.
  * Returns a map of `{ specifier: modulePath }`.
  */
-function resolveImports(
-  chain: ChainEntry[]
-): Record<string, string> | null {
+function resolveImports(chain: ChainEntry[]): Record<string, string> | null {
   const importsEntry = chain.find((c) => c.method === "imports");
   if (!importsEntry) return null;
 
   const configEntry = chain.find((c) => c.method === "config");
-  const configDefaults: Record<string, unknown> = (configEntry?.args[0] as Record<string, unknown>) ?? {};
+  const configDefaults: Record<string, unknown> =
+    (configEntry?.args[0] as Record<string, unknown>) ?? {};
 
   const raw = importsEntry.args[0] as Record<string, unknown>;
   const resolved: Record<string, string> = {};
   for (const [specifier, value] of Object.entries(raw)) {
     if (typeof value === "string") {
       resolved[specifier] = value;
-    } else if (
-      value &&
-      typeof value === "object" &&
-      symGet(value, CONFIG_BRAND) === true
-    ) {
+    } else if (value && typeof value === "object" && symGet(value, CONFIG_BRAND) === true) {
       const slotName = (value as { name: string }).name;
       const defaultVal = configDefaults[slotName];
       if (typeof defaultVal === "string") {
@@ -60,16 +54,16 @@ function buildImportStatements(imports: Record<string, string>): string {
   return stmts.join("");
 }
 
-/** Check if any pattern entry contains a seq proxy with .to(). */
-function patternContainsSeqTo(
-  entries: { tag: string; pattern: Record<string, unknown>; chain: ChainEntry[] }[]
+/** Check if any pattern entry contains a proxy with `.to()` anywhere. */
+function patternContainsInnerTo(
+  entries: { tag: string; pattern: Record<string, unknown>; chain: ChainEntry[] }[],
 ): boolean {
   function walk(v: unknown): boolean {
     if (v == null) return false;
     // Proxy nodes are functions — check before the typeof === "object" gate.
     if (typeof v === "function" && symGet(v, NODE)) {
       const pn = symGet(v, NODE) as ProxyNode;
-      if (pn.tag === "seq" && pn.chain.some((c: ChainEntry) => c.method === "to")) return true;
+      if (pn.chain.some((c: ChainEntry) => c.method === "to")) return true;
       return pn.args.some(walk);
     }
     if (typeof v !== "object") return false;
@@ -82,7 +76,7 @@ function patternContainsSeqTo(
 /** Compile an AstTransform into an ESLint rule module. */
 export function createRule(
   transform: TransformLike,
-  opts: { message?: string; fix?: boolean } = {}
+  opts: { message?: string; fix?: boolean } = {},
 ): RuleModule {
   const meta = extractRuleMeta("", transform);
   const entries = meta.patterns;
@@ -92,19 +86,17 @@ export function createRule(
 
   const proxyNode = symGet(transform, NODE) as ProxyNode | undefined;
 
-  // Check if the pattern contains seq proxies with .to() — these produce
-  // fixes even without a top-level factory.
-  const hasSeqRewrites = patternContainsSeqTo(entries);
+  // The rule is fixable if the proxy chain has a top-level `.to()`
+  // (factory != null) or any sub-pattern carries a `.to()` site.
+  const hasInnerRewrites = patternContainsInnerTo(entries);
 
   // Pre-resolve imports from the top-level chain
-  const importMap = proxyNode?.chain
-    ? resolveImports(proxyNode.chain)
-    : null;
+  const importMap = proxyNode?.chain ? resolveImports(proxyNode.chain) : null;
 
   return {
     meta: {
       type: "suggestion",
-      ...(factory || hasSeqRewrites ? { fixable: "code" as const } : {}),
+      ...(factory || hasInnerRewrites ? { fixable: "code" as const } : {}),
       messages: { match: message },
     },
     create(context) {
@@ -113,8 +105,9 @@ export function createRule(
 
       for (const { tag, pattern, chain } of entries) {
         visitors[tag] = (node: TSESTree.Node) => {
-          const bag = match(node, pattern, chain);
-          if (!bag) return;
+          const result = matchWithSites(node, pattern, chain);
+          if (!result) return;
+          const bag = result.bag;
           const data: Record<string, string> = {};
           for (const [k, v] of Object.entries(bag)) {
             data[k] =
@@ -126,10 +119,14 @@ export function createRule(
                 ? String(v.name)
                 : String(v);
           }
-          // Check for seq rewrites in the bag (produced by U.seq().to()).
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const seqRewrites = (bag as any)[SEQ_REWRITES] as SeqRewrite[] | undefined;
-          const canFix = factory || (seqRewrites && seqRewrites.length > 0);
+          // For OR-rooted rules, the per-branch chain doesn't carry the
+          // outer `.to()`. extractRuleMeta extracts it as `factory`; inject
+          // it as a root site if matchWithSites didn't already.
+          const sites = [...result.sites];
+          if (factory && !sites.some((s) => s.path.length === 0)) {
+            sites.push({ path: [], factory, scopeBag: bag });
+          }
+          const canFix = sites.length > 0;
 
           context.report({
             node,
@@ -138,40 +135,17 @@ export function createRule(
             ...(canFix
               ? {
                   fix(fixer) {
-                    let transformedBag: Record<string, unknown> = bag;
-                    for (const withFn of withEntries) {
-                      const newEntries = withFn(transformedBag);
-                      transformedBag = { ...transformedBag, ...newEntries };
+                    // Apply withs in place so all sites see the extra fields.
+                    if (withEntries.length > 0) {
+                      let b: Record<string, unknown> = bag;
+                      for (const w of withEntries) b = { ...b, ...w(b) };
+                      for (const k of Object.keys(b)) bag[k] = b[k];
                     }
 
-                    // Seq rewrite path: apply seq .to() factories to the
-                    // matched node, producing a modified clone.
-                    if (!factory && seqRewrites) {
-                      const clone = JSON.parse(JSON.stringify(node, (k, v) => k === "parent" ? undefined : v));
-                      for (const sr of seqRewrites) {
-                        const result = sr.factory(transformedBag);
-                        const reified = reify(result, sourceCode);
-                        // Rebuild the array from captures: [...before, result, ...after].
-                        // The bag's spread captures + seq result reconstruct the array.
-                        for (const key of Object.keys(clone)) {
-                          if (!Array.isArray(clone[key])) continue;
-                          const before = transformedBag.before as unknown[] ?? [];
-                          const after = transformedBag.after as unknown[] ?? [];
-                          const replacement = Array.isArray(reified) ? reified : [reified];
-                          clone[key] = [...before, ...replacement, ...after];
-                          break;
-                        }
-                      }
-                      const text = print(clone as Parameters<typeof print>[0]).code;
-                      return fixer.replaceText(node, text);
-                    }
-
-                    const output = factory!(transformedBag);
-                    const ast = reify(output, sourceCode);
-                    // reify returns an ESTree-shaped plain object; recast's
-                    // print() expects its own ASTNode type which is
-                    // structurally compatible but not identical.
-                    const text = print(ast as Parameters<typeof print>[0]).code;
+                    // canFix gated this branch on sites.length > 0, so
+                    // applyRewrites returns non-null.
+                    const rewritten = applyRewrites(node, sites, result.capturePaths, sourceCode);
+                    const text = print(rewritten as Parameters<typeof print>[0]).code;
 
                     // If imports are specified, prepend missing ones to the file
                     if (importMap) {
@@ -180,7 +154,7 @@ export function createRule(
                       for (const [specifier, modulePath] of Object.entries(importMap)) {
                         // Simple heuristic: check if an import of this specifier from this module exists
                         const importPattern = new RegExp(
-                          `import\\s+\\{[^}]*\\b${specifier}\\b[^}]*\\}\\s+from\\s+["']${modulePath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["']`
+                          `import\\s+\\{[^}]*\\b${specifier}\\b[^}]*\\}\\s+from\\s+["']${modulePath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["']`,
                         );
                         if (!importPattern.test(fullSource)) {
                           missingImports[specifier] = modulePath;

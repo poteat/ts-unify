@@ -1,6 +1,5 @@
-import { match, reify, SEQ_REWRITES } from "@ts-unify/engine";
-import type { SeqRewrite } from "@ts-unify/engine";
-import type { RuleMeta, Bag, Factory, WithFn } from "./extract-rule-meta";
+import { matchWithSites, applyRewrites } from "@ts-unify/engine";
+import type { RuleMeta, Bag, WithFn } from "./extract-rule-meta";
 
 export type LintMatch = {
   rule: string;
@@ -9,7 +8,7 @@ export type LintMatch = {
   column: number;
   endLine: number;
   endColumn: number;
-  /** Reified output node from the rule's .to() factory, if any. */
+  /** Reified output node from the rule's rewrite, if any. */
   reified: unknown;
 };
 
@@ -20,79 +19,24 @@ export type LintResult = {
 };
 
 /**
- * Run the rule's .to() factory on a match bag and reify the result.
- * Returns the reified ESTree node, or null on failure.
+ * Apply `with()` callbacks to a bag in chain order, accumulating their
+ * returned overlays. Used to feed extra fields into the bag before any
+ * `.to()` factories run.
  */
-function renderReified(
-  factory: Factory,
-  withs: WithFn[],
-  bag: Bag,
-  kebab: string
-): unknown {
+function applyWiths(bag: Bag, withs: WithFn[]): Bag {
   let b: Bag = bag;
-  try {
-    for (const w of withs) b = { ...b, ...w(b) };
-    const output = factory(b);
-    return reify(output);
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.warn(`[ts-unify] rewrite failed for ${kebab}:`, e);
-    return null;
-  }
+  for (const w of withs) b = { ...b, ...w(b) };
+  return b;
 }
 
 /**
- * When a rule has no top-level .to() but its pattern contains U.seq()
- * elements with .to(), reconstruct the matched node with seq rewrites
- * applied. The seq's factory is run on the merged bag, reified, and
- * spliced into the parent array in place of the consumed elements.
+ * Lint a pre-parsed AST against a set of rules. Returns all matches with
+ * their reified output nodes (ready for serialization by the consumer).
+ *
+ * Rewrites — root-level `.to()` and any inner `.to()` sites — are applied
+ * in a single bottom-up pass via the engine's `applyRewrites`.
  */
-function applySeqRewrites(
-  matchedNode: unknown,
-  bag: Bag,
-  kebab: string
-): unknown {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rewrites = (bag as any)[SEQ_REWRITES] as SeqRewrite[] | undefined;
-  if (!rewrites || rewrites.length === 0) return null;
-
-  try {
-    // Deep clone the matched node so we don't mutate the AST.
-    const clone = JSON.parse(
-      JSON.stringify(matchedNode, (k, v) => (k === "parent" ? undefined : v))
-    );
-
-    for (const rewrite of rewrites) {
-      const result = rewrite.factory(bag);
-      const reified = reify(result);
-
-      // Rebuild the array from captures: [...before, result, ...after].
-      for (const key of Object.keys(clone)) {
-        if (!Array.isArray(clone[key])) continue;
-        const before = (bag.before as unknown[]) ?? [];
-        const after = (bag.after as unknown[]) ?? [];
-        const replacement = Array.isArray(reified) ? reified : [reified];
-        clone[key] = [...before, ...replacement, ...after];
-        break;
-      }
-    }
-    return clone;
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.warn(`[ts-unify] seq rewrite failed for ${kebab}:`, e);
-    return null;
-  }
-}
-
-/**
- * Lint a pre-parsed AST against a set of rules. Returns all matches
- * with their reified output nodes (ready for serialization by the
- * consumer).
- */
-export function lint(
-  ast: unknown,
-  rules: RuleMeta[]
-): LintMatch[] {
+export function lint(ast: unknown, rules: RuleMeta[]): LintMatch[] {
   const found: LintMatch[] = [];
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -102,27 +46,45 @@ export function lint(
       node.parent = parent;
       for (const { kebab, message, patterns, factory, withs } of rules) {
         for (const { tag, pattern, chain } of patterns) {
-          if (node.type === tag) {
-            const bag = match(node, pattern, chain);
-            if (bag) {
-              let reified: unknown = null;
-              if (factory) {
-                reified = renderReified(factory, withs, bag as Bag, kebab);
-              } else {
-                // No top-level .to() — check for seq rewrites.
-                reified = applySeqRewrites(node, bag, kebab);
-              }
-              found.push({
-                rule: kebab,
-                message,
-                line: node.loc?.start?.line ?? 0,
-                column: (node.loc?.start?.column ?? 0) + 1,
-                endLine: node.loc?.end?.line ?? 0,
-                endColumn: (node.loc?.end?.column ?? 0) + 1,
-                reified,
-              });
+          if (node.type !== tag) continue;
+          const result = matchWithSites(node, pattern, chain);
+          if (!result) continue;
+
+          // Apply withs to the bag in place so all sites (including the
+          // root `.to()` site) see the extra fields.
+          if (withs.length > 0) {
+            const transformed = applyWiths(result.bag, withs);
+            for (const k of Object.keys(transformed)) {
+              result.bag[k] = transformed[k];
             }
           }
+
+          // For OR-rooted rules, the per-branch chain doesn't carry the
+          // outer `.to()` — extractRuleMeta extracts it as `factory`.
+          // Inject it as a root site if matchWithSites didn't already.
+          const sites = [...result.sites];
+          if (factory && !sites.some((s) => s.path.length === 0)) {
+            sites.push({ path: [], factory, scopeBag: result.bag });
+          }
+
+          let reified: unknown = null;
+          try {
+            reified = applyRewrites(node, sites, result.capturePaths);
+          } catch (e) {
+            // eslint-disable-next-line no-console
+            console.warn(`[ts-unify] rewrite failed for ${kebab}:`, e);
+            reified = null;
+          }
+
+          found.push({
+            rule: kebab,
+            message,
+            line: node.loc?.start?.line ?? 0,
+            column: (node.loc?.start?.column ?? 0) + 1,
+            endLine: node.loc?.end?.line ?? 0,
+            endColumn: (node.loc?.end?.column ?? 0) + 1,
+            reified,
+          });
         }
       }
     }

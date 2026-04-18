@@ -1,37 +1,81 @@
-import { NODE, CAPTURE_BRAND, SPREAD_BRAND, $ as dollarSentinel, REST_CAPTURE, CONFIG_BRAND } from "@ts-unify/core/internal";
+import {
+  NODE,
+  CAPTURE_BRAND,
+  SPREAD_BRAND,
+  $,
+  REST_CAPTURE,
+  CONFIG_BRAND,
+} from "@ts-unify/core/internal";
 import type { ProxyNode, ChainEntry } from "@ts-unify/core/internal";
 import { symGet } from "../sym-get";
 
 type NamedBinding = { name: string; value: unknown };
 
-/** Symbol key for storing seq rewrite info in the capture bag. */
-export const SEQ_REWRITES = Symbol.for("ts-unify.seq-rewrites");
+/**
+ * Path of property keys / array indices from the root of a matched node down
+ * to a sub-position. Used by inner-`.to()` rewrites and capture rebinding.
+ */
+export type Path = ReadonlyArray<string | number>;
 
-export type SeqRewrite = {
-  /** Factory from the seq's .to() chain. */
+/**
+ * One inner-`.to()` rewrite to be applied bottom-up after match. `path` is
+ * the position within the matched node where the inner pattern lived.
+ * `span` is set for seq sites that consumed more than one array element.
+ */
+export type RewriteSite = {
+  path: Path;
   factory: (bag: Record<string, unknown>) => unknown;
-  /** The capture bag snapshot at the time the seq matched. */
+  scopeBag: Record<string, unknown>;
+  span?: number;
+};
+
+/**
+ * Match result that includes inner-rewrite metadata. The `bag` is the
+ * merged capture bag; `sites` enumerates every `.to()` proxy that fired
+ * during the match (including any root-level `.to()` from `chain`);
+ * `capturePaths` records where each named capture was sourced from, so
+ * deeper rewrites can rebind outer-visible captures.
+ */
+export type MatchResult = {
   bag: Record<string, unknown>;
-  /** Array field path where the seq lives (for applying rewrites). */
-  parentKey: string;
-  /** Index range in the ORIGINAL (pre-expansion) array. */
-  originalIndex: number;
-  /** How many elements the seq consumed. */
-  consumedCount: number;
+  sites: RewriteSite[];
+  capturePaths: Record<string, Path>;
+};
+
+type Ctx = {
+  sites: RewriteSite[];
+  capturePaths: Record<string, Path>;
 };
 
 /**
  * Match an AST node against a pattern object, extracting captures.
  * Returns the capture bag on match, or null on mismatch.
+ *
+ * For inner-`.to()` rewrite sites, use {@link matchWithSites} instead.
  */
 export function match(
   node: unknown,
   pattern: unknown,
-  chain?: ChainEntry[]
+  chain?: ChainEntry[],
 ): Record<string, unknown> | null {
+  const result = matchWithSites(node, pattern, chain);
+  return result?.bag ?? null;
+}
+
+/**
+ * Match an AST node against a pattern and return the capture bag plus
+ * any inner-`.to()` rewrite sites. The root-level chain's `.to()` (if
+ * present) is included as a site at path `[]`.
+ */
+export function matchWithSites(
+  node: unknown,
+  pattern: unknown,
+  chain?: ChainEntry[],
+): MatchResult | null {
   const configDefaults = chain ? extractConfigDefaults(chain) : {};
   const namedBindings: NamedBinding[] = [];
-  const bag = matchInner(node, pattern, namedBindings, configDefaults);
+  const ctx: Ctx = { sites: [], capturePaths: {} };
+  const bag = matchInner(node, pattern, namedBindings, configDefaults, ctx, []);
   if (!bag) return null;
 
   // Validate duplicate named captures have equal values
@@ -51,21 +95,44 @@ export function match(
   // subtrees. Currently supports .none() quantifier (subtree scope).
   if (chain && !applyWhere(chain, node)) return null;
 
-  return bag;
+  // Pin every site's scopeBag to the final root bag so factories see all
+  // merged captures (including any siblings that bound outside their scope).
+  // Captures get rebound in place during applyRewrites so this same bag
+  // object reflects deeper rewrites by the time outer factories read it.
+  for (const site of ctx.sites) site.scopeBag = bag;
+
+  // Record root-level .to() as a site at path [] so the rewrite pipeline
+  // is uniform (no special "top-level factory" branch downstream).
+  if (chain) {
+    const toEntry = chainGet(chain, "to");
+    if (toEntry) {
+      const factory =
+        (toEntry.args[0] as ((bag: Record<string, unknown>) => unknown) | undefined) ??
+        ((b: Record<string, unknown>) => Object.values(b)[0]);
+      ctx.sites.push({ path: [], factory, scopeBag: bag });
+    }
+  }
+
+  return { bag, sites: ctx.sites, capturePaths: ctx.capturePaths };
 }
 
 function matchInner(
   node: unknown,
   pattern: unknown,
   namedBindings: NamedBinding[],
-  configDefaults: Record<string, unknown> = {}
+  configDefaults: Record<string, unknown> = {},
+  ctx?: Ctx,
+  path: Path = [],
 ): Record<string, unknown> | null {
   // When the entire pattern is $, capture all own non-meta properties of the node
-  if (pattern === dollarSentinel) {
+  if (pattern === $) {
     const bag: Record<string, unknown> = {};
     if (node && typeof node === "object") {
       for (const key of Object.keys(node)) {
-        if (!SKIP_KEYS.has(key)) bag[key] = (node as Record<string, unknown>)[key];
+        if (!SKIP_KEYS.has(key)) {
+          bag[key] = (node as Record<string, unknown>)[key];
+          if (ctx) ctx.capturePaths[key] = [...path, key];
+        }
       }
     }
     return bag;
@@ -77,15 +144,18 @@ function matchInner(
 
   for (const [key, expected] of Object.entries(patternRec)) {
     const actual = nodeRec[key];
+    const childPath: Path = [...path, key];
 
-    if (expected === dollarSentinel) {
+    if (expected === $) {
       bag[key] = actual;
+      if (ctx) ctx.capturePaths[key] = childPath;
       continue;
     }
 
     if (isCapture(expected)) {
       bag[expected.name] = actual;
       namedBindings.push({ name: expected.name, value: actual });
+      if (ctx) ctx.capturePaths[expected.name] = childPath;
       continue;
     }
 
@@ -97,14 +167,22 @@ function matchInner(
     }
 
     if (isProxyNode(expected)) {
-      const proxyBag = matchProxyNode(actual, expected, namedBindings, configDefaults, key);
+      const proxyBag = matchProxyNode(
+        actual,
+        expected,
+        namedBindings,
+        configDefaults,
+        key,
+        ctx,
+        childPath,
+      );
       if (!proxyBag) return null;
       Object.assign(bag, proxyBag);
       continue;
     }
 
     if (typeof expected === "object" && expected !== null && !Array.isArray(expected)) {
-      const innerBag = matchInner(actual, expected, namedBindings, configDefaults);
+      const innerBag = matchInner(actual, expected, namedBindings, configDefaults, ctx, childPath);
       if (!innerBag) return null;
       Object.assign(bag, innerBag);
       continue;
@@ -112,7 +190,15 @@ function matchInner(
 
     if (Array.isArray(expected)) {
       if (!Array.isArray(actual)) return null;
-      const arrayBag = matchArrayInner(actual, expected, key, namedBindings, configDefaults);
+      const arrayBag = matchArrayInner(
+        actual,
+        expected,
+        key,
+        namedBindings,
+        configDefaults,
+        ctx,
+        childPath,
+      );
       if (!arrayBag) return null;
       Object.assign(bag, arrayBag);
       continue;
@@ -128,6 +214,7 @@ function matchInner(
     for (const key of Object.keys(node)) {
       if (!SKIP_KEYS.has(key) && !patternKeys.has(key)) {
         bag[key] = (node as Record<string, unknown>)[key];
+        if (ctx) ctx.capturePaths[key] = [...path, key];
       }
     }
   }
@@ -146,29 +233,63 @@ function matchProxyNode(
   expected: unknown,
   namedBindings: NamedBinding[],
   configDefaults: Record<string, unknown>,
-  parentKey?: string
+  parentKey?: string,
+  ctx?: Ctx,
+  path: Path = [],
 ): Record<string, unknown> | null {
   const inner = symGet(expected, NODE) as ProxyNode;
 
+  let resultBag: Record<string, unknown> | null;
+
   if (inner.tag === "or") {
     // Pass parentKey to or branches so seal/bind on branches can re-key properly
-    const orBag = matchOrInner(actual, inner.args, namedBindings, configDefaults, parentKey);
+    const orBag = matchOrInner(
+      actual,
+      inner.args,
+      namedBindings,
+      configDefaults,
+      parentKey,
+      ctx,
+      path,
+    );
     if (!orBag) return null;
     if (!applyWhenGuards(inner.chain, orBag)) return null;
-    return applyChainModifiers(inner.chain, orBag, actual, parentKey);
-  }
-  if (inner.tag === "maybeBlock") {
-    const maybeBlockBag = matchMaybeBlockInner(actual, inner.args[0], namedBindings, configDefaults);
+    resultBag = applyChainModifiers(inner.chain, orBag, actual, parentKey);
+  } else if (inner.tag === "maybeBlock") {
+    const maybeBlockBag = matchMaybeBlockInner(
+      actual,
+      inner.args[0],
+      namedBindings,
+      configDefaults,
+      ctx,
+      path,
+    );
     if (!maybeBlockBag) return null;
     if (!applyWhenGuards(inner.chain, maybeBlockBag)) return null;
-    return applyChainModifiers(inner.chain, maybeBlockBag, actual, parentKey);
+    resultBag = applyChainModifiers(inner.chain, maybeBlockBag, actual, parentKey);
+  } else {
+    if ((actual as Record<string, unknown> | null | undefined)?.type !== inner.tag) return null;
+    const innerPattern = inner.args[0] ?? {};
+    const innerBag = matchInner(actual, innerPattern, namedBindings, configDefaults, ctx, path);
+    if (!innerBag) return null;
+    if (!applyWhenGuards(inner.chain, innerBag)) return null;
+    resultBag = applyChainModifiers(inner.chain, innerBag, actual, parentKey);
   }
-  if ((actual as Record<string, unknown> | null | undefined)?.type !== inner.tag) return null;
-  const innerPattern = inner.args[0] ?? {};
-  const innerBag = matchInner(actual, innerPattern, namedBindings, configDefaults);
-  if (!innerBag) return null;
-  if (!applyWhenGuards(inner.chain, innerBag)) return null;
-  return applyChainModifiers(inner.chain, innerBag, actual, parentKey);
+
+  // Record an inner-`.to()` site if this proxy's chain carries one.
+  // scopeBag is filled in at the root of matchWithSites once the merged
+  // bag is finalized (so factories see all captures, not just local).
+  if (ctx && resultBag) {
+    const toEntry = chainGet(inner.chain, "to");
+    if (toEntry) {
+      const factory =
+        (toEntry.args[0] as ((bag: Record<string, unknown>) => unknown) | undefined) ??
+        ((b: Record<string, unknown>) => Object.values(b)[0]);
+      ctx.sites.push({ path, factory, scopeBag: resultBag });
+    }
+  }
+
+  return resultBag;
 }
 
 function matchValueInner(
@@ -176,13 +297,17 @@ function matchValueInner(
   expected: unknown,
   namedBindings: NamedBinding[],
   configDefaults: Record<string, unknown> = {},
-  key?: string
+  key?: string,
+  ctx?: Ctx,
+  path: Path = [],
 ): Record<string, unknown> | null {
-  if (expected === dollarSentinel) {
+  if (expected === $) {
+    if (ctx && key) ctx.capturePaths[key] = path;
     return key ? { [key]: actual } : { _: actual };
   }
   if (isCapture(expected)) {
     namedBindings.push({ name: expected.name, value: actual });
+    if (ctx) ctx.capturePaths[expected.name] = path;
     return { [expected.name]: actual };
   }
   if (isConfigSlot(expected)) {
@@ -190,10 +315,10 @@ function matchValueInner(
     return actual === defaultVal ? {} : null;
   }
   if (isProxyNode(expected)) {
-    return matchProxyNode(actual, expected, namedBindings, configDefaults, key);
+    return matchProxyNode(actual, expected, namedBindings, configDefaults, key, ctx, path);
   }
   if (typeof expected === "object" && expected !== null) {
-    return matchInner(actual, expected, namedBindings, configDefaults);
+    return matchInner(actual, expected, namedBindings, configDefaults, ctx, path);
   }
   return actual === expected ? {} : null;
 }
@@ -235,43 +360,14 @@ function expandSeqs(expected: unknown[]): {
   return { expanded, seqs };
 }
 
-/**
- * After a successful array match, record any seq rewrite info in the bag.
- * Seq rewrites are stored as a non-enumerable symbol property so they
- * don't interfere with capture iteration.
- */
-function attachSeqRewrites(
-  bag: Record<string, unknown>,
-  seqs: SeqInfo[]
-): Record<string, unknown> {
-  if (seqs.length === 0) return bag;
-  const rewrites: SeqRewrite[] = [];
-  for (const seq of seqs) {
-    const toEntry = seq.chain.find((c: ChainEntry) => c.method === "to");
-    if (!toEntry?.args[0]) continue;
-    rewrites.push({
-      factory: toEntry.args[0] as (bag: Record<string, unknown>) => unknown,
-      bag: { ...bag },
-      parentKey: "",
-      originalIndex: seq.start,
-      consumedCount: seq.length,
-    });
-  }
-  if (rewrites.length > 0) {
-    // Enumerable so Object.assign propagates it up the match recursion.
-    // Symbol keys are invisible to Object.keys() / Object.entries() so
-    // this won't interfere with capture iteration.
-    Object.defineProperty(bag, SEQ_REWRITES, { value: rewrites, enumerable: true });
-  }
-  return bag;
-}
-
 function matchArrayInner(
   actual: unknown[],
   expected: unknown[],
   parentKey: string,
   namedBindings: NamedBinding[],
-  configDefaults: Record<string, unknown> = {}
+  configDefaults: Record<string, unknown> = {},
+  ctx?: Ctx,
+  path: Path = [],
 ): Record<string, unknown> | null {
   // Expand any U.seq() proxies into their constituents before matching.
   const { expanded, seqs } = expandSeqs(expected);
@@ -279,7 +375,8 @@ function matchArrayInner(
     expected = expanded;
   }
 
-  const mv = (a: unknown, e: unknown, k?: string) => matchValueInner(a, e, namedBindings, configDefaults, k);
+  const mv = (a: unknown, e: unknown, k?: string, p?: Path) =>
+    matchValueInner(a, e, namedBindings, configDefaults, k, ctx, p);
 
   const spreadIndices: number[] = [];
   for (let i = 0; i < expected.length; i++) {
@@ -290,11 +387,13 @@ function matchArrayInner(
     if (actual.length !== expected.length) return null;
     const bag: Record<string, unknown> = {};
     for (let i = 0; i < expected.length; i++) {
-      const elemBag = mv(actual[i], expected[i], `${i}`);
+      const elemBag = mv(actual[i], expected[i], `${i}`, [...path, i]);
       if (!elemBag) return null;
       Object.assign(bag, elemBag);
     }
-    return attachSeqRewrites(bag, seqs);
+    // No-spread: actual index = expanded index for every seq.
+    if (ctx) for (const seq of seqs) recordSeqSiteAt(seq, bag, ctx, path, seq.start);
+    return bag;
   }
 
   if (spreadIndices.length === 1) {
@@ -305,20 +404,23 @@ function matchArrayInner(
 
     const bag: Record<string, unknown> = {};
     for (let i = 0; i < before.length; i++) {
-      const elemBag = mv(actual[i], before[i], `${i}`);
+      const elemBag = mv(actual[i], before[i], `${i}`, [...path, i]);
       if (!elemBag) return null;
       Object.assign(bag, elemBag);
     }
     for (let i = 0; i < after.length; i++) {
       const idx = actual.length - after.length + i;
-      const elemBag = mv(actual[idx], after[i], `${idx}`);
+      const elemBag = mv(actual[idx], after[i], `${idx}`, [...path, idx]);
       if (!elemBag) return null;
       Object.assign(bag, elemBag);
     }
     const spread = expected[si] as { name: string };
     const name = spread.name || parentKey;
-    if (name) bag[name] = actual.slice(before.length, actual.length - after.length);
-    return attachSeqRewrites(bag, seqs);
+    if (name) {
+      bag[name] = actual.slice(before.length, actual.length - after.length);
+      if (ctx) ctx.capturePaths[name] = path;
+    }
+    return bag;
   }
 
   if (spreadIndices.length === 2) {
@@ -330,13 +432,13 @@ function matchArrayInner(
 
     const bag: Record<string, unknown> = {};
     for (let i = 0; i < before.length; i++) {
-      const elemBag = mv(actual[i], before[i], `${i}`);
+      const elemBag = mv(actual[i], before[i], `${i}`, [...path, i]);
       if (!elemBag) return null;
       Object.assign(bag, elemBag);
     }
     for (let i = 0; i < after.length; i++) {
       const idx = actual.length - after.length + i;
-      const elemBag = mv(actual[idx], after[i], `${idx}`);
+      const elemBag = mv(actual[idx], after[i], `${idx}`, [...path, idx]);
       if (!elemBag) return null;
       Object.assign(bag, elemBag);
     }
@@ -347,17 +449,36 @@ function matchArrayInner(
       const mBag: Record<string, unknown> = {};
       let ok = true;
       for (let i = 0; i < middle.length; i++) {
-        const elemBag = mv(actual[pos + i], middle[i], `${pos + i}`);
-        if (!elemBag) { ok = false; break; }
+        const elemBag = mv(actual[pos + i], middle[i], `${pos + i}`, [...path, pos + i]);
+        if (!elemBag) {
+          ok = false;
+          break;
+        }
         Object.assign(mBag, elemBag);
       }
       if (ok) {
         Object.assign(bag, mBag);
         const s1 = expected[si1] as { name: string };
         const s2 = expected[si2] as { name: string };
-        if (s1.name || parentKey) bag[s1.name || parentKey] = actual.slice(before.length, pos);
-        if (s2.name) bag[s2.name] = actual.slice(pos + middle.length, mEnd);
-        return attachSeqRewrites(bag, seqs);
+        if (s1.name || parentKey) {
+          const n = s1.name || parentKey;
+          bag[n] = actual.slice(before.length, pos);
+          if (ctx && n) ctx.capturePaths[n] = path;
+        }
+        if (s2.name) {
+          bag[s2.name] = actual.slice(pos + middle.length, mEnd);
+          if (ctx) ctx.capturePaths[s2.name] = path;
+        }
+        // Two-spread: seqs only meaningful inside `middle`. Their actual
+        // start index = pos + (seq.start - si1 - 1).
+        if (ctx) {
+          for (const seq of seqs) {
+            const offsetInMiddle = seq.start - si1 - 1;
+            if (offsetInMiddle < 0 || offsetInMiddle >= middle.length) continue;
+            recordSeqSiteAt(seq, bag, ctx, path, pos + offsetInMiddle);
+          }
+        }
+        return bag;
       }
     }
     return null;
@@ -366,9 +487,47 @@ function matchArrayInner(
   return null;
 }
 
-function matchOrInner(actual: unknown, args: unknown[], namedBindings: NamedBinding[], configDefaults: Record<string, unknown> = {}, parentKey?: string): Record<string, unknown> | null {
+/**
+ * Push a seq's `.to()` factory as a rewrite site at the given actual-array
+ * index. No-op if the seq has no `.to()` in its chain.
+ */
+function recordSeqSiteAt(
+  seq: SeqInfo,
+  bag: Record<string, unknown>,
+  ctx: Ctx,
+  parentPath: Path,
+  actualStart: number,
+): void {
+  const toEntry = seq.chain.find((c: ChainEntry) => c.method === "to");
+  if (!toEntry?.args[0]) return;
+  const factory = toEntry.args[0] as (bag: Record<string, unknown>) => unknown;
+  ctx.sites.push({
+    path: [...parentPath, actualStart],
+    factory,
+    scopeBag: bag,
+    span: seq.length,
+  });
+}
+
+function matchOrInner(
+  actual: unknown,
+  args: unknown[],
+  namedBindings: NamedBinding[],
+  configDefaults: Record<string, unknown> = {},
+  parentKey?: string,
+  ctx?: Ctx,
+  path: Path = [],
+): Record<string, unknown> | null {
   for (const arg of args) {
-    const result = matchValueInner(actual, arg, namedBindings, configDefaults, parentKey);
+    const result = matchValueInner(
+      actual,
+      arg,
+      namedBindings,
+      configDefaults,
+      parentKey,
+      ctx,
+      path,
+    );
     if (result) return result;
   }
   return null;
@@ -378,14 +537,28 @@ function matchMaybeBlockInner(
   actual: unknown,
   stmtPattern: unknown,
   namedBindings: NamedBinding[],
-  configDefaults: Record<string, unknown> = {}
+  configDefaults: Record<string, unknown> = {},
+  ctx?: Ctx,
+  path: Path = [],
 ): Record<string, unknown> | null {
   const actualRec = actual as Record<string, unknown> | null | undefined;
-  if (actualRec?.type === "BlockStatement" && Array.isArray(actualRec.body) && actualRec.body.length === 1) {
-    const result = matchValueInner((actualRec.body as unknown[])[0], stmtPattern, namedBindings, configDefaults);
+  if (
+    actualRec?.type === "BlockStatement" &&
+    Array.isArray(actualRec.body) &&
+    actualRec.body.length === 1
+  ) {
+    const result = matchValueInner(
+      (actualRec.body as unknown[])[0],
+      stmtPattern,
+      namedBindings,
+      configDefaults,
+      undefined,
+      ctx,
+      [...path, "body", 0],
+    );
     if (result) return result;
   }
-  return matchValueInner(actual, stmtPattern, namedBindings, configDefaults);
+  return matchValueInner(actual, stmtPattern, namedBindings, configDefaults, undefined, ctx, path);
 }
 
 const SKIP_KEYS = new Set(["parent", "loc", "range"]);
@@ -412,10 +585,7 @@ function deepEqual(a: unknown, b: unknown): boolean {
  * Check `.when()` guards in a proxy node's chain.
  * Returns true if all guards pass (or there are none), false otherwise.
  */
-function applyWhenGuards(
-  chain: ChainEntry[],
-  bag: Record<string, unknown>
-): boolean {
+function applyWhenGuards(chain: ChainEntry[], bag: Record<string, unknown>): boolean {
   for (const entry of chain) {
     if (entry.method === "when") {
       const guardFn = entry.args[0];
@@ -463,11 +633,20 @@ function readQuantifier(chain: ChainEntry[]): Quantifier | null {
   if (chainHas(chain, "none")) return { kind: "none", test: (n) => n === 0 };
   if (chainHas(chain, "some")) return { kind: "some", test: (n) => n > 0 };
   const atLeast = chainGet(chain, "atLeast");
-  if (atLeast) { const k = (atLeast.args[0] ?? 0) as number; return { kind: "atLeast", test: (n) => n >= k }; }
+  if (atLeast) {
+    const k = (atLeast.args[0] ?? 0) as number;
+    return { kind: "atLeast", test: (n) => n >= k };
+  }
   const atMost = chainGet(chain, "atMost");
-  if (atMost) { const k = (atMost.args[0] ?? 0) as number; return { kind: "atMost", test: (n) => n <= k }; }
+  if (atMost) {
+    const k = (atMost.args[0] ?? 0) as number;
+    return { kind: "atMost", test: (n) => n <= k };
+  }
   const exactly = chainGet(chain, "exactly");
-  if (exactly) { const k = (exactly.args[0] ?? 0) as number; return { kind: "exactly", test: (n) => n === k }; }
+  if (exactly) {
+    const k = (exactly.args[0] ?? 0) as number;
+    return { kind: "exactly", test: (n) => n === k };
+  }
   return null;
 }
 
@@ -480,7 +659,7 @@ function subtreeCount(
   root: unknown,
   pattern: ProxyNode,
   boundary: unknown,
-  limit?: number
+  limit?: number,
 ): number {
   const rootRec = root as Record<string, unknown> | null | undefined;
   if (!rootRec || typeof rootRec !== "object") return 0;
@@ -510,7 +689,7 @@ function countDescendant(
   node: unknown,
   pattern: ProxyNode,
   boundary: unknown,
-  limit?: number
+  limit?: number,
 ): number {
   const nodeRec = node as Record<string, unknown> | null | undefined;
   if (!nodeRec || typeof nodeRec !== "object" || !nodeRec.type) return 0;
@@ -562,10 +741,7 @@ function countDescendant(
  * Check if a node matches a boundary pattern. The boundary can be a
  * proxy node (single type) or an or-proxy (multiple types).
  */
-function isBoundaryNode(
-  node: Record<string, unknown>,
-  boundary: unknown
-): boolean {
+function isBoundaryNode(node: Record<string, unknown>, boundary: unknown): boolean {
   if (!isProxyNode(boundary)) return false;
   const bNode = symGet(boundary, NODE) as ProxyNode;
   if (bNode.tag === "or") {
@@ -626,7 +802,7 @@ function applyChainModifiers(
   chain: ChainEntry[],
   bag: Record<string, unknown>,
   actual: unknown,
-  parentKey?: string
+  parentKey?: string,
 ): Record<string, unknown> {
   const bindEntry = chainGet(chain, "bind");
   if (bindEntry) {
