@@ -5,6 +5,7 @@ import type { DollarObjectSpread } from "@/capture";
 import type { NodeByKind } from "@/ast/node-by-kind";
 import type { NodeKind } from "@/ast/node-kind";
 import type { SEQ_BRAND } from "@/ast/seq-brand";
+import type { TSESTree } from "@typescript-eslint/types";
 
 // For object shapes, allow specifying any subset of keys.
 // Omitted keys are treated as "don't care" by consumers.
@@ -20,8 +21,14 @@ type SequencePattern<S extends readonly unknown[]> = ReadonlyArray<
 >;
 
 // Allow object patterns to optionally constrain the parent node. This does not
-// contribute captures; it's a provider-level acceptance hook.
-type WithParent = { parent?: Pattern<NodeByKind[NodeKind]> };
+// contribute captures; it's a provider-level acceptance hook. A comment is
+// never a parent, and a parent `Program` is the upstream interface (its
+// comments raw): both keep the parent union within what the compiler can
+// represent.
+type ParentShape =
+  | NodeByKind[Exclude<NodeKind, "Comment" | "Program">]
+  | TSESTree.Program;
+type WithParent = { parent?: Pattern<ParentShape> };
 
 /**
  * Deeply capturable pattern for a shape `T`.

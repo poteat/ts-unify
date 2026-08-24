@@ -24,7 +24,8 @@ contract of this provider.
 - `BindCaptures` aligns explicit/implicit capture tokens with the node kind so
   extracted capture bags reflect the actual AST shape.
 - Internal ESTree fields (`parent`, `loc`, `range`) are excluded from input and
-  output shapes.
+  output shapes, except on `Comment`, whose `loc` and `range` are data: a rule
+  about layout reads the comment's column from a `loc` capture.
 
 ## Examples
 

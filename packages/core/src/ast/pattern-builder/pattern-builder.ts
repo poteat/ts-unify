@@ -42,9 +42,10 @@ export type PatternBuilder<K extends NodeKind> = {
 /**
  * Assuming a pattern `P` conforms to the shape of AST node kind `K`, bind
  * the capture bag type from `P` using the specific corresponding types from
- * the AST node shape `NodeByKind[K]`.
+ * the AST node shape `NodeByKind[K]`. A comment's position is data, so its
+ * `loc` and `range` bind too.
  */
 type BindAgainstNodeKind<P, K extends NodeKind> = BindCaptures<
   P,
-  WithoutInternalAstFields<NodeByKind[K]>
+  K extends "Comment" ? NodeByKind[K] : WithoutInternalAstFields<NodeByKind[K]>
 >;

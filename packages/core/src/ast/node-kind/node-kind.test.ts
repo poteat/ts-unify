@@ -9,6 +9,7 @@ describe("NodeKind", () => {
     assertType<Extract<K, "IfStatement">, "IfStatement">(0);
     assertType<Extract<K, "Identifier">, "Identifier">(0);
     assertType<Extract<K, "Literal">, "Literal">(0);
+    assertType<Extract<K, "Comment">, "Comment">(0);
   });
 
   it("is keyed to TSESTree.AST_NODE_TYPES", () => {
