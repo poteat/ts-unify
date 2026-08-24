@@ -1,11 +1,14 @@
-import SrcCapture from '@/capture'
-import type { BindCaptures, Capture, DollarObjectSpread } from '@/capture'
+import type { Capture } from '@/capture/capture-type'
+import type { $ } from '@/capture/dollar'
+import type { DollarObjectSpread } from '@/capture/dollar-spread'
 import AssertType from '@/test-utils/assert-type'
 
-describe('BindCaptures with object spread-$ (type-level)', () => {
+import type { BindCaptures } from './bind-captures'
+
+describe('bind-object', () => {
   it('binds omitted keys when using { ...$, explicit: $ }', () => {
     type Shape = { a: number; b: string }
-    type Pattern = { a: SrcCapture.$ } & DollarObjectSpread
+    type Pattern = { a: $ } & DollarObjectSpread
     type Bound = BindCaptures<Pattern, Shape>
     type Expected = {
       readonly a: Capture<'a', number>

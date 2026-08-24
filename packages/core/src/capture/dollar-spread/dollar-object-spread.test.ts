@@ -1,27 +1,29 @@
-import Capture from '@/capture'
-import type { DollarObjectSpread, Spread } from '@/capture'
+import Dollar from '@/capture/dollar'
+import type { Spread } from '@/capture/spread'
 import AssertType from '@/test-utils/assert-type'
 
-describe('$ object/sequence spread semantics', () => {
+import type { DollarObjectSpread } from './dollar-object-spread'
+
+describe('dollar-object-spread', () => {
   it('typeof $ carries the DollarObjectSpread brand (type-level)', () => {
-    type HasBrand = typeof Capture.$ extends DollarObjectSpread ? true : false
+    type HasBrand = typeof Dollar.$ extends DollarObjectSpread ? true : false
     AssertType.assertType<HasBrand, true>(0)
   })
 
   it('typeof $ is iterable over anonymous Spread tokens (type-level)', () => {
     type IterOK =
-      typeof Capture.$ extends Iterable<Spread<'', unknown>> ? true : false
+      typeof Dollar.$ extends Iterable<Spread<'', unknown>> ? true : false
     AssertType.assertType<IterOK, true>(0)
   })
 
   it('spread in object context produces only the REST_CAPTURE marker', () => {
-    const spread = { ...Capture.$ }
+    const spread = { ...Dollar.$ }
     expect(Object.keys(spread)).toEqual([])
-    expect((spread as any)[Capture.REST_CAPTURE]).toBe(true)
+    expect(Reflect.get(spread, Dollar.REST_CAPTURE)).toBe(true)
   })
 
   it('spreading $ in sequences yields a single item at runtime', () => {
-    const seq = [...Capture.$]
+    const seq = [...Dollar.$]
     expect(Array.isArray(seq)).toBe(true)
     expect(seq.length).toBe(1)
   })

@@ -28,7 +28,7 @@ type Tagged = CaptureMods<{ map: string }>;
 - `ModMap<New>` -- `{ map: New }` -- post-match value transformation.
 - `ModDefault<Expr>` -- `{ default: Expr }` -- fallback when capture is
   `undefined`.
-- `ModTruthy` -- `{ truthy: true }` -- exclude JS-falsy values.
+- `ModTruthy` -- `{ isTruthy: true }` -- exclude JS-falsy values.
 - `ModWhen<Narrow>` -- `{ when: Narrow }` -- type-narrowing guard.
 
 ## Scope

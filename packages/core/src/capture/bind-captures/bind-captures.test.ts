@@ -1,28 +1,30 @@
-import SrcCapture from '@/capture'
-import type { BindCaptures, Capture } from '@/capture'
+import type { Capture } from '@/capture/capture-type'
+import type { $ } from '@/capture/dollar'
 import type { StringPredicate } from '@/string-predicate'
 import AssertType from '@/test-utils/assert-type'
 
-describe('BindCaptures - type-level', () => {
+import type { BindCaptures } from './bind-captures'
+
+describe('bind-captures', () => {
   it('binds implicit $ to named captures based on shape', () => {
-    type Shape = { id: number; name: string; nested: { flag: boolean } }
+    type Shape = { id: number; name: string; nested: { isOn: boolean } }
     type Pattern = {
-      id: SrcCapture.$
+      id: $
       name: 'Alice'
-      nested: { flag: SrcCapture.$ }
+      nested: { isOn: $ }
     }
     type Result = BindCaptures<Pattern, Shape>
     type Expected = {
       readonly id: Capture<'id', number>
       readonly name: 'Alice'
-      readonly nested: { readonly flag: Capture<'flag', boolean> }
+      readonly nested: { readonly isOn: Capture<'isOn', boolean> }
     }
     AssertType.assertType<Result, Expected>(0)
   })
 
   it('leaves a RegExp in a string position as is, with no capture', () => {
     type Shape = { id: number; name: string }
-    type Pattern = { id: SrcCapture.$; name: RegExp }
+    type Pattern = { id: $; name: RegExp }
     type Result = BindCaptures<Pattern, Shape>
     type Expected = {
       readonly id: Capture<'id', number>
@@ -31,9 +33,9 @@ describe('BindCaptures - type-level', () => {
     AssertType.assertType<Result, Expected>(0)
   })
 
-  it('leaves a string predicate in a string position as is, with no capture', () => {
+  it('leaves a string predicate in a string position as is', () => {
     type Shape = { id: number; name: string }
-    type Pattern = { id: SrcCapture.$; name: StringPredicate }
+    type Pattern = { id: $; name: StringPredicate }
     type Result = BindCaptures<Pattern, Shape>
     type Expected = {
       readonly id: Capture<'id', number>
@@ -58,7 +60,7 @@ describe('BindCaptures - type-level', () => {
 
   it('allows explicit captures anywhere in the pattern', () => {
     type Shape = { a: number; b: { c: string } }
-    type Pattern = { a: Capture<'x', unknown>; b: { c: SrcCapture.$ } }
+    type Pattern = { a: Capture<'x', unknown>; b: { c: $ } }
     type Result = BindCaptures<Pattern, Shape>
     type Expected = {
       readonly a: Capture<'x', number>
@@ -69,7 +71,7 @@ describe('BindCaptures - type-level', () => {
 
   it('binds root-level $ across object shape', () => {
     type Shape = { a: number; b: string }
-    type Pattern = SrcCapture.$
+    type Pattern = $
     type Result = BindCaptures<Pattern, Shape>
     type Expected = {
       readonly a: Capture<'a', number>
@@ -80,7 +82,7 @@ describe('BindCaptures - type-level', () => {
 
   it('binds root-level $ across tuple shape', () => {
     type Shape = [number, string]
-    type Pattern = SrcCapture.$
+    type Pattern = $
     type Result = BindCaptures<Pattern, Shape>
     type Expected = readonly [Capture<'0', number>, Capture<'1', string>]
     AssertType.assertType<Result, Expected>(0)
@@ -88,7 +90,7 @@ describe('BindCaptures - type-level', () => {
 
   it('binds root-level $ across array shape', () => {
     type Shape = string[]
-    type Pattern = SrcCapture.$
+    type Pattern = $
     type Result = BindCaptures<Pattern, Shape>
     type Expected = readonly Capture<`${number}`, string>[]
     AssertType.assertType<Result, Expected>(0)

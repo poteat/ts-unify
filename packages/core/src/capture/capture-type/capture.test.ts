@@ -1,9 +1,9 @@
 import AssertType from '@/test-utils/assert-type'
 
-import { CAPTURE_BRAND } from './capture-type'
-import type { Capture } from './capture-type'
+import type { Capture } from './capture'
+import { CAPTURE_BRAND } from './capture-brand'
 
-describe('Capture type', () => {
+describe('capture', () => {
   it('should preserve literal name types', () => {
     type TestCapture = Capture<'test'>
     type Name = TestCapture['name']

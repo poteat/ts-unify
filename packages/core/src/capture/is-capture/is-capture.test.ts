@@ -1,10 +1,10 @@
-import Capture from '@/capture'
+import Dollar from '@/capture/dollar'
 
 import { isCapture } from './is-capture'
 
-describe('isCapture', () => {
+describe('is-capture', () => {
   it('should return true for capture sentinels', () => {
-    expect(isCapture(Capture.$('test'))).toBe(true)
+    expect(isCapture(Dollar.$('test'))).toBe(true)
   })
 
   it('should return false for regular objects', () => {
@@ -30,7 +30,7 @@ describe('isCapture', () => {
   })
 
   it('should narrow types correctly', () => {
-    const value: unknown = Capture.$('test')
+    const value: unknown = Dollar.$('test')
 
     isCapture(value)
       ? expect(value.name).toBe('test')

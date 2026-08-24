@@ -1,16 +1,19 @@
-/**
- * @internal Branding symbol for the Spread token
- */
-export const SPREAD_BRAND = Symbol('SPREAD_BRAND')
+import type { SPREAD_BRAND } from './spread-brand'
 
 /**
- * Sequence-only capture token for contiguous slice positions in arrays/tuples.
+ * Sequence-only capture token for a contiguous slice of an array or tuple.
  *
- * The generic parameter `Elem` denotes the element type of the captured slice.
- * This is a type-level marker; semantics are defined by consumers.
+ * A type-level marker; what a slice matches is defined by the consumers.
+ *
+ * @typeParam Name name the slice binds to
+ * @typeParam Elem element type of the captured slice
  */
 export type Spread<Name extends string = string, Elem = unknown> = {
   readonly [SPREAD_BRAND]: true
   readonly name: Name
+
+  /**
+   * Phantom producer of the slice's element type, absent at runtime.
+   */
   readonly value?: () => Elem
 }

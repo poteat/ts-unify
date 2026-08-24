@@ -1,3 +1,11 @@
 export * from './bind-captures'
+export * from './bind-node'
+export * from './bind-object'
+export * from './bind-placeholder'
+export * from './bind-value'
+export * from './mods'
+export * from './pattern-keys'
+export * from './sequence'
+export * from './shape'
 
 export * as default from '.'

@@ -1,14 +1,14 @@
-import Capture from '@/capture'
+import CaptureType from '@/capture/capture-type'
 
 import { $ } from './dollar'
 
-describe('$ function', () => {
+describe('dollar', () => {
   it('should create a capture with the given name', () => {
     expect($('test').name).toBe('test')
   })
 
   it('should have the capture brand', () => {
-    expect($('test')[Capture.CAPTURE_BRAND]).toBe(true)
+    expect($('test')[CaptureType.CAPTURE_BRAND]).toBe(true)
   })
 
   it('should preserve literal types', () => {

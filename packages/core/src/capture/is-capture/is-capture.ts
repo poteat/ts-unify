@@ -1,10 +1,11 @@
 import CaptureType from '@/capture/capture-type'
-import type { Capture } from '@/capture/capture-type'
 
 /**
- * Type guard to check if a value is a capture sentinel.
+ * Type guard for a capture sentinel: an object carrying the capture brand.
+ *
+ * @param value what to test
  */
-export const isCapture = (value: unknown): value is Capture =>
+export const isCapture = (value: unknown): value is CaptureType.Capture =>
   typeof value === 'object' &&
   value !== null &&
   CaptureType.CAPTURE_BRAND in value &&

@@ -2,8 +2,10 @@ import type { Capture } from '@/capture/capture-type'
 import type { $ } from '@/capture/dollar'
 
 /**
- * CaptureLike is a type-level token that represents either a placeholder
- * token (`$`) or an explicit capture token (`Capture`).
+ * Either token a pattern position may carry: the bare placeholder `$` or an
+ * explicit `Capture`.
+ *
+ * @typeParam Value type the explicit capture may carry
  */
 export type CaptureLike<Value = unknown> =
   | $

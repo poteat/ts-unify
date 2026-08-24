@@ -3,7 +3,7 @@ import AssertType from '@/test-utils/assert-type'
 
 import type { CaptureLike } from './capture-like'
 
-describe('CaptureLike', () => {
+describe('capture-like', () => {
   it('default CaptureLike is $ | Capture<string, unknown>', () => {
     type U = $ | Capture
     AssertType.assertType<CaptureLike, U>(0)

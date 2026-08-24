@@ -4,7 +4,7 @@ import AssertType from '@/test-utils/assert-type'
 
 import type { Capturable } from './capturable'
 
-describe('Capturable', () => {
+describe('capturable', () => {
   it('is T | CaptureLike<T> | ConfigSlot', () => {
     type T = string
     type Expected = string | CaptureLike<string> | ConfigSlot

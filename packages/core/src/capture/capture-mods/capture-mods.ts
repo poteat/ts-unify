@@ -1,17 +1,10 @@
-// Branding key for deferred capture-local modifiers.
-export const CAPTURE_MODS_BRAND = Symbol('CAPTURE_MODS_BRAND')
+import type { CAPTURE_MODS_BRAND } from './capture-mods-brand'
 
 /**
  * Attach a set of modifiers to a capture token.
+ *
+ * @typeParam Mods record of the modifiers, one of the `Mod*` shapes
  */
 export type CaptureMods<Mods> = {
   readonly [CAPTURE_MODS_BRAND]: Mods
 }
-
-/**
- * Modifier shapes
- */
-export type ModMap<New> = { map: New }
-export type ModDefault<Expr> = { default: Expr }
-export type ModTruthy = { truthy: true }
-export type ModWhen<Narrow> = { when: Narrow }
