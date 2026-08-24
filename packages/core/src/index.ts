@@ -6,4 +6,4 @@ export { $ } from "./capture/dollar";
 export { C } from "./config/config-slot";
 export type { ExtractCaptures } from "./pattern/extract-captures";
 export type { FluentNode } from "./ast/fluent-node";
-export type { PatternBuilder } from "./ast";
+export type { PatternBuilder, NodeKind, NodeByKind } from "./ast";
