@@ -3,6 +3,7 @@ import type { OrCombinator } from "@/ast/or";
 import type { FromNode } from "@/ast/from-node";
 import type { MaybeBlockCombinator } from "@/ast/maybe-block";
 import type { SeqCombinator } from "@/ast/node-with-seq";
+import type { StringPredicates } from "@/string-predicate/string-predicates";
 
 /**
  * BuilderUtilities
@@ -17,4 +18,6 @@ export type BuilderUtilities = {
   maybeBlock: MaybeBlockCombinator;
   fromNode: FromNode;
   seq: SeqCombinator;
+  /** String predicates for string positions and captured values; see string-predicate.spec.md. */
+  string: StringPredicates;
 };

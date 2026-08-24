@@ -6,6 +6,7 @@ import type { Prettify, UnionToIntersection, Values } from "@/type-utils";
 import type { SingleKeyOf } from "@/type-utils/single-key-of";
 import type { Sealed } from "@/ast/sealed";
 import type { Overwrite } from "@/type-utils";
+import type { StringPredicate } from "@/string-predicate/string-predicate";
 import type { OR_BRAND } from "@/ast/or";
 import type { SEQ_BRAND } from "@/ast/seq-brand";
 import type { FLUENT_INNER } from "@/ast/fluent-node";
@@ -22,7 +23,7 @@ type ReKeyIfSingle<Bag, K extends string> = [SingleKeyOf<Bag>] extends [never]
 
 type ExtractFromPropertyValue<T, Key extends string> = T extends TSESTree.Node
   ? {}
-  : T extends RegExp
+  : T extends StringPredicate | RegExp
   ? {}
   : T extends ConfigSlot
   ? {}

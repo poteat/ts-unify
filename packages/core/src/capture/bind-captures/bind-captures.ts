@@ -3,6 +3,7 @@ import type { OBJECT_SPREAD_BRAND } from "@/capture/dollar-spread/dollar-spread"
 import type { Capture } from "@/capture/capture-type";
 import type { ConfigSlot } from "@/config/config-type";
 import type { Spread } from "@/capture/spread/spread";
+import type { StringPredicate } from "@/string-predicate/string-predicate";
 import type { TSESTree } from "@typescript-eslint/types";
 import type { Sealed } from "@/ast/sealed";
 import type { OR_BRAND } from "@/ast/or";
@@ -42,12 +43,12 @@ type TupleCaptures<
 
 // Keys to consider from a pattern object:
 // - Exclude 'parent'
-// - Exclude function-valued keys except when the value is the $ sentinel
+// - Exclude function-valued keys except the $ sentinel and string predicates
 type PatternKeys<P extends object> = {
   [K in keyof P]-?: K extends "parent"
     ? never
     : P[K] extends (...args: any) => any
-      ? P[K] extends $
+      ? P[K] extends $ | StringPredicate
         ? KeyStr<K>
         : never
       : KeyStr<K>;
@@ -94,8 +95,8 @@ type BindValue<P, S, Key extends string> =
   // Short-circuit: don't recurse into concrete AST nodes
   P extends TSESTree.Node
     ? P
-    : // A RegExp tests a string position and binds nothing
-      P extends RegExp
+    : // A string predicate (or RegExp) tests a string position and binds nothing
+      P extends StringPredicate | RegExp
       ? P
       : // Placeholder becomes named capture using key context
       P extends $

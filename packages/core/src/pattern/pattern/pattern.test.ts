@@ -1,5 +1,6 @@
 import type { Pattern } from ".";
 import { $ } from "@/capture";
+import { U } from "@/ast/builder-map";
 import type { Spread } from "@/capture";
 import { SPREAD_BRAND } from "@/capture/spread/spread";
 
@@ -41,6 +42,20 @@ describe("Pattern type", () => {
     const bad: Pattern<Shape> = { x: /1/ };
     expect(typeof p).toBe("object");
     expect(typeof bad).toBe("object");
+  });
+
+  it("accepts a string predicate in a string position only", () => {
+    type Shape = { x: number; y: { z: string } };
+    const p: Pattern<Shape> = { y: { z: U.string.reserved() } };
+    const q: Pattern<Shape> = { y: { z: U.string.not(U.string.identifierName()) } };
+    // @ts-expect-error a number position takes no predicate
+    const bad: Pattern<Shape> = { x: U.string.reserved() };
+    // @ts-expect-error a bare function is not a predicate
+    const bare: Pattern<Shape> = { y: { z: (s: string) => s.length > 1 } };
+    expect(typeof p).toBe("object");
+    expect(typeof q).toBe("object");
+    expect(typeof bad).toBe("object");
+    expect(typeof bare).toBe("object");
   });
 
   it("accepts explicit captures", () => {

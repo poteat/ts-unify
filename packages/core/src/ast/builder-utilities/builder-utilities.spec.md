@@ -26,3 +26,7 @@ and composition of fluent rules without introducing synthetic AST kinds.
 - Provider for the `U` namespace’s helper surface. Concrete helper semantics are
   defined by their own typing and consumed by downstream providers (e.g.,
   extraction/binding).
+- `string`: The string predicates (`regex`, `reserved`, `identifierName`,
+  `not`), each usable in a string position of a pattern and callable on a
+  captured value. Served as a value, not a pattern descriptor. See
+  `string-predicate.spec.md`.

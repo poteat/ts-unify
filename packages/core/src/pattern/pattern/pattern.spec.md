@@ -15,8 +15,9 @@ not interpret names, unify duplicates, or perform any runtime work.
 ## Allowed Positions
 
 - Primitives: either the original value type `T`, or a capture token.
-- Strings: also a `RegExp`; consumers test it against the string. It
-  contributes no capture.
+- Strings: also a string predicate (`U.string.*`) or a `RegExp`; consumers
+  test it against the string. It contributes no capture. See
+  `string-predicate.spec.md`.
 - Objects: either a capture token for the whole subtree, or an object with any
   subset of properties from `T`, where each present property is
   `Pattern<T[K]>`. Omitted keys are treated as "don’t care".

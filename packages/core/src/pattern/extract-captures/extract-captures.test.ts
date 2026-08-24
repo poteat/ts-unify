@@ -1,6 +1,7 @@
 import type { Capture } from "@/capture";
 import type { ExtractCaptures } from "./extract-captures";
 import { assertType } from "@/test-utils/assert-type/assert-type";
+import type { StringPredicate } from "@/string-predicate";
 
 describe("ExtractCaptures type tests", () => {
   test("type assertions compile", () => {
@@ -11,6 +12,10 @@ describe("ExtractCaptures type tests", () => {
     // A RegExp in a string position contributes no capture
     type TestRegExp = ExtractCaptures<{ value: Capture<"v">; name: RegExp }>;
     assertType<TestRegExp, { v: unknown }>(0);
+
+    // A string predicate in a string position contributes no capture
+    type TestPredicate = ExtractCaptures<{ value: Capture<"v">; name: StringPredicate }>;
+    assertType<TestPredicate, { v: unknown }>(0);
 
     // Test 2: Multiple different captures (implicit values => unknown)
     type TestMultiple = ExtractCaptures<{

@@ -2,6 +2,7 @@ import type { BindCaptures } from "@/capture";
 import type { Capture } from "@/capture";
 import { $ } from "@/capture";
 import { assertType } from "@/test-utils/assert-type";
+import type { StringPredicate } from "@/string-predicate";
 
 describe("BindCaptures - type-level", () => {
   it("binds implicit $ to named captures based on shape", () => {
@@ -21,6 +22,14 @@ describe("BindCaptures - type-level", () => {
     type Pattern = { id: $; name: RegExp };
     type Result = BindCaptures<Pattern, Shape>;
     type Expected = { id: Capture<"id", number>; name: RegExp };
+    assertType<Result, Expected>(0);
+  });
+
+  it("leaves a string predicate in a string position as is, with no capture", () => {
+    type Shape = { id: number; name: string };
+    type Pattern = { id: $; name: StringPredicate };
+    type Result = BindCaptures<Pattern, Shape>;
+    type Expected = { id: Capture<"id", number>; name: StringPredicate };
     assertType<Result, Expected>(0);
   });
 

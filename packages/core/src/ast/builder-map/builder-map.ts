@@ -1,5 +1,6 @@
 import type { NodeKind, PatternBuilder } from "@/ast";
 import type { BuilderUtilities } from "@/ast/builder-utilities";
+import { stringPredicates } from "@/string-predicate/string-predicates";
 
 /**
  * Map from `NodeKind` to its corresponding `PatternBuilder`.
@@ -25,11 +26,16 @@ export type ProxyNode = {
 // Proxy typing cannot express this dynamic shape, so `any` on the return type
 // and spread args is unavoidable.  The cast to `BuilderMap` at the export site
 // restores type safety for callers.
+// Utilities that are values rather than pattern descriptors, served from the
+// root as they are.
+const VALUES: Record<string, unknown> = { string: stringPredicates };
+
 function makeProxy(node?: ProxyNode): any {
   return new Proxy(function () {}, {
     get(_, prop) {
       if (prop === NODE) return node;
       if (typeof prop === "symbol") return undefined;
+      if (!node && prop in VALUES) return VALUES[prop];
       if (node) {
         // Fluent method on an existing node — return callable that appends to chain
         const method = prop as string;

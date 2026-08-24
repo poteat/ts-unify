@@ -5,6 +5,7 @@ import type { DollarObjectSpread } from "@/capture";
 import type { NodeByKind } from "@/ast/node-by-kind";
 import type { NodeKind } from "@/ast/node-kind";
 import type { SEQ_BRAND } from "@/ast/seq-brand";
+import type { StringPredicate } from "@/string-predicate/string-predicate";
 import type { TSESTree } from "@typescript-eslint/types";
 
 // For object shapes, allow specifying any subset of keys.
@@ -30,8 +31,10 @@ type ParentShape =
   | TSESTree.Program;
 type WithParent = { parent?: Pattern<ParentShape> };
 
-// A string position also accepts a RegExp, tested against the string.
-type StringPattern<T> = T extends string ? Capturable<T> | RegExp : Capturable<T>;
+// A string position also accepts a string predicate, or a RegExp standing for one.
+type StringPattern<T> = T extends string
+  ? Capturable<T> | StringPredicate | RegExp
+  : Capturable<T>;
 
 /**
  * Deeply capturable pattern for a shape `T`.
@@ -40,7 +43,7 @@ type StringPattern<T> = T extends string ? Capturable<T> | RegExp : Capturable<T
  * - Provide a nested pattern of the original value type, or
  * - Provide a capture token (implicit `$` or explicit `Capture`), or
  * - In sequence positions (arrays/tuples), provide a spread capture `Spread`, or
- * - In string positions, provide a `RegExp`.
+ * - In string positions, provide a string predicate (`U.string.*`) or a `RegExp`.
  *
  * This type defines what inputs are accepted; consumers interpret semantics
  * such as naming, anchoring, and unification.
