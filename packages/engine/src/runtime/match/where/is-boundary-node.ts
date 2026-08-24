@@ -11,7 +11,7 @@ import Pattern from '../pattern'
 export function isBoundaryNode(node: unknown, boundary: unknown) {
   if (!Pattern.isProxyNode(boundary)) return false
 
-  const bNode = Pattern.proxyNodeOf(boundary)
+  const bNode = Pattern.patternNodeOf(boundary)
   const actualType = Node.nodeType(node)
 
   return bNode.tag === 'or'
@@ -19,7 +19,7 @@ export function isBoundaryNode(node: unknown, boundary: unknown) {
         typeof arg === 'string'
           ? actualType === arg
           : Pattern.isProxyNode(arg)
-            ? actualType === Pattern.proxyNodeOf(arg).tag
+            ? actualType === Pattern.patternNodeOf(arg).tag
             : false,
       )
     : actualType === bNode.tag

@@ -1,6 +1,6 @@
-import Node from '../node'
 import type { Constraint } from './constraint'
 import { countDescendant } from './count-descendant'
+import Sub from '../../sub'
 
 /**
  * How many descendants of a node match a constraint, the node itself not
@@ -20,7 +20,7 @@ export function countChildren(
   let count = 0
 
   for (const key of Object.keys(nodeRec)) {
-    if (Node.META_KEYS.has(key)) continue
+    if (Sub.POSITION_KEYS.has(key)) continue
     const child = nodeRec[key]
 
     for (const item of Array.isArray(child) ? child : [child]) {

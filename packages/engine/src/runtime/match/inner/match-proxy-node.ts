@@ -25,7 +25,7 @@ export function matchProxyNode(
   expected: unknown,
   at: Cursor,
 ): Bag | null {
-  const inner = Pattern.proxyNodeOf(expected)
+  const inner = Pattern.patternNodeOf(expected)
   const node =
     inner.tag === 'Comment' && Node.isRawComment(actual)
       ? CommentNodes.commentNodeOf(at.ctx.program, actual)

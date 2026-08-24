@@ -16,7 +16,7 @@ export function expandSeqs(expected: unknown[]): {
 
   for (const elem of expected) {
     if (Pattern.isProxyNode(elem)) {
-      const pn = Pattern.proxyNodeOf(elem)
+      const pn = Pattern.patternNodeOf(elem)
 
       if (pn.tag === 'seq') {
         const start = expanded.length

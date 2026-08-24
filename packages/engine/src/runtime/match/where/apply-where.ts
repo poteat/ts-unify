@@ -21,7 +21,7 @@ export function applyWhere(chain: ChainEntry[], actual: unknown) {
 
     for (const constraint of entry.args) {
       if (!Pattern.isProxyNode(constraint)) continue
-      const pattern = Pattern.proxyNodeOf(constraint)
+      const pattern = Pattern.patternNodeOf(constraint)
       const boundary = Chain.chainGet(pattern.chain, 'until')?.args[0] ?? null
       const q = readQuantifier(pattern.chain)
       if (!q) continue

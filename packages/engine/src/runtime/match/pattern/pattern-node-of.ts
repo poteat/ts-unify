@@ -4,8 +4,9 @@ import type { ProxyNode } from '@ts-unify/core/internal'
 import SymGet from '../../sym-get'
 
 /**
- * The tag, arguments and chain a proxy node carries.
+ * The tag, arguments and chain a pattern's proxy node carries; the caller
+ * has checked {@link isProxyNode}.
  *
  * @param v a proxy node, as {@link isProxyNode} admits
  */
-export const proxyNodeOf = (v: unknown) => SymGet.symGet(v, NODE) as ProxyNode
+export const patternNodeOf = (v: unknown) => SymGet.symGet(v, NODE) as ProxyNode

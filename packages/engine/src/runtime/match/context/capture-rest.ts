@@ -1,6 +1,6 @@
 import type { Bag } from '../bag'
-import Node from '../node'
 import type { Cursor } from './cursor'
+import Sub from '../../sub'
 
 /**
  * The structural properties of a node the pattern did not name, captured
@@ -21,7 +21,7 @@ export function captureRest(
   if (!node || typeof node !== 'object') return bag
 
   for (const key of Object.keys(node)) {
-    if (!Node.META_KEYS.has(key) && !named.has(key)) {
+    if (!Sub.POSITION_KEYS.has(key) && !named.has(key)) {
       bag[key] = (node as Record<string, unknown>)[key]
       at.ctx.capturePaths[key] = [...at.path, key]
     }

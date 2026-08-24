@@ -5,17 +5,26 @@
     "declaration": false,
     "baseUrl": ".",
     "paths": {
-      "@ts-unify/core": ["../core/src/index.ts"],
-      "@/*": ["../core/src/*"],
-      "@": ["../core/src/index.ts"]
+      "@ts-unify/core": [
+        "../core/src/index.ts"
+      ],
+      "@/*": [
+        "../core/src/*"
+      ],
+      "@": [
+        "../core/src/index.ts"
+      ]
     }
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*"
+  ],
   "exclude": [
     "node_modules",
     "dist",
     "**/*.test.ts",
     "**/*.spec.ts",
-    "**/test-utils"
+    "**/test-utils",
+    "**/fixtures/**"
   ]
 }

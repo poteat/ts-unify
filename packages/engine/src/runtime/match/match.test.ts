@@ -367,7 +367,7 @@ describe('match', () => {
       }
       const exprBlock = Fixtures.expressionBlock().bind()
 
-      expect(Pattern.proxyNodeOf(exprBlock).tag).toBe('BlockStatement')
+      expect(Pattern.patternNodeOf(exprBlock).tag).toBe('BlockStatement')
 
       const bag = match({ type: 'SomeNode', body: ast }, { body: exprBlock })
 

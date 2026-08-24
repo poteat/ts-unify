@@ -1,5 +1,5 @@
-import Node from '../node'
 import type { NamedBinding } from './named-binding'
+import Sub from '../../sub'
 
 /**
  * Whether every name bound more than once was bound to equal values.
@@ -11,7 +11,7 @@ export function bindingsAgree(bindings: readonly NamedBinding[]) {
 
   for (const { name, value } of bindings) {
     if (name in seen) {
-      if (!Node.deepEqual(seen[name], value)) return false
+      if (!Sub.deepEqual(seen[name], value)) return false
     } else {
       seen[name] = value
     }

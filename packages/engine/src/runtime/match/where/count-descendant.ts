@@ -28,7 +28,7 @@ export function countDescendant(
   const { pattern, boundary } = constraint
   const alternatives: ProxyNode[] =
     pattern.tag === 'or'
-      ? pattern.args.filter(Pattern.isProxyNode).map(Pattern.proxyNodeOf)
+      ? pattern.args.filter(Pattern.isProxyNode).map(Pattern.patternNodeOf)
       : [pattern]
   const at: Context.Cursor = { ctx: Context.createMatchContext(), path: [] }
   const matches = (alt: ProxyNode) =>
