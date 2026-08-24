@@ -49,7 +49,8 @@ fetch(base + "/api");
   (`typeof x`); it has more than one read, or its one read is not in the
   next statement; the read sits inside a nested function or a loop's
   test, update or body (the initializer would run later, again, or
-  never); the read is a shorthand property; the declarator is annotated
+  never); the read is a shorthand property; the read sits in a template
+  literal's hole (a template is built from named fragments); the declarator is annotated
   (`const x: Narrow = v` checks `v`); or the initializer has effects (a
   call, `new`, `await`, `yield`, an assignment, an update, a tagged
   template) and the read comes after another effect in the statement or

@@ -116,15 +116,17 @@ const hasEffects = (tree: unknown): boolean =>
   [...walk(tree)].some(([n]) => EFFECTS.has(n.type));
 
 /**
- * Whether substituting `init` for one read changes when `init` runs: the
- * read sits in a nested function, a loop, a shorthand property, or — for
- * an `init` with effects — after another effect or under a branch that
- * may not be taken.
+ * Whether substituting `init` for one read changes when `init` runs, or
+ * what the statement reads like: the read sits in a nested function, a
+ * loop, a shorthand property, a template literal's hole (a fragment keeps
+ * its name), or — for an `init` with effects — after another effect or
+ * under a branch that may not be taken.
  */
 function moves(read: { node: Node; above: Node[] }, stmt: Node, init: Node): boolean {
   const { node, above } = read;
   const parent = above[above.length - 1];
   if (parent !== undefined && parent.type === "Property" && parent.shorthand) return true;
+  if (parent !== undefined && parent.type === "TemplateLiteral") return true;
   for (let i = 0; i < above.length; i++) {
     const a = above[i];
     if (FUNCTIONS.has(a.type)) return true;
@@ -202,7 +204,8 @@ const substituted = <T>(tree: T, target: Node, replacement: Node): T => {
  * binding, a label or a type position is none; a same-named binding, or a
  * `typeof` of the name, anywhere after the declaration stops the inlining. The one read may not
  * sit inside a nested function or a loop (the initializer would run later,
- * or again), nor be a shorthand property; and an initializer with effects
+ * or again), nor be a shorthand property, nor a template literal's hole (a
+ * template is built from named fragments); and an initializer with effects
  * may not be moved past another effect or under a branch. An annotated
  * const keeps its check.
  *

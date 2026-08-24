@@ -36,6 +36,8 @@ tester.run(
       "function f(seed: () => number, xs: number[]) { const x = seed(); return xs.map(x => x + 1); }",
       // An annotated const keeps its check
       "function f(value: unknown, keep: (n: number) => void) { const checked: number = value as number; keep(checked); }",
+      // A template fragment keeps its name
+      "function f(name: string) { const head = `export function ${name}`; return `${head}(): void`; }",
       // A shorthand property
       "function f(make: () => number) { const n = make(); return { n }; }",
       // An effectful initializer after another effect
