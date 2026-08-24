@@ -24,3 +24,6 @@ coverage/
 .pnp.*
 src/temp
 *.js
+
+# local editor and agent state
+.claude/
