@@ -1,11 +1,8 @@
 import { U, $, C } from "@ts-unify/core";
 import { createRule } from "./create-rule";
 
-// The fluent builder returns a Proxy whose static type (FluentNode) does not
-// structurally satisfy TransformLike, even though the runtime value does.
-// We cast through `any` to keep the tests focused on runtime behaviour.
-const id = U.Identifier({ name: $("n") }) as any;
-const ifStmt = U.IfStatement({ test: $("cond") }) as any;
+const id = U.Identifier({ name: $("n") });
+const ifStmt = U.IfStatement({ test: $("cond") });
 
 describe("createRule", () => {
   it("returns a RuleModule with meta.type = 'suggestion'", () => {
@@ -45,7 +42,7 @@ describe("createRule", () => {
   });
 
   it("runs a Comment entry from the Program visitor and reports at the comment's loc", () => {
-    const rule = createRule(U.Comment({ kind: "line" }) as any);
+    const rule = createRule(U.Comment({ kind: "line" }));
     const reported: any[] = [];
     const visitors = rule.create({ report: (d: any) => reported.push(d) } as any);
     expect(Object.keys(visitors)).toEqual(["Program"]);

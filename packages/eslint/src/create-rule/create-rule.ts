@@ -4,6 +4,7 @@ import { matchWithSites, applyRewrites, symGet, commentNodes } from "@ts-unify/e
 import { extractRuleMeta } from "@ts-unify/runner";
 import type { TSESTree } from "@typescript-eslint/types";
 import type { RuleModule } from "../rule-module";
+import { sourceText } from "../rule-module";
 import type { TransformLike } from "../transform-like";
 import { printNode } from "../print-node";
 
@@ -167,7 +168,7 @@ export function createRule(
 
                     // If imports are specified, prepend missing ones to the file
                     if (importMap) {
-                      const fullSource = sourceCode?.getText?.() ?? "";
+                      const fullSource = sourceText(sourceCode);
                       const missingImports: Record<string, string> = {};
                       for (const [specifier, modulePath] of Object.entries(importMap)) {
                         // Simple heuristic: check if an import of this specifier from this module exists

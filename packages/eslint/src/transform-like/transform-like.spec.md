@@ -3,17 +3,20 @@
 ## Overview
 
 `TransformLike` is the type accepted by `createRule` and `createPlugin` to
-represent any value produced by the fluent builder API (`U`). It is a branded
-object carrying a `[NODE]` symbol key that points to the underlying `ProxyNode`
-trace.
+represent any value produced by the fluent builder API (`U`). It is the union
+of the two shapes the builder returns: a bare pattern (`MatchLike`) and a
+transform with `.to()` (an `AstTransform`).
 
 ## Design
 
-- Defined as `{ readonly [k: symbol]: ProxyNode }`.
-- The symbol key is `NODE` (from `@ts-unify/core`), a well-known symbol used to
-  carry proxy metadata through the builder chain.
-- Any value returned by `U.SomeNode(...)`, `U.or(...)`, or a chained fluent call
-  (`.to(...)`, `.when(...)`, etc.) satisfies this type.
+- `MatchLike` is `{ readonly [FLUENT_INNER]: unknown }`: the brand every
+  `FluentNode<N>` carries. A rule built from one has no rewrite; it reports
+  each match with the default message or the `.message()` text.
+- The second member, `{ readonly [k: symbol]: ProxyNode }`, is the shape of
+  the `.to()` result: the `NODE` symbol (from `@ts-unify/core`) carries the
+  proxy trace through the builder chain.
+- Any value returned by `U.SomeNode(...)`, `U.or(...)`, or a chained fluent
+  call (`.to(...)`, `.when(...)`, etc.) satisfies `TransformLike`.
 
 ## Examples
 

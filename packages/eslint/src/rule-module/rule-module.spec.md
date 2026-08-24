@@ -20,7 +20,12 @@ at the type level.
 
 - `RuleContext` -- subset of ESLint's context: `report()`, `sourceCode` /
   `getSourceCode()`. A report names either the matched `node` or, for a
-  comment match, the comment's `loc`.
+  comment match, the comment's `loc`. ESLint's own `RuleContext` is
+  assignable to it, so a `RuleModule` is a `RuleDefinition` and
+  `RuleTester.run` takes one directly.
+- `sourceCode` is typed loosely because ESLint's generic `SourceCode` has no
+  `getText()`; `sourceText(sourceCode)` reads the full text from either the
+  `text` field or a `getText()` method, and returns `""` for anything else.
 - `RuleFixer` -- `replaceText(node, text)`.
 - `RuleFix` -- `{ range, text }`.
 
