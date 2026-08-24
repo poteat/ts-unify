@@ -7,6 +7,7 @@ import type { NodeKind } from "@/ast/node-kind";
 import type { SEQ_BRAND } from "@/ast/seq-brand";
 import type { StringPredicate } from "@/string-predicate/string-predicate";
 import type { TSESTree } from "@typescript-eslint/types";
+import type { FLUENT_INNER } from "@/ast/fluent-node";
 
 // For object shapes, allow specifying any subset of keys.
 // Omitted keys are treated as "don't care" by consumers.
@@ -29,7 +30,17 @@ type SequencePattern<S extends readonly unknown[]> = ReadonlyArray<
 type ParentShape =
   | NodeByKind[Exclude<NodeKind, "Comment" | "Program">]
   | TSESTree.Program;
-type WithParent = { parent?: Pattern<ParentShape> };
+// A parent pattern is one level deep: a capture, a fluent node, or a shape
+// whose `type` is checked and whose other keys are taken as given. Every
+// AST node carries a `parent`, so a parent pattern as deep as the node
+// would let assignability walk the whole node graph through it.
+type ParentPattern =
+  | CaptureLike<ParentShape>
+  | { readonly [FLUENT_INNER]: unknown }
+  | ({ readonly type?: Capturable<ParentShape["type"]> } & {
+      readonly [key: string]: unknown;
+    });
+type WithParent = { parent?: ParentPattern };
 
 // A string position also accepts a string predicate, or a RegExp standing for one.
 type StringPattern<T> = T extends string
@@ -45,6 +56,10 @@ type StringPattern<T> = T extends string
  * - In sequence positions (arrays/tuples), provide a spread capture `Spread`, or
  * - In string positions, provide a string predicate (`U.string.*`) or a `RegExp`.
  *
+ * Any AST node is accepted at any node position: a captured value (typed by
+ * where it was captured) can be placed where a rebuilt node wants a narrower
+ * kind, and the runtime does not check kinds.
+ *
  * This type defines what inputs are accepted; consumers interpret semantics
  * such as naming, anchoring, and unification.
  */
@@ -53,6 +68,7 @@ export type Pattern<T> = T extends readonly any[]
   : T extends object
   ?
       | Capturable<T>
+      | TSESTree.Node
       | (PatternChildren<T> & WithParent)
       | (PatternChildren<T> & DollarObjectSpread)
       | (PatternChildren<T> & DollarObjectSpread & WithParent)

@@ -8,6 +8,7 @@ import type { IsAstNode } from "@/ast/is-ast-node";
 import type { Sealed } from "@/ast/sealed";
 import type { OR_BRAND } from "@/ast/or";
 import type { SEQ_BRAND } from "@/ast/seq-brand";
+import type { FLUENT_INNER } from "@/ast/fluent-node";
 import type { CAPTURE_MODS_BRAND } from "@/capture/capture-mods/capture-mods";
 import type { Falsy, Truthy } from "@/ast/builder-helpers";
 import type { StripSeal } from "@/pattern/strip-seal";
@@ -156,9 +157,13 @@ type BindSeqElements<Elements extends readonly unknown[], ElemShape> = {
 
 // ————— Main dispatcher —————
 type BindNode<P, S, Key extends string> =
-  // Seq combinator: bind each constituent element against the array
-  // element shape, preserving the SEQ_BRAND wrapper.
-  P extends { readonly [SEQ_BRAND]: infer Elements }
+  // A fluent node is its pattern plus methods; the pattern under the brand
+  // is what binds (the methods would recurse into the node's own captures).
+  P extends { readonly [FLUENT_INNER]: infer N }
+    ? BindNode<N, S, Key>
+    : // Seq combinator: bind each constituent element against the array
+    // element shape, preserving the SEQ_BRAND wrapper.
+    P extends { readonly [SEQ_BRAND]: infer Elements }
     ? Elements extends readonly unknown[]
       ? {
           readonly [SEQ_BRAND]: BindSeqElements<Elements, S>;

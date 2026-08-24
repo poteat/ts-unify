@@ -43,8 +43,13 @@ type ExtractFromPropertyValue<T, Key extends string> = T extends TSESTree.Node
  * concerns: $, Spread, __with, __only, and ReKeyIfSingle for sealed nodes.
  */
 type ExtractCapturesFromPattern<P, Key extends string = ""> =
-  // Sealed subtree: extract inner and (under a property key) re-key if single
-  P extends Sealed<infer _Inner>
+  // A fluent node is its pattern plus methods whose types mention the node's
+  // own captures: walking the methods recurses into this very computation at
+  // every level of nesting. Read the pattern under the brand instead.
+  P extends { readonly [FLUENT_INNER]: infer N }
+    ? ExtractCapturesFromPattern<N, Key>
+    : // Sealed subtree: extract inner and (under a property key) re-key if single
+    P extends Sealed<infer _Inner>
     ? Key extends ""
       ? ExtractCapturesFromPattern<StripSeal<P>, "">
       : ReKeyIfSingle<ExtractCapturesFromPattern<StripSeal<P>, "">, Key>
@@ -61,7 +66,7 @@ type ExtractCapturesFromPattern<P, Key extends string = ""> =
       ? UnionToIntersection<
           {
             [K in keyof Elements]: ExtractCapturesFromPattern<
-              Elements[K] extends { readonly [FLUENT_INNER]: infer N } ? N : Elements[K],
+              Elements[K],
               `${K & string}`
             >;
           }[number]
