@@ -1,10 +1,10 @@
 import { identifierName } from './identifier-name'
 
-const isIdentifierName = identifierName()
-
 const v: unknown = 'name'
 
-describe('identifierName', () => {
+describe('identifier-name', () => {
+  const isIdentifierName = identifierName()
+
   it('accepts ASCII identifiers, $ and _', () => {
     for (const s of ['a', 'fooBar', '_', '$', '$el', '_x1', 'a1', 'x$y_z'])
       expect(isIdentifierName(s)).toBe(true)
@@ -15,7 +15,7 @@ describe('identifierName', () => {
       expect(isIdentifierName(s)).toBe(true)
   })
 
-  it('rejects a leading digit, punctuation, space, and the empty string', () => {
+  it('rejects a leading digit, punctuation, space and the empty string', () => {
     for (const s of ['', '1a', 'foo-bar', 'a b', 'a.b', ' a', 'a\n', '́a'])
       expect(isIdentifierName(s)).toBe(false)
   })

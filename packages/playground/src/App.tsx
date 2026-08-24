@@ -3,12 +3,12 @@ import Editor, { type Monaco } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
 import { Group, Panel, Separator } from "react-resizable-panels";
 import * as rules from "@ts-unify/rules";
-import { extractRuleMeta, lint, fix } from "@ts-unify/runner";
+import { extractRuleMeta, lint, fix, nonOverlapping } from "@ts-unify/runner";
 import type { LintMatch } from "@ts-unify/runner";
 import { parse } from "@typescript-eslint/typescript-estree";
-import { tsGenerate } from "./ts-generate";
-import { SCENARIOS, DEFAULT_CODE } from "./scenarios";
-import { defineMonacoTheme, tokenizeLine } from "./theme";
+import TsGenerate from "./ts-generate";
+import Scenarios from "./scenarios";
+import Theme from "./theme";
 import "./App.css";
 
 // ---------- rule catalog ----------
@@ -18,7 +18,7 @@ const ALL_RULES = Object.entries(rules).map(([name, transform]) =>
 );
 
 const DEFAULT_ENABLED = new Set<string>(
-  ALL_RULES.filter((r) => r.recommended).map((r) => r.kebab)
+  ALL_RULES.filter((r) => r.isRecommended).map((r) => r.kebab)
 );
 
 // ---------- helpers ----------
@@ -49,7 +49,7 @@ function runLint(source: string, enabled: Set<string>) {
 
 function safeSerialize(node: unknown, rule: string): string | null {
   try {
-    return tsGenerate(node);
+    return TsGenerate.tsGenerate(node);
   } catch (e) {
     // eslint-disable-next-line no-console
     console.warn(`[ts-unify] serialize failed for ${rule}:`, e);
@@ -61,7 +61,7 @@ function applyFixes(source: string, enabled: Set<string>): string {
   const enabledRules = ALL_RULES.filter((r) => enabled.has(r.kebab));
   return fix(source, enabledRules, {
     parse: parseSafe,
-    serialize: tsGenerate,
+    serialize: TsGenerate.tsGenerate,
   });
 }
 
@@ -86,19 +86,7 @@ type DiffRow =
 
 function buildDiff(code: string, matches: PlaygroundMatch[]): DiffRow[] {
   const lines = code.split("\n");
-  const sorted = matches
-    .filter((m) => m.rewrite != null)
-    .sort((a, b) => (a.line !== b.line ? a.line - b.line : a.column - b.column));
-  const usable: PlaygroundMatch[] = [];
-  let lastEndLine = -1;
-  let lastEndCol = -1;
-  for (const m of sorted) {
-    if (m.line > lastEndLine || (m.line === lastEndLine && m.column >= lastEndCol)) {
-      usable.push(m);
-      lastEndLine = m.endLine;
-      lastEndCol = m.endColumn;
-    }
-  }
+  const usable = nonOverlapping(matches.filter((m) => m.rewrite != null));
   const rows: DiffRow[] = [];
   let cursor = 1;
   for (const m of usable) {
@@ -127,8 +115,8 @@ function buildDiff(code: string, matches: PlaygroundMatch[]): DiffRow[] {
 // ---------- component ----------
 
 function App() {
-  const [code, setCode] = useState(DEFAULT_CODE);
-  const [scenarioKey, setScenarioKey] = useState<string>(SCENARIOS[0].key);
+  const [code, setCode] = useState(Scenarios.DEFAULT_CODE);
+  const [scenarioKey, setScenarioKey] = useState<string>(Scenarios.SCENARIOS[0].key);
   const [enabledRules, setEnabledRules] = useState<Set<string>>(
     () => new Set(DEFAULT_ENABLED)
   );
@@ -306,8 +294,8 @@ function App() {
                       <button className={`tab ${sourceTab === "ast" ? "active" : ""}`} onClick={() => setSourceTab("ast")}>AST</button>
                     </div>
                     <span className="panel-meta">
-                      <select className="scenario-select" value={scenarioKey} onChange={(e) => { const s = SCENARIOS.find((s) => s.key === e.target.value); if (s) { setScenarioKey(s.key); setCode(s.code); } }} aria-label="scenario">
-                        {SCENARIOS.map((s) => (<option key={s.key} value={s.key}>{s.label}</option>))}
+                      <select className="scenario-select" value={scenarioKey} onChange={(e) => { const s = Scenarios.SCENARIOS.find((s) => s.key === e.target.value); if (s) { setScenarioKey(s.key); setCode(s.code); } }} aria-label="scenario">
+                        {Scenarios.SCENARIOS.map((s) => (<option key={s.key} value={s.key}>{s.label}</option>))}
                       </select>
                       <span className="chip chip-accent">{matches.length} match{matches.length === 1 ? "" : "es"}</span>
                     </span>
@@ -321,7 +309,7 @@ function App() {
                           value={code}
                           onChange={(v) => setCode(v ?? "")}
                           theme="ts-unify-dark"
-                          beforeMount={defineMonacoTheme}
+                          beforeMount={Theme.defineMonacoTheme}
                           options={{ minimap: { enabled: false }, fontSize: 13, scrollBeyondLastLine: false, renderLineHighlight: "none", padding: { top: 10, bottom: 10 }, fontFamily: "JetBrains Mono, SF Mono, ui-monospace, Menlo, monospace" }}
                           onMount={(ed, monaco) => { editorRef.current = ed; monacoRef.current = monaco; setMonacoApi(monaco); paintMarkers(); }}
                         />
@@ -370,7 +358,7 @@ function App() {
 
 function HighlightedCode({ code, monaco, language = "typescript" }: { code: string; monaco: Monaco | null; language?: string }) {
   const lines = useMemo(() => code.split("\n"), [code]);
-  const lineSpans = useMemo(() => lines.map((l) => tokenizeLine(monaco, l, language)), [lines, monaco, language]);
+  const lineSpans = useMemo(() => lines.map((l) => Theme.tokenizeLine(monaco, l, language)), [lines, monaco, language]);
   return (
     <pre className="code-view">
       {lineSpans.map((spans, i) => (
@@ -384,7 +372,7 @@ function HighlightedCode({ code, monaco, language = "typescript" }: { code: stri
 
 function DiffView({ code, matches, monaco }: { code: string; matches: PlaygroundMatch[]; monaco: Monaco | null }) {
   const rows = useMemo(() => buildDiff(code, matches), [code, matches]);
-  const rowSpans = useMemo(() => rows.map((r) => tokenizeLine(monaco, r.line, "typescript")), [rows, monaco]);
+  const rowSpans = useMemo(() => rows.map((r) => Theme.tokenizeLine(monaco, r.line, "typescript")), [rows, monaco]);
   return (
     <div className="diff-view">
       {rows.map((row, i) => (

@@ -1,6 +1,10 @@
-export type Scenario = { key: string; label: string; code: string }
+import type { Scenario } from './scenario'
 
-export const SCENARIOS: Scenario[] = [
+/**
+ * The sample programs the playground's scenario menu offers, the first one
+ * loaded at start. Each exercises one cluster of rules.
+ */
+export const SCENARIOS: readonly Scenario[] = [
   {
     key: 'starter',
     label: 'starter',
@@ -148,5 +152,3 @@ const summary = Object.assign({}, defaults, {
 `,
   },
 ]
-
-export const DEFAULT_CODE = SCENARIOS[0].code

@@ -481,7 +481,7 @@ describe('create-rule', () => {
      * The slot form, for a slot with nothing to capture.
      */
     const reservedName = U.Identifier({
-      name: U.string.reserved({ typescript: true }),
+      name: U.string.reserved({ isTypeScript: true }),
     }).message('reserved')
 
     const messages = (rule: unknown, code: string) =>

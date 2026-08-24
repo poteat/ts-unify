@@ -11,20 +11,21 @@ the predicates: `regex(re)`, `reserved(options?)`, `identifierName()`, and
 
 ## Scope
 
-- Provider of the `StringPredicate` type, the `stringPredicate` brand, the
-  `isStringPredicate` guard, `testString`, and the `U.string` members.
+- Provider of the `StringPredicate` type, the `brandStringPredicate` brand,
+  the `isStringPredicate` guard, `testString`, and the `U.string` members.
 - `Pattern`, `BindCaptures` and `ExtractCaptures` admit a predicate (or a
   `RegExp`) in string positions and leave it unbound; the engine's match
   calls `testString`.
-- The reserved-word table is generated, not written: `reserved-words.ts` is
-  emitted by `scripts/gen-reserved-words.mjs` from the installed TypeScript's
-  keyword table, and `reserved.test.ts` fails when the two differ.
+- The reserved-word tables are generated, not written: `reserved-words.ts`,
+  `strict-mode-reserved-words.ts` and `contextual-keywords.ts` are emitted
+  by `scripts/gen-reserved-words.mjs` from the installed TypeScript's keyword
+  table, and `reserved.test.ts` fails when the two differ.
 
 ## Design
 
 - One mechanism. Every predicate value is recognised by `isStringPredicate`
-  and applied by `testString`; a new test is a new `stringPredicate` call,
-  never a new branch in the matcher or the types.
+  and applied by `testString`; a new test is a new `brandStringPredicate`
+  call, never a new branch in the matcher or the types.
 - One spelling. A predicate is a function of `unknown` returning `boolean`,
   `false` for a non-string, so the slot form `{ name: U.string.reserved() }`
   and the call form `U.string.reserved()(key)` are the same value. A capture
@@ -63,14 +64,14 @@ the predicates: `regex(re)`, `reserved(options?)`, `identifierName()`, and
   | Set | TypeScript range | Counted when |
   | --- | --- | --- |
   | ECMAScript reserved words (`break` ... `with`, `enum`, `null`, `true`, `false`) | `FirstReservedWord`..`LastReservedWord` | always |
-  | Strict-mode reserved words (`implements`, `interface`, `let`, `package`, `private`, `protected`, `public`, `static`, `yield`) | `FirstFutureReservedWord`..`LastFutureReservedWord` | `strict !== false` |
-  | `await` | contextual in TypeScript; reserved in module code by ECMAScript | `strict !== false` |
-  | TypeScript's contextual keywords (`abstract`, `as`, `async`, `declare`, `of`, `type`, ...) | `FirstContextualKeyword`..`LastContextualKeyword` | `typescript === true` |
+  | Strict-mode reserved words (`implements`, `interface`, `let`, `package`, `private`, `protected`, `public`, `static`, `yield`) | `FirstFutureReservedWord`..`LastFutureReservedWord` | `isStrict` |
+  | `await` | contextual in TypeScript; reserved in module code by ECMAScript | `isStrict` |
+  | TypeScript's contextual keywords (`abstract`, `as`, `async`, `declare`, `of`, `type`, ...) | `FirstContextualKeyword`..`LastContextualKeyword` | `isTypeScript` |
 
-  - `strict` defaults to `true` because modules are strict code. `await` is
+  - `isStrict` defaults to `true` because modules are strict code. `await` is
     listed with that set because ECMAScript reserves it in the module goal;
     TypeScript keeps it contextual so that script-goal code may bind it.
-  - `typescript` defaults to `false` because TypeScript's keywords are legal
+  - `isTypeScript` defaults to `false` because TypeScript's keywords are legal
     identifiers (`type`, `of`, `as`); a caller asking whether a name can bind
     does not want them.
   - Case is not normalised: `Class` is not reserved. `eval`, `arguments` and
@@ -92,12 +93,12 @@ U.Property({
 // A slot with nothing to capture takes the predicate directly:
 U.Identifier({ name: U.string.reserved() });
 U.Property({ key: U.Literal({ value: U.string.identifierName() }) });
-U.Identifier({ name: U.string.not(U.string.reserved({ typescript: true })) });
+U.Identifier({ name: U.string.not(U.string.reserved({ isTypeScript: true })) });
 U.Comment({ text: /TODO/ });                       // sugar for U.string.regex(/TODO/)
 
 // Called:
 U.string.reserved()("class");                      // true
-U.string.reserved({ strict: false })("let");       // false
-U.string.reserved({ typescript: true })("type");   // true
+U.string.reserved({ isStrict: false })("let");     // false
+U.string.reserved({ isTypeScript: true })("type"); // true
 U.string.identifierName()("foo-bar");              // false
 ```

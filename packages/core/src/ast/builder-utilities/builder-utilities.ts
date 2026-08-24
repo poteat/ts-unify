@@ -3,7 +3,7 @@ import type { FromNode } from '@/ast/from-node'
 import type { MaybeBlockCombinator } from '@/ast/maybe-block'
 import type { SeqCombinator } from '@/ast/node-with-seq'
 import type { OrCombinator } from '@/ast/or'
-import type { StringPredicates } from '@/string-predicate/string-predicates'
+import type { StringPredicateTable } from '@/string-predicate/string-predicates'
 
 /**
  * The helpers on the `U` namespace that belong to no AST kind: guards,
@@ -20,5 +20,5 @@ export type BuilderUtilities = {
    * Predicates for the string positions of a pattern, each callable on a
    * captured value too; see string-predicate.spec.md.
    */
-  readonly string: StringPredicates
+  readonly string: StringPredicateTable
 }

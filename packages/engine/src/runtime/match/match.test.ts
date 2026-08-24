@@ -169,13 +169,13 @@ describe('match', () => {
       expect(
         match(
           Fixtures.identifier('let'),
-          U.Identifier({ name: U.string.reserved({ strict: false }) }),
+          U.Identifier({ name: U.string.reserved({ isStrict: false }) }),
         ),
       ).toBeNull()
       expect(
         match(
           Fixtures.identifier('type'),
-          U.Identifier({ name: U.string.reserved({ typescript: true }) }),
+          U.Identifier({ name: U.string.reserved({ isTypeScript: true }) }),
         ),
       ).toEqual({})
     })

@@ -1,89 +1,13 @@
 import type { Monaco } from '@monaco-editor/react'
 
-// ---------- token colors ----------
+import { registerJsonTokenizer } from './register-json-tokenizer'
 
-const TOKEN_COLOR: Record<string, string> = {
-  comment: '#545a69',
-  keyword: '#8b8cf5',
-  string: '#a8d08d',
-  'string.escape': '#c9e0b0',
-  'string.key': '#7dc4e4',
-  regexp: '#a8d08d',
-  number: '#e5b575',
-  type: '#7dc4e4',
-  identifier: '#cdd3dc',
-  delimiter: '#767c8b',
-  operator: '#b5bac2',
-}
-
-export function tokenColor(type: string) {
-  const parts = type.split('.')
-
-  while (parts.length > 0) {
-    const key = parts.join('.')
-    if (TOKEN_COLOR[key]) return TOKEN_COLOR[key]
-    parts.pop()
-  }
-
-  return '#cdd3dc'
-}
-
-export type Span = { text: string; color: string }
-
-export function tokenizeLine(
-  monaco: Monaco | null,
-  line: string,
-  language: string,
-): Span[] {
-  if (!monaco || line.length === 0) return [{ text: line, color: '#cdd3dc' }]
-  const tokens = monaco.editor.tokenize(line, language)[0] ?? []
-  if (tokens.length === 0) return [{ text: line, color: '#cdd3dc' }]
-  const spans: Span[] = []
-
-  for (let i = 0; i < tokens.length; i++) {
-    const t = tokens[i]
-    const next = tokens[i + 1]
-    const text = line.slice(t.offset, next ? next.offset : line.length)
-
-    if (text)
-      spans.push({
-        text,
-        color: tokenColor(t.type),
-      })
-  }
-
-  return spans
-}
-
-// ---------- JSON tokenizer ----------
-
-function registerJsonTokenizer(monaco: Monaco) {
-  if (
-    !monaco.languages
-      .getLanguages()
-      .some((l: { id: string }) => l.id === 'json')
-  ) {
-    monaco.languages.register({
-      id: 'json',
-    })
-  }
-
-  monaco.languages.setMonarchTokensProvider('json', {
-    tokenizer: {
-      root: [
-        [/"(?:[^"\\]|\\.)*"(?=\s*:)/, 'string.key.json'],
-        [/"(?:[^"\\]|\\.)*"/, 'string.value.json'],
-        [/-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/, 'number.json'],
-        [/\b(?:true|false|null)\b/, 'keyword.json'],
-        [/[{}[\],:]/, 'delimiter.json'],
-        [/\s+/, ''],
-      ],
-    },
-  })
-}
-
-// ---------- Monaco theme ----------
-
+/**
+ * Register the playground's dark theme, `ts-unify-dark`, and its JSON
+ * tokenizer on a Monaco instance; the editor's `beforeMount` hook.
+ *
+ * @param monaco the Monaco instance about to mount
+ */
 export function defineMonacoTheme(monaco: Monaco) {
   registerJsonTokenizer(monaco)
   monaco.editor.defineTheme('ts-unify-dark', {
