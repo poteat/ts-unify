@@ -18,6 +18,9 @@ import type { SingleValueOf } from "@/type-utils/single-value-of";
  * - Bag guard — `(bag): bag is Narrow` refines the node by structurally
  *   updating capture/spread occurrences.
  * - Bag predicate — `(bag) => boolean` returns the same node type.
+ *
+ * The bag forms are open to a single-capture node too, with an annotated
+ * parameter: the match passes the bag at runtime whatever the capture count.
  */
 export type NodeWithWhen<Node> = Node & {
   /**
@@ -62,12 +65,8 @@ export type NodeWithWhen<Node> = Node & {
    * @returns A node with all occurrences narrowed per the refined bag.
    */
   when<Narrow extends ExtractCaptures<Node>>(
-    guard: [HasSingleCapture<Node>] extends [true]
-      ? never
-      : (bag: ExtractCaptures<Node>) => bag is Narrow
-  ): [HasSingleCapture<Node>] extends [true]
-    ? never
-    : FluentNode<SubstituteCaptures<Node, Narrow>>;
+    guard: (bag: ExtractCaptures<Node>) => bag is Narrow
+  ): FluentNode<SubstituteCaptures<Node, Narrow>>;
 
   /**
    * Bag boolean predicate overload. Accepts a predicate over the capture bag
@@ -77,9 +76,5 @@ export type NodeWithWhen<Node> = Node & {
    * the node from matching.
    * @returns The same node type (no narrowing).
    */
-  when(
-    predicate: [HasSingleCapture<Node>] extends [true]
-      ? never
-      : (bag: ExtractCaptures<Node>) => boolean
-  ): [HasSingleCapture<Node>] extends [true] ? never : FluentNode<Node>;
+  when(predicate: (bag: ExtractCaptures<Node>) => boolean): FluentNode<Node>;
 };

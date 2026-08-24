@@ -15,9 +15,12 @@ not pass it around manually.
 - Single‑capture callbacks (node has exactly one capture):
   - `(value) => boolean` — checks a condition; no type change.
   - `(value): value is Narrow` — narrows that capture’s value type.
-- Bag callbacks (multiple captures):
+- Bag callbacks (any capture count):
   - `(bag) => boolean` — checks a condition; no type change.
   - `(bag): bag is Narrow` — narrows each named capture in the node.
+  - On a single‑capture node the single‑capture overloads come first, so a
+    bag callback there annotates its parameter (`(bag: { key: unknown })`);
+    an unannotated or destructured lambda is typed as the value form.
 - Narrowing updates embedded capture tokens; spread captures refine their
   element types when the bag entry is a readonly array.
 - Chaining: each guard’s narrowing feeds into the next `.when`.
@@ -33,6 +36,12 @@ not pass it around manually.
 const r = U.ReturnStatement({ argument: $("arg") })
   .when((arg) => arg != null) // predicate (no narrowing)
   .when((arg): arg is string => true); // guard (narrows arg to string)
+
+// One capture under a U.or — annotated bag guard, applied once whichever
+// branch bound it, narrowing `key` where the or is embedded
+const key = U.or(U.Identifier({ name: $("key") }), U.Literal({ value: $("key") }))
+  .when((bag: { key: unknown }): bag is { key: string } =>
+    U.string.identifierName()(bag.key) && !U.string.reserved()(bag.key));
 
 // Multiple captures — bag callback
 const i = U.IfStatement({
