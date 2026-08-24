@@ -14,7 +14,7 @@ describe('spread-new-set-to-uniq.eslint', () => {
     'spread-new-set-to-uniq',
     createRule(spreadNewSetToUniq, {
       message: 'Use uniq() instead of [...new Set()]',
-      fix: true,
+      canFix: true,
     }),
     {
       valid: [

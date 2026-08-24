@@ -14,7 +14,7 @@ describe('typeof-undefined-to-nullish-check.eslint', () => {
     'typeof-undefined',
     createRule(typeofUndefinedToNullishCheck, {
       message: "Use == null instead of typeof === 'undefined'",
-      fix: true,
+      canFix: true,
     }),
     {
       valid: ["typeof x === 'string';", 'x === undefined;'],

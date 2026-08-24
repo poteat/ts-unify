@@ -5,7 +5,7 @@ import { commentNodes } from './comment-nodes'
 import Fixtures from './fixtures'
 
 const headers = (code: string) =>
-  commentNodes(Fixtures.program(code)).map(c => c.header)
+  commentNodes(Fixtures.program(code)).map(c => c.isHeader)
 
 describe('comment-nodes', () => {
   it('gives every comment a kind and its text without delimiters', () => {
@@ -17,19 +17,19 @@ describe('comment-nodes', () => {
       type: 'Comment',
       kind: 'line',
       text: ' a',
-      header: true,
+      isHeader: true,
     })
 
     expect(block).toMatchObject({
       kind: 'block',
       text: ' b ',
-      header: false,
+      isHeader: false,
     })
 
     expect(jsdoc).toMatchObject({
       kind: 'jsdoc',
       text: 'c',
-      header: false,
+      isHeader: false,
     })
   })
 

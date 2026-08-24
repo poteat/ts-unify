@@ -1,6 +1,6 @@
+import Sub from '../../sub'
 import type { Constraint } from './constraint'
 import { countDescendant } from './count-descendant'
-import Sub from '../../sub'
 
 /**
  * How many descendants of a node match a constraint, the node itself not

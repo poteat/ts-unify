@@ -110,7 +110,7 @@ describe('create-rule', () => {
     expect(
       createRule(
         U.Identifier({ name: $('n') }).to(it => U.Identifier({ name: it.n })),
-        { fix: true },
+        { canFix: true },
       ).meta.fixable,
     ).toBe('code')
   })
@@ -163,7 +163,7 @@ describe('create-rule', () => {
         )
         .imports({ uniq: C('from') })
         .config({ from: 'lodash' }),
-      { fix: true },
+      { canFix: true },
     )
     expect(rule.meta.fixable).toBe('code')
 
@@ -189,7 +189,7 @@ describe('create-rule', () => {
           .to(it => U.Identifier({ name: it.n }))
           .imports({ uniq: 'lodash' })
           .config({}),
-        { fix: true },
+        { canFix: true },
       ),
       { getText: () => 'import { uniq } from "lodash";\nconst x = foo;' },
     )
@@ -241,13 +241,13 @@ describe('create-rule', () => {
       U.Comment({
         kind: U.or('line', 'block'),
         text: $('text'),
-        header: $('isHeader'),
+        isHeader: $('isHeader'),
       }).when(it => !Fixtures.DIRECTIVE.test(it.text)),
       U.Comment({
         kind: 'jsdoc',
         attachedTo: null,
         text: $('text'),
-        header: $('isHeader'),
+        isHeader: $('isHeader'),
       }),
     )
       .when(({ text, isHeader }) => !(isHeader && Fixtures.LICENSE.test(text)))

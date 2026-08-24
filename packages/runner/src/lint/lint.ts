@@ -54,7 +54,7 @@ export function lint(ast: unknown, rules: readonly RuleMeta[]): LintMatch[] {
   }
 
   function walk(node: unknown, parent: unknown) {
-    if (typeof node !== 'object' || node === null) return
+    if (typeof node !== 'object' || !node) return
 
     if (isAstNode(node)) {
       node.parent = parent

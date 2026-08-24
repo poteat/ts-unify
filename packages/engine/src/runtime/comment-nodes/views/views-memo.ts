@@ -11,7 +11,7 @@ export function viewsMemo(): { of: (program: unknown) => Views } {
 
   return {
     of: program => {
-      if (typeof program !== 'object' || program === null) {
+      if (typeof program !== 'object' || !program) {
         return { list: [], byRaw: new WeakMap() }
       }
 

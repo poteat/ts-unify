@@ -33,6 +33,7 @@ export type NodeWithTo<Node> = {
   /**
    * Attaches the rewrite that fills a node kind with the captures, as
    * `.to(bag => Builder(bag))` would.
+   *
    * @param builder the builder of the output kind
    */
   to<K extends NodeKind>(
@@ -47,6 +48,7 @@ export type NodeWithTo<Node> = {
 
   /**
    * Attaches the rewrite whose output the factory builds from the bag.
+   *
    * @param factory receives the capture bag of a match
    */
   to<Result>(

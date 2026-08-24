@@ -9,7 +9,8 @@ export type RuleOptions = {
   message: string | undefined
 
   /**
-   * Whether the top-level rewrite becomes a fix; false withholds it.
+   * Whether the rewrites become fixes; false reports alone, every site
+   * withheld.
    */
-  fix: boolean
+  canFix: boolean
 }

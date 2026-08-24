@@ -1,5 +1,5 @@
-import type { NamedBinding } from './named-binding'
 import Sub from '../../sub'
+import type { NamedBinding } from './named-binding'
 
 /**
  * Whether every name bound more than once was bound to equal values.

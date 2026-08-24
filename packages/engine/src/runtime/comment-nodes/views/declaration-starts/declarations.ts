@@ -18,6 +18,8 @@ export const DECLARATIONS: ReadonlySet<string> = new Set([
   'TSAbstractPropertyDefinition',
   'TSPropertySignature',
   'TSMethodSignature',
+  'TSCallSignatureDeclaration',
+  'TSConstructSignatureDeclaration',
   'Property',
   'ExportNamedDeclaration',
   'ExportDefaultDeclaration',

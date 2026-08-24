@@ -26,7 +26,7 @@ like any other.
 - `attachedTo` is a plain `TSESTree.Node | null`, so a nested node pattern (or
   a `U.or` of several) reads the declaration's name in the same match.
 - `header` marks a comment that opens the file, so a license or module header
-  is one field away: `U.Comment({ header: true })`.
+  is one field away: `U.Comment({ isHeader: true })`.
 
 ## Semantics
 
@@ -62,7 +62,7 @@ like any other.
 
 ```ts
 U.Comment({ kind: "jsdoc", attachedTo: null });
-U.Comment({ header: true, text: /licen[cs]e/i });
+U.Comment({ isHeader: true, text: /licen[cs]e/i });
 U.Comment({ kind: "jsdoc", summary: [$, $, $, ...$] });
 U.Comment({ attachedTo: U.FunctionDeclaration({ id: U.Identifier({ name: $("name") }) }) });
 ```

@@ -15,11 +15,10 @@ import type { Overwrite } from '@/type-utils'
 export type NodeWithWith<Node> = Node & {
   /**
    * Merges the bag the callback returns into the capture bag.
+   *
    * @param fn computes the new entries from the captures of a match
    */
-  with<NewBag>(
-    fn: (bag: ExtractCaptures<Node>) => NewBag,
-  ): FluentNode<
+  with<NewBag>(fn: (bag: ExtractCaptures<Node>) => NewBag): FluentNode<
     SubstituteCaptures<Omit<Node, '__with'>, OverwriteBag<Node, NewBag>> & {
       readonly __with: Node extends { readonly __with: infer WB }
         ? Overwrite<WB, NormalizeBag<NewBag>>

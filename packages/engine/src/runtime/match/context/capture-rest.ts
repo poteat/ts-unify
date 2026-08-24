@@ -1,6 +1,6 @@
+import Sub from '../../sub'
 import type { Bag } from '../bag'
 import type { Cursor } from './cursor'
-import Sub from '../../sub'
 
 /**
  * The structural properties of a node the pattern did not name, captured

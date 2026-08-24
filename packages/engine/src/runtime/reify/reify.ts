@@ -5,9 +5,8 @@ import SymGet from '../sym-get'
  * the form recast's `print()` takes.
  *
  * @param value a proxy, a node, an array of either, or a primitive
- * @param sourceCode a source handle, reserved and not yet read
  */
-export function reify(value: unknown, sourceCode?: unknown): unknown {
+export function reify(value: unknown): unknown {
   const node = SymGet.proxyNodeOf(value)
 
   if (node) {
@@ -20,13 +19,11 @@ export function reify(value: unknown, sourceCode?: unknown): unknown {
     for (const [k, v] of Object.entries(args)) {
       if (k === 'type') continue
 
-      result[k] = reify(v, sourceCode)
+      result[k] = reify(v)
     }
 
     return result
   }
 
-  return Array.isArray(value)
-    ? value.map((v: unknown) => reify(v, sourceCode))
-    : value
+  return Array.isArray(value) ? value.map((v: unknown) => reify(v)) : value
 }

@@ -29,7 +29,8 @@ export function createRule(
   const meta = extractRuleMeta('', transform)
   const entries = meta.patterns
   const message = opts.message ?? (meta.message || DEFAULT_MESSAGE)
-  const factory = opts.fix === false ? null : meta.factory
+  const canFix = opts.canFix !== false
+  const factory = canFix ? meta.factory : null
   const withEntries = meta.withs
   const proxyNode = symGet(transform, NODE) as ProxyNode | undefined
   const isFixable = factory !== null || patternContainsInnerTo(entries)
@@ -68,7 +69,7 @@ export function createRule(
                 : String(v)
           }
 
-          const sites = [...result.sites]
+          const sites = canFix ? [...result.sites] : []
 
           if (factory && !sites.some(s => s.path.length === 0)) {
             sites.push({
@@ -106,12 +107,7 @@ export function createRule(
                     }
 
                     const text = PrintNode.printNode(
-                      applyRewrites(
-                        node,
-                        sites,
-                        result.capturePaths,
-                        sourceCode,
-                      ),
+                      applyRewrites(node, sites, result.capturePaths),
                     )
 
                     if (

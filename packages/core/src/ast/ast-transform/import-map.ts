@@ -8,4 +8,4 @@ import type { ConfigSlot } from '@/config/config-type'
  * `"default as foo"` is `import foo`, and `"* as foo"` is
  * `import * as foo`.
  */
-export type ImportMap = Record<string, string | ConfigSlot>
+export type ImportMap = Readonly<Record<string, string | ConfigSlot>>

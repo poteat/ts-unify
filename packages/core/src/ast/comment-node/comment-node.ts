@@ -45,7 +45,7 @@ export type CommentNode = {
   /**
    * `true` when nothing but whitespace precedes the comment.
    */
-  header: boolean
+  isHeader: boolean
 
   loc: TSESTree.SourceLocation
   range: TSESTree.Range

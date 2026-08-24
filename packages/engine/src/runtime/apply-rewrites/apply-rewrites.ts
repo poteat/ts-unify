@@ -16,13 +16,11 @@ import { setAt } from './set-at'
  * @param matchedNode the node the pattern matched; left as it was
  * @param sites the rewrite sites the match recorded
  * @param capturePaths where each named capture was sourced from
- * @param sourceCode a source handle, handed on to `reify` and not yet read
  */
 export function applyRewrites(
   matchedNode: unknown,
   sites: ReadonlyArray<RewriteSite>,
   capturePaths: Record<string, Path> = {},
-  sourceCode?: unknown,
 ): unknown {
   if (sites.length === 0) return null
 
@@ -35,7 +33,7 @@ export function applyRewrites(
   const ordered = [...sites].sort((a, b) => b.path.length - a.path.length)
 
   for (const site of ordered) {
-    const reified = Reify.reify(site.factory(site.scopeBag), sourceCode)
+    const reified = Reify.reify(site.factory(site.scopeBag))
 
     if (site.path.length === 0) {
       root = reified

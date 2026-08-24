@@ -30,7 +30,7 @@ export function toCommentNode(
     ),
     ...parts,
     attachedTo: attachedDeclaration(raw, setting.starts, setting.tokenStarts),
-    header: setting.isHeader,
+    isHeader: setting.isHeader,
     loc: raw.loc,
     range: raw.range,
     parent: setting.parent,

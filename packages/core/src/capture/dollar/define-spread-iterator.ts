@@ -10,7 +10,7 @@ import Spread from '@/capture/spread'
 export const defineSpreadIterator = <Name extends string, Value>(
   target: object,
   name: Name,
-): void => {
+) => {
   Object.defineProperty(target, Symbol.iterator, {
     enumerable: false,
     configurable: false,
