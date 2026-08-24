@@ -1,27 +1,29 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { RuleTester } = require('@typescript-eslint/rule-tester')
+/**
+ * guardAndAccessToOptionalChain compiled by createRule and driven through
+ * ESLint's RuleTester over the cases below.
+ *
+ * @scenario
+ */
 import { createRule } from '@ts-unify/eslint/internal'
 import { guardAndAccessToOptionalChain } from '@ts-unify/rules'
 
-const tester = new RuleTester({
-  languageOptions: {
-    parser: require('@typescript-eslint/parser'),
-  },
-})
+import Tester from '../tester'
 
-tester.run(
-  'guard-and-access',
-  createRule(guardAndAccessToOptionalChain, {
-    message: 'Use optional chaining',
-  }),
-  {
-    valid: ['obj?.prop;', 'obj || obj.prop;', 'obj && other.prop;'],
-    invalid: [
-      {
-        code: 'obj && obj.prop;',
-        errors: [{ messageId: 'match' }],
-        output: 'obj?.prop;',
-      },
-    ],
-  },
-)
+describe('guard-and-access-to-optional-chain.eslint', () => {
+  Tester.run(
+    'guard-and-access',
+    createRule(guardAndAccessToOptionalChain, {
+      message: 'Use optional chaining',
+    }),
+    {
+      valid: ['obj?.prop;', 'obj || obj.prop;', 'obj && other.prop;'],
+      invalid: [
+        {
+          code: 'obj && obj.prop;',
+          errors: [{ messageId: 'match' }],
+          output: 'obj?.prop;',
+        },
+      ],
+    },
+  )
+})

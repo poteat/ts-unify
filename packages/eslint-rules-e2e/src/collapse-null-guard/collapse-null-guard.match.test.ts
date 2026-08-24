@@ -1,8 +1,14 @@
+/**
+ * The patterns extractPatterns reads off collapseNullGuard, matched against
+ * hand-built nodes.
+ *
+ * @scenario
+ */
 import { match, extractPatterns } from '@ts-unify/engine'
 import { collapseNullGuard } from '@ts-unify/rules'
 
-describe('collapseNullGuard matching', () => {
-  const rule = extractPatterns(collapseNullGuard)[0]!
+describe('collapse-null-guard.match', () => {
+  const rule = extractPatterns(collapseNullGuard)[0]
 
   it('extracts as a BlockStatement pattern', () => {
     expect(rule.tag).toBe('BlockStatement')
@@ -66,12 +72,12 @@ describe('collapseNullGuard matching', () => {
 
     expect(bag).not.toBeNull()
 
-    expect(bag!.value).toEqual({
+    expect(bag?.value).toEqual({
       type: 'Identifier',
       name: 'x',
     })
 
-    expect(bag!.fallback).toEqual({
+    expect(bag?.fallback).toEqual({
       type: 'Identifier',
       name: 'def',
     })
@@ -126,7 +132,7 @@ describe('collapseNullGuard matching', () => {
     )
 
     expect(bag).not.toBeNull()
-    expect(bag!.body).toEqual([])
+    expect(bag?.body).toEqual([])
   })
 
   it('rejects when null check has wrong operator', () => {

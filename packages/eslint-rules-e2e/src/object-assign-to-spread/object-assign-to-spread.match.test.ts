@@ -1,8 +1,14 @@
+/**
+ * The patterns extractPatterns reads off objectAssignToSpread, matched against
+ * hand-built nodes.
+ *
+ * @scenario
+ */
 import { match, extractPatterns } from '@ts-unify/engine'
 import { objectAssignToSpread } from '@ts-unify/rules'
 
-describe('objectAssignToSpread matching', () => {
-  const rule = extractPatterns(objectAssignToSpread)[0]!
+describe('object-assign-to-spread.match', () => {
+  const rule = extractPatterns(objectAssignToSpread)[0]
 
   it('extracts as a CallExpression pattern', () => {
     expect(rule.tag).toBe('CallExpression')
@@ -55,7 +61,7 @@ describe('objectAssignToSpread matching', () => {
     )
 
     expect(bag).not.toBeNull()
-    expect(bag!.sources).toEqual([a, b])
+    expect(bag?.sources).toEqual([a, b])
   })
 
   it('matches Object.assign({}, single)', () => {
@@ -98,7 +104,7 @@ describe('objectAssignToSpread matching', () => {
 
     expect(bag).not.toBeNull()
 
-    expect(bag!.sources).toEqual([
+    expect(bag?.sources).toEqual([
       {
         type: 'Identifier',
         name: 'x',
@@ -184,7 +190,7 @@ describe('objectAssignToSpread matching', () => {
     ).toBeNull()
   })
 
-  it('rejects Object.assign(existingObj, a) (first arg not empty object)', () => {
+  it('rejects Object.assign(existingObj, a): the first argument is {}', () => {
     expect(
       match(
         {

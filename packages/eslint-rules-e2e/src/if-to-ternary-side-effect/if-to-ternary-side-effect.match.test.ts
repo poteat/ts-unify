@@ -1,8 +1,14 @@
+/**
+ * The patterns extractPatterns reads off ifToTernarySideEffect, matched against
+ * hand-built nodes.
+ *
+ * @scenario
+ */
 import { match, extractPatterns } from '@ts-unify/engine'
 import { ifToTernarySideEffect } from '@ts-unify/rules'
 
-describe('ifToTernarySideEffect matching', () => {
-  const rule = extractPatterns(ifToTernarySideEffect)[0]!
+describe('if-to-ternary-side-effect.match', () => {
+  const rule = extractPatterns(ifToTernarySideEffect)[0]
 
   it('extracts as an IfStatement pattern', () => {
     expect(rule.tag).toBe('IfStatement')
@@ -53,7 +59,7 @@ describe('ifToTernarySideEffect matching', () => {
 
     expect(bag).not.toBeNull()
 
-    expect(bag!.test).toEqual({
+    expect(bag?.test).toEqual({
       type: 'Identifier',
       name: 'cond',
     })

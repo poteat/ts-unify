@@ -1,8 +1,14 @@
+/**
+ * The patterns extractPatterns reads off guardedForPushToFilterMap, matched
+ * against hand-built nodes.
+ *
+ * @scenario
+ */
 import { match, extractPatterns } from '@ts-unify/engine'
 import { guardedForPushToFilterMap } from '@ts-unify/rules'
 
-describe('guardedForPushToFilterMap matching', () => {
-  const rule = extractPatterns(guardedForPushToFilterMap)[0]!
+describe('guarded-for-push-to-filter-map.match', () => {
+  const rule = extractPatterns(guardedForPushToFilterMap)[0]
 
   it('extracts as a BlockStatement pattern', () => {
     expect(rule.tag).toBe('BlockStatement')
@@ -111,18 +117,18 @@ describe('guardedForPushToFilterMap matching', () => {
 
     expect(bag).not.toBeNull()
 
-    expect(bag!.source).toEqual({
+    expect(bag?.source).toEqual({
       type: 'Identifier',
       name: 'items',
     })
 
-    expect(bag!.condition).toEqual({
+    expect(bag?.condition).toEqual({
       type: 'Identifier',
       name: 'cond',
     })
 
-    expect(bag!.before).toEqual([])
-    expect(bag!.after).toEqual([])
+    expect(bag?.before).toEqual([])
+    expect(bag?.after).toEqual([])
   })
 
   it('matches with before/after statements', () => {
@@ -237,8 +243,8 @@ describe('guardedForPushToFilterMap matching', () => {
     )
 
     expect(bag).not.toBeNull()
-    expect(bag!.before).toHaveLength(1)
-    expect(bag!.after).toHaveLength(1)
+    expect(bag?.before).toHaveLength(1)
+    expect(bag?.after).toHaveLength(1)
   })
 
   it('rejects a BlockStatement whose body is empty', () => {

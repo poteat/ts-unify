@@ -1,8 +1,14 @@
+/**
+ * The patterns extractPatterns reads off ifGuardedCallToOptional, matched
+ * against hand-built nodes.
+ *
+ * @scenario
+ */
 import { match, extractPatterns } from '@ts-unify/engine'
 import { ifGuardedCallToOptional } from '@ts-unify/rules'
 
-describe('ifGuardedCallToOptional matching', () => {
-  const rule = extractPatterns(ifGuardedCallToOptional)[0]!
+describe('if-guarded-call-to-optional.match', () => {
+  const rule = extractPatterns(ifGuardedCallToOptional)[0]
 
   it('extracts as an IfStatement pattern', () => {
     expect(rule.tag).toBe('IfStatement')
@@ -51,7 +57,7 @@ describe('ifGuardedCallToOptional matching', () => {
 
     expect(bag).not.toBeNull()
 
-    expect(bag!.callee).toEqual({
+    expect(bag?.callee).toEqual({
       type: 'Identifier',
       name: 'fn',
     })
@@ -90,7 +96,7 @@ describe('ifGuardedCallToOptional matching', () => {
     ).not.toBeNull()
   })
 
-  it('rejects if (fn) { fn(args); } else { ... } (alternate must be null)', () => {
+  it('rejects if (fn) { fn(args); } else { ... }: no alternate', () => {
     expect(
       match(
         {

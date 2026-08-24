@@ -1,8 +1,14 @@
+/**
+ * The patterns extractPatterns reads off ifReturnToTernary, matched against
+ * hand-built nodes.
+ *
+ * @scenario
+ */
 import { match, extractPatterns } from '@ts-unify/engine'
 import { ifReturnToTernary } from '@ts-unify/rules'
 
-describe('ifReturnToTernary matching', () => {
-  const rule = extractPatterns(ifReturnToTernary)[0]!
+describe('if-return-to-ternary.match', () => {
+  const rule = extractPatterns(ifReturnToTernary)[0]
 
   it('extracts as an IfStatement pattern', () => {
     expect(rule.tag).toBe('IfStatement')
@@ -53,7 +59,7 @@ describe('ifReturnToTernary matching', () => {
 
     expect(bag).not.toBeNull()
 
-    expect(bag!.test).toEqual({
+    expect(bag?.test).toEqual({
       type: 'Identifier',
       name: 'cond',
     })

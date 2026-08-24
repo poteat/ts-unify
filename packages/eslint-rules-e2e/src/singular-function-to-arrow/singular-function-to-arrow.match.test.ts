@@ -1,10 +1,16 @@
+/**
+ * The patterns extractPatterns reads off singularFunctionToArrow, matched
+ * against hand-built nodes.
+ *
+ * @scenario
+ */
 import { match, extractPatterns } from '@ts-unify/engine'
 import { singularFunctionToArrow } from '@ts-unify/rules'
 
-describe('singularFunctionToArrow matching', () => {
+describe('singular-function-to-arrow.match', () => {
   const patterns = extractPatterns(singularFunctionToArrow)
 
-  it('extracts two branches: FunctionDeclaration and FunctionExpression', () => {
+  it('extracts the FunctionDeclaration and FunctionExpression branches', () => {
     expect(patterns).toHaveLength(2)
     expect(patterns[0].tag).toBe('FunctionDeclaration')
     expect(patterns[1].tag).toBe('FunctionExpression')

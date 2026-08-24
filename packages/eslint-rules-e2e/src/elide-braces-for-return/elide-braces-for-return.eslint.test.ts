@@ -1,37 +1,39 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { RuleTester } = require('@typescript-eslint/rule-tester')
+/**
+ * elideBracesForReturn compiled by createRule and driven through ESLint's
+ * RuleTester over the cases below.
+ *
+ * @scenario
+ */
 import { createRule } from '@ts-unify/eslint/internal'
 import { elideBracesForReturn } from '@ts-unify/rules'
 
-const tester = new RuleTester({
-  languageOptions: {
-    parser: require('@typescript-eslint/parser'),
-  },
-})
+import Tester from '../tester'
 
-tester.run(
-  'elide-braces-for-return',
-  createRule(elideBracesForReturn, {
-    message: 'Elide braces for arrow function with single return',
-  }),
-  {
-    valid: [
-      'const f = (x) => x + 1;',
-      'function foo() { return 1; }',
-      'const f = () => { a(); b(); };',
-      'const f = () => { const x = 1; return x; };',
-    ],
-    invalid: [
-      {
-        code: 'const f = (x) => { return x + 1; };',
-        errors: [{ messageId: 'match' }],
-        output: 'const f = (x) => x + 1;',
-      },
-      {
-        code: 'const g = () => { return 42; };',
-        errors: [{ messageId: 'match' }],
-        output: 'const g = () => 42;',
-      },
-    ],
-  },
-)
+describe('elide-braces-for-return.eslint', () => {
+  Tester.run(
+    'elide-braces-for-return',
+    createRule(elideBracesForReturn, {
+      message: 'Elide braces for arrow function with single return',
+    }),
+    {
+      valid: [
+        'const f = (x) => x + 1;',
+        'function foo() { return 1; }',
+        'const f = () => { a(); b(); };',
+        'const f = () => { const x = 1; return x; };',
+      ],
+      invalid: [
+        {
+          code: 'const f = (x) => { return x + 1; };',
+          errors: [{ messageId: 'match' }],
+          output: 'const f = (x) => x + 1;',
+        },
+        {
+          code: 'const g = () => { return 42; };',
+          errors: [{ messageId: 'match' }],
+          output: 'const g = () => 42;',
+        },
+      ],
+    },
+  )
+})

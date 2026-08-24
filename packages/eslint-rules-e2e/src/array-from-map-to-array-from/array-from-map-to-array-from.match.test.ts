@@ -1,8 +1,16 @@
+/**
+ * The patterns extractPatterns reads off arrayFromMapToArrayFrom, matched
+ * against hand-built nodes.
+ *
+ * @scenario
+ */
 import { match, extractPatterns } from '@ts-unify/engine'
 import { arrayFromMapToArrayFrom } from '@ts-unify/rules'
 
-describe('arrayFromMapToArrayFrom matching', () => {
-  const rule = extractPatterns(arrayFromMapToArrayFrom)[0]!
+import Nodes from '../nodes'
+
+describe('array-from-map-to-array-from.match', () => {
+  const rule = extractPatterns(arrayFromMapToArrayFrom)[0]
 
   it('extracts as a CallExpression pattern', () => {
     expect(rule.tag).toBe('CallExpression')
@@ -14,21 +22,18 @@ describe('arrayFromMapToArrayFrom matching', () => {
       name: 'items',
     }
 
-    const mapFn = {
-      type: 'ArrowFunctionExpression',
-
-      params: [
+    const mapFn = Nodes.arrowOf(
+      [
         {
           type: 'Identifier',
           name: 'x',
         },
       ],
-
-      body: {
+      {
         type: 'Identifier',
         name: 'x',
       },
-    }
+    )
 
     const bag = match(
       {
@@ -77,8 +82,8 @@ describe('arrayFromMapToArrayFrom matching', () => {
     )
 
     expect(bag).not.toBeNull()
-    expect(bag!.iterable).toEqual(iterable)
-    expect(bag!.mapFn).toEqual(mapFn)
+    expect(bag?.iterable).toEqual(iterable)
+    expect(bag?.mapFn).toEqual(mapFn)
   })
 
   it('rejects Array.from(iterable).filter(fn) (wrong method)', () => {

@@ -1,32 +1,37 @@
+/**
+ * The patterns extractPatterns reads off addReturnToBlock, matched against
+ * hand-built nodes.
+ *
+ * @scenario
+ */
 import { match, extractPatterns } from '@ts-unify/engine'
 import { addReturnToBlock } from '@ts-unify/rules'
 
-describe('addReturnToBlock matching', () => {
-  const rule = extractPatterns(addReturnToBlock)[0]!
+import Nodes from '../nodes'
+
+describe('add-return-to-block.match', () => {
+  const rule = extractPatterns(addReturnToBlock)[0]
 
   it('extracts as a BlockStatement pattern', () => {
     expect(rule.tag).toBe('BlockStatement')
   })
 
   it('matches function() { expr(); }', () => {
-    const ast = {
-      type: 'BlockStatement',
-      parent: { type: 'FunctionDeclaration' },
-      body: [
-        {
-          type: 'ExpressionStatement',
-          expression: {
-            type: 'CallExpression',
-            callee: { type: 'Identifier', name: 'fn' },
-            arguments: [],
-          },
+    const ast = Nodes.blockOf(
+      { type: 'FunctionDeclaration' },
+      {
+        type: 'ExpressionStatement',
+        expression: {
+          type: 'CallExpression',
+          callee: { type: 'Identifier', name: 'fn' },
+          arguments: [],
         },
-      ],
-    }
+      },
+    )
 
     const bag = match(ast, rule.pattern)
     expect(bag).not.toBeNull()
-    expect(bag!.expression).toEqual(ast.body[0].expression)
+    expect(bag?.expression).toEqual(ast.body[0].expression)
   })
 
   it('matches arrow function body', () => {
@@ -115,7 +120,7 @@ describe('addReturnToBlock matching', () => {
     ).toBeNull()
   })
 
-  it('rejects a node whose single body element is not ExpressionStatement', () => {
+  it('rejects a body whose one statement is not an ExpressionStatement', () => {
     expect(
       match(
         {

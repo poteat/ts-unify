@@ -1,7 +1,13 @@
+/**
+ * The patterns extractPatterns reads off normalizeTernaryOrder, matched against
+ * hand-built nodes.
+ *
+ * @scenario
+ */
 import { match, extractPatterns } from '@ts-unify/engine'
 import { normalizeTernaryOrder } from '@ts-unify/rules'
 
-describe('normalizeTernaryOrder matching', () => {
+describe('normalize-ternary-order.match', () => {
   const patterns = extractPatterns(normalizeTernaryOrder)
 
   it('extracts two ConditionalExpression branches', () => {
@@ -40,7 +46,7 @@ describe('normalizeTernaryOrder matching', () => {
 
     expect(bag).not.toBeNull()
 
-    expect(bag!.condition).toEqual({
+    expect(bag?.condition).toEqual({
       type: 'Identifier',
       name: 'cond',
     })
@@ -81,7 +87,7 @@ describe('normalizeTernaryOrder matching', () => {
     )
 
     expect(bag).not.toBeNull()
-    expect(bag!.operator).toBe('!==')
+    expect(bag?.operator).toBe('!==')
   })
 
   it('branch 2 matches x != y ? a : b', () => {
@@ -119,7 +125,7 @@ describe('normalizeTernaryOrder matching', () => {
     )
 
     expect(bag).not.toBeNull()
-    expect(bag!.operator).toBe('!=')
+    expect(bag?.operator).toBe('!=')
   })
 
   it('branch 2 rejects x === y ? a : b (when guard filters it out)', () => {

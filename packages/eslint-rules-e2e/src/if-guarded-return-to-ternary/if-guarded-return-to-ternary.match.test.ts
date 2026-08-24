@@ -1,8 +1,14 @@
+/**
+ * The patterns extractPatterns reads off ifGuardedReturnToTernary, matched
+ * against hand-built nodes.
+ *
+ * @scenario
+ */
 import { match, extractPatterns } from '@ts-unify/engine'
 import { ifGuardedReturnToTernary } from '@ts-unify/rules'
 
-describe('ifGuardedReturnToTernary matching', () => {
-  const rule = extractPatterns(ifGuardedReturnToTernary)[0]!
+describe('if-guarded-return-to-ternary.match', () => {
+  const rule = extractPatterns(ifGuardedReturnToTernary)[0]
 
   it('extracts as a BlockStatement pattern', () => {
     expect(rule.tag).toBe('BlockStatement')
@@ -54,17 +60,17 @@ describe('ifGuardedReturnToTernary matching', () => {
 
     expect(bag).not.toBeNull()
 
-    expect(bag!.test).toEqual({
+    expect(bag?.test).toEqual({
       type: 'Identifier',
       name: 'cond',
     })
 
-    expect(bag!.alternate).toEqual({
+    expect(bag?.alternate).toEqual({
       type: 'Literal',
       value: 2,
     })
 
-    expect(bag!.body).toEqual([])
+    expect(bag?.body).toEqual([])
   })
 
   it('matches with leading statements', () => {
@@ -114,7 +120,7 @@ describe('ifGuardedReturnToTernary matching', () => {
     )
 
     expect(bag).not.toBeNull()
-    expect(bag!.body).toHaveLength(1)
+    expect(bag?.body).toHaveLength(1)
   })
 
   it('rejects a BlockStatement with an empty body', () => {

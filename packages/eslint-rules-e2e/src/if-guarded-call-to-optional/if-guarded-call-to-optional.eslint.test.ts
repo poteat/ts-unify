@@ -1,41 +1,43 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { RuleTester } = require('@typescript-eslint/rule-tester')
+/**
+ * ifGuardedCallToOptional compiled by createRule and driven through ESLint's
+ * RuleTester over the cases below.
+ *
+ * @scenario
+ */
 import { createRule } from '@ts-unify/eslint/internal'
 import { ifGuardedCallToOptional } from '@ts-unify/rules'
 
-const tester = new RuleTester({
-  languageOptions: {
-    parser: require('@typescript-eslint/parser'),
-  },
-})
+import Tester from '../tester'
 
-tester.run(
-  'if-guarded-call-to-optional',
-  createRule(ifGuardedCallToOptional, {
-    message: 'Use optional call instead of if-guarded call',
-  }),
-  {
-    valid: [
-      'fn?.(arg1, arg2);',
-      'if (fn) { fn(arg); } else { fallback(); }',
-      'if (cond) { return x; }',
-    ],
-    invalid: [
-      {
-        code: 'if (fn) { fn(arg1, arg2); }',
-        errors: [{ messageId: 'match' }],
-        output: 'fn?.(arg1, arg2);',
-      },
-      {
-        code: 'if (callback) { callback(); }',
-        errors: [{ messageId: 'match' }],
-        output: 'callback?.();',
-      },
-      {
-        code: 'if (handler) handler(event);',
-        errors: [{ messageId: 'match' }],
-        output: 'handler?.(event);',
-      },
-    ],
-  },
-)
+describe('if-guarded-call-to-optional.eslint', () => {
+  Tester.run(
+    'if-guarded-call-to-optional',
+    createRule(ifGuardedCallToOptional, {
+      message: 'Use optional call instead of if-guarded call',
+    }),
+    {
+      valid: [
+        'fn?.(arg1, arg2);',
+        'if (fn) { fn(arg); } else { fallback(); }',
+        'if (cond) { return x; }',
+      ],
+      invalid: [
+        {
+          code: 'if (fn) { fn(arg1, arg2); }',
+          errors: [{ messageId: 'match' }],
+          output: 'fn?.(arg1, arg2);',
+        },
+        {
+          code: 'if (callback) { callback(); }',
+          errors: [{ messageId: 'match' }],
+          output: 'callback?.();',
+        },
+        {
+          code: 'if (handler) handler(event);',
+          errors: [{ messageId: 'match' }],
+          output: 'handler?.(event);',
+        },
+      ],
+    },
+  )
+})

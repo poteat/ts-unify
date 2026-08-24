@@ -1,8 +1,14 @@
+/**
+ * The patterns extractPatterns reads off spreadNewSetToUniq, matched against
+ * hand-built nodes.
+ *
+ * @scenario
+ */
 import { match, extractPatterns } from '@ts-unify/engine'
 import { spreadNewSetToUniq } from '@ts-unify/rules'
 
-describe('spreadNewSetToUniq matching', () => {
-  const rule = extractPatterns(spreadNewSetToUniq)[0]!
+describe('spread-new-set-to-uniq.match', () => {
+  const rule = extractPatterns(spreadNewSetToUniq)[0]
 
   it('matches [...new Set(arr)]', () => {
     const bag = match(
@@ -36,7 +42,7 @@ describe('spreadNewSetToUniq matching', () => {
 
     expect(bag).not.toBeNull()
 
-    expect(bag!.array).toEqual({
+    expect(bag?.array).toEqual({
       type: 'Identifier',
       name: 'arr',
     })
