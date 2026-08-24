@@ -19,7 +19,7 @@ type Walk<P, Token> = {
 type PropertyValue<T, Token> = T extends TSESTree.Node
   ? {}
   : T extends Token
-    ? T extends { readonly name: infer Name extends string; readonly value?: infer V }
+    ? T extends { readonly name: infer Name extends string; readonly value?: () => infer V }
       ? { [K in Name]: V }
       : {}
     : T extends object
@@ -43,7 +43,7 @@ export type ExtractFromPattern<P, Token, Key extends string = ""> =
       : P extends TSESTree.Node
         ? {}
         : P extends Token
-          ? P extends { readonly name: infer Name extends string; readonly value?: infer V }
+          ? P extends { readonly name: infer Name extends string; readonly value?: () => infer V }
             ? { [K in Name]: V }
             : {}
           : P extends readonly [...infer Items]

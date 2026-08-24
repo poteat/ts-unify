@@ -7,6 +7,8 @@ capture names to their value types.
 
 - Explicit captures contribute their declared value type.
 - Implicit placeholders (`$` in type positions) contribute `unknown`.
+- The bag is writable whatever the pattern's own modifiers: a readonly bound
+  shape yields `{ n: string }`, not `{ readonly n: string }`.
 
 ## Core Semantics
 

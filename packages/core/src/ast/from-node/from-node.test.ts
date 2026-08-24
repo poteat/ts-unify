@@ -8,8 +8,8 @@ describe("U.fromNode typing (type-level)", () => {
     function check(U: BuilderMap) {
       const n = U.fromNode({ type: AST_NODE_TYPES.ReturnStatement });
       type Inner = UnwrapFluent<typeof n>;
-      // Expect `{ type: 'ReturnStatement' }`
-      assertType<Inner, { type: NodeByKind["ReturnStatement"]["type"] }>(0);
+      // Expect `{ readonly type: 'ReturnStatement' }`
+      assertType<Inner, { readonly type: NodeByKind["ReturnStatement"]["type"] }>(0);
     }
     void check;
   });

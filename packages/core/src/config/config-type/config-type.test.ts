@@ -24,12 +24,12 @@ describe("ConfigSlot type", () => {
   it("should default value type to unknown", () => {
     type TestSlot = ConfigSlot<"theme">;
     type Value = TestSlot["value"];
-    assertType<Value, unknown | undefined>(0);
+    assertType<Value, (() => unknown) | undefined>(0);
   });
 
   it("should preserve explicit value types", () => {
     type TestSlot = ConfigSlot<"maxRetries", number>;
     type Value = TestSlot["value"];
-    assertType<Value, number | undefined>(0);
+    assertType<Value, (() => number) | undefined>(0);
   });
 });

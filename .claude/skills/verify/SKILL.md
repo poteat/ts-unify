@@ -44,3 +44,5 @@ the comment itself. Remove the temp files afterwards.
 - Jest needs `--watchman=false` on this machine.
 - The runner's `tsconfig.json` typecheck fails on `@/` aliases; the build
   (`tsconfig.build.json`) is fine.
+- `createPlugin({ shortName })` registers the rule as `v/short-name`: rule
+  ids are kebab-cased, so the `rules` entry must be too.

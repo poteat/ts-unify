@@ -8,7 +8,10 @@ describe("BindCaptures with object spread-$ (type-level)", () => {
     type Shape = { a: number; b: string };
     type Pattern = { a: $ } & DollarObjectSpread;
     type Bound = BindCaptures<Pattern, Shape>;
-    type Expected = { a: Capture<"a", number>; b: Capture<"b", string> };
+    type Expected = {
+      readonly a: Capture<"a", number>;
+      readonly b: Capture<"b", string>;
+    };
     assertType<Bound, Expected>(0);
   });
 
@@ -17,8 +20,8 @@ describe("BindCaptures with object spread-$ (type-level)", () => {
     type Pattern = { a: Capture<"a", number> } & DollarObjectSpread;
     type Bound = BindCaptures<Pattern, Shape>;
     type Expected = {
-      a: Capture<"a", number>;
-      b: Capture<"b", string>;
+      readonly a: Capture<"a", number>;
+      readonly b: Capture<"b", string>;
     };
     assertType<Bound, Expected>(0);
   });

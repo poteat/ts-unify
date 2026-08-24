@@ -4,7 +4,7 @@ import type { Capture } from "@/capture/capture-type";
 import type { ConfigSlot } from "@/config/config-type";
 import type { Spread } from "@/capture/spread/spread";
 import type { StringPredicate } from "@/string-predicate/string-predicate";
-import type { TSESTree } from "@typescript-eslint/types";
+import type { IsAstNode } from "@/ast/is-ast-node";
 import type { Sealed } from "@/ast/sealed";
 import type { OR_BRAND } from "@/ast/or";
 import type { SEQ_BRAND } from "@/ast/seq-brand";
@@ -93,7 +93,7 @@ type ApplyMods<Base, Mods> = Mods extends infer M
 
 type BindValue<P, S, Key extends string> =
   // Short-circuit: don't recurse into concrete AST nodes
-  P extends TSESTree.Node
+  IsAstNode<P> extends true
     ? P
     : // A string predicate (or RegExp) tests a string position and binds nothing
       P extends StringPredicate | RegExp
@@ -106,7 +106,7 @@ type BindValue<P, S, Key extends string> =
             ? Readonly<TupleCaptures<S>>
             : ReadonlyArray<Capture<`${number}`, ArrayElem<S>>>
           : S extends object
-            ? { [K in keyof S]: Capture<K & string, S[K]> }
+            ? { readonly [K in keyof S]: Capture<K & string, S[K]> }
             : never
         : Capture<Key, ApplyMods<S, ExtractMods<P>>>
       : // Config slot: bind value type from the position in the AST shape
@@ -135,7 +135,7 @@ type BindValue<P, S, Key extends string> =
               : // Objects — map over filtered keys and spread extras in one mapped type
                 P extends object
                 ? {
-                    [K in
+                    readonly [K in
                       | PatternKeys<P>
                       | (P extends { readonly [OBJECT_SPREAD_BRAND]: true }
                           ? Exclude<keyof S, keyof P | "type"> & string

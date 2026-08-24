@@ -2,7 +2,7 @@ import type { Capture } from "@/capture/capture-type";
 import type { Spread } from "@/capture/spread/spread";
 import type { ConfigSlot } from "@/config/config-type";
 import type { Sealed } from "@/ast/sealed";
-import type { TSESTree } from "@typescript-eslint/types";
+import type { IsAstNode } from "@/ast/is-ast-node";
 
 /**
  * SubstituteCaptures<Node, Bag>
@@ -37,7 +37,7 @@ export type SubstituteCaptures<Node, Bag> =
         : Node
       : Spread<SName & string, Elem>
     : // Raw AST nodes never contain captures – short-circuit
-    Node extends TSESTree.Node
+    IsAstNode<Node> extends true
     ? Node
     : // Tuples
     Node extends readonly [...infer Items]

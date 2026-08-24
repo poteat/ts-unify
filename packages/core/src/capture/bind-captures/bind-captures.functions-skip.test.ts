@@ -10,7 +10,7 @@ describe("BindCaptures skips function-valued keys in object patterns", () => {
     };
 
     type R = BindCaptures<Pattern, Shape>;
-    assertType<R, { x: Capture<"x", number> }>(0);
+    assertType<R, { readonly x: Capture<"x", number> }>(0);
   });
 
   it("omits fluent method keys like 'to'", () => {
@@ -21,6 +21,6 @@ describe("BindCaptures skips function-valued keys in object patterns", () => {
     };
 
     type R = BindCaptures<Pattern, Shape>;
-    assertType<R, { x: Capture<"x", number> }>(0);
+    assertType<R, { readonly x: Capture<"x", number> }>(0);
   });
 });

@@ -8,5 +8,5 @@ export const CONFIG_BRAND = Symbol("CONFIG_BRAND");
 export type ConfigSlot<Name extends string = string, Value = unknown> = {
   readonly [CONFIG_BRAND]: true;
   readonly name: Name;
-  readonly value?: Value;
+  readonly value?: () => Value;
 };

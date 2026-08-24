@@ -30,7 +30,7 @@ export type FromNode = {
   /** "Any K" form: `{ type }` only. */
   <V extends NodeByKind[NodeKind]["type"], K extends KindForType<V>>(input: {
     type: V;
-  }): FluentNode<{ type: NodeByKind[K]["type"] }>;
+  }): FluentNode<{ readonly type: NodeByKind[K]["type"] }>;
 
   /** Build a concrete node (no capture tokens). Returns a fluent node. */
   <

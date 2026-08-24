@@ -10,9 +10,9 @@ describe("BindCaptures - type-level", () => {
     type Pattern = { id: $; name: "Alice"; nested: { flag: $ } };
     type Result = BindCaptures<Pattern, Shape>;
     type Expected = {
-      id: Capture<"id", number>;
-      name: "Alice";
-      nested: { flag: Capture<"flag", boolean> };
+      readonly id: Capture<"id", number>;
+      readonly name: "Alice";
+      readonly nested: { readonly flag: Capture<"flag", boolean> };
     };
     assertType<Result, Expected>(0);
   });
@@ -21,7 +21,7 @@ describe("BindCaptures - type-level", () => {
     type Shape = { id: number; name: string };
     type Pattern = { id: $; name: RegExp };
     type Result = BindCaptures<Pattern, Shape>;
-    type Expected = { id: Capture<"id", number>; name: RegExp };
+    type Expected = { readonly id: Capture<"id", number>; readonly name: RegExp };
     assertType<Result, Expected>(0);
   });
 
@@ -29,7 +29,10 @@ describe("BindCaptures - type-level", () => {
     type Shape = { id: number; name: string };
     type Pattern = { id: $; name: StringPredicate };
     type Result = BindCaptures<Pattern, Shape>;
-    type Expected = { id: Capture<"id", number>; name: StringPredicate };
+    type Expected = {
+      readonly id: Capture<"id", number>;
+      readonly name: StringPredicate;
+    };
     assertType<Result, Expected>(0);
   });
 
@@ -41,8 +44,8 @@ describe("BindCaptures - type-level", () => {
     };
     type Result1 = BindCaptures<Pattern1, Shape>;
     type Expected1 = {
-      value: Capture<"v", number>;
-      text: Capture<"t", string>;
+      readonly value: Capture<"v", number>;
+      readonly text: Capture<"t", string>;
     };
     assertType<Result1, Expected1>(0);
   });
@@ -51,7 +54,10 @@ describe("BindCaptures - type-level", () => {
     type Shape = { a: number; b: { c: string } };
     type Pattern = { a: Capture<"x", unknown>; b: { c: $ } };
     type Result = BindCaptures<Pattern, Shape>;
-    type Expected = { a: Capture<"x", number>; b: { c: Capture<"c", string> } };
+    type Expected = {
+      readonly a: Capture<"x", number>;
+      readonly b: { readonly c: Capture<"c", string> };
+    };
     assertType<Result, Expected>(0);
   });
 
@@ -59,7 +65,10 @@ describe("BindCaptures - type-level", () => {
     type Shape = { a: number; b: string };
     type Pattern = $;
     type Result = BindCaptures<Pattern, Shape>;
-    type Expected = { a: Capture<"a", number>; b: Capture<"b", string> };
+    type Expected = {
+      readonly a: Capture<"a", number>;
+      readonly b: Capture<"b", string>;
+    };
     assertType<Result, Expected>(0);
   });
 

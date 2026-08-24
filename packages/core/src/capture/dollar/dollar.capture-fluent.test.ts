@@ -7,7 +7,7 @@ describe("Capture-local fluent on $(name)", () => {
     function check(capture: FluentCapture<"x", number>) {
       const c = capture.map((n: number) => n.toString());
       type Bound = import("@/capture").BindCaptures<typeof c, number>;
-      type V = Bound extends { value?: infer T } ? T : never;
+      type V = Bound extends { value?: () => infer T } ? T : never;
       assertType<V, string>(0);
     }
     void check;
@@ -17,7 +17,7 @@ describe("Capture-local fluent on $(name)", () => {
     function check(capture: FluentCapture<"y", string>) {
       const c = capture.default(123 as const);
       type Bound = import("@/capture").BindCaptures<typeof c, string>;
-      type V = Bound extends { value?: infer T } ? T : never;
+      type V = Bound extends { value?: () => infer T } ? T : never;
       assertType<V, string | 123>(0);
     }
     void check;
@@ -27,7 +27,7 @@ describe("Capture-local fluent on $(name)", () => {
     function check(capture: FluentCapture<"z", string>) {
       const c = capture.defaultUndefined();
       type Bound = import("@/capture").BindCaptures<typeof c, string>;
-      type V = Bound extends { value?: infer T } ? T : never;
+      type V = Bound extends { value?: () => infer T } ? T : never;
       // Using Identifier("undefined") sugar adds Identifier (union with base)
       assertType<
         V,
@@ -44,7 +44,7 @@ describe("Capture-local fluent on $(name)", () => {
         typeof c,
         string | "" | 0 | null
       >;
-      type V = Bound extends { value?: infer T } ? T : never;
+      type V = Bound extends { value?: () => infer T } ? T : never;
       assertType<V, string>(0);
     }
     void check;
@@ -55,7 +55,7 @@ describe("Capture-local fluent on $(name)", () => {
       const notNull: (x: string | null) => x is string = null as any;
       const c = capture.when(notNull);
       type Bound = import("@/capture").BindCaptures<typeof c, string | null>;
-      type V = Bound extends { value?: infer T } ? T : never;
+      type V = Bound extends { value?: () => infer T } ? T : never;
       assertType<V, string>(0);
     }
     void check;
@@ -66,7 +66,7 @@ describe("Capture-local fluent on $(name)", () => {
       const pred: (x: string | null) => boolean = null as any;
       const c = capture.when(pred);
       type Bound = import("@/capture").BindCaptures<typeof c, string | null>;
-      type V = Bound extends { value?: infer T } ? T : never;
+      type V = Bound extends { value?: () => infer T } ? T : never;
       assertType<V, string | null>(0);
     }
     void check;
@@ -76,7 +76,7 @@ describe("Capture-local fluent on $(name)", () => {
     function check(capture: FluentCapture<"c", string | "">) {
       const notEmpty: (s: string) => s is `${string}${string}` = null as any;
       const c = capture.default("x").truthy().when(notEmpty);
-      type V = typeof c extends { value?: infer T } ? T : never;
+      type V = typeof c extends { value?: () => infer T } ? T : never;
       // After default + truthy + when, we still have string
       assertType<V, string>(0);
     }

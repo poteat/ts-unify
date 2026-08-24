@@ -109,7 +109,7 @@ type ExtractCapturesFromPattern<P, Key extends string = ""> =
     : // Handle objects
     P extends object
     ? {
-        [K in keyof P]-?: CoalesceUnionOfBags<
+        -readonly [K in keyof P]-?: CoalesceUnionOfBags<
           ExtractFromPropertyValue<P[K], K & string>
         >;
       } extends infer M

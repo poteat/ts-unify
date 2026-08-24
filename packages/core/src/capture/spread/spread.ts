@@ -10,5 +10,5 @@ export const SPREAD_BRAND = Symbol("SPREAD_BRAND");
 export type Spread<Name extends string = string, Elem = unknown> = {
   readonly [SPREAD_BRAND]: true;
   readonly name: Name;
-  readonly value?: Elem;
+  readonly value?: () => Elem;
 };

@@ -63,7 +63,9 @@ describe("BindCaptures with Spread over arrays (type-level)", () => {
     type Shape = { body: ReadonlyArray<string | number> };
     type Pattern = { body: readonly [Spread<"">, "x"] };
     type Result = BindCaptures<Pattern, Shape>;
-    type Expected = { body: readonly [Spread<"body", string | number>, "x"] };
+    type Expected = {
+      readonly body: readonly [Spread<"body", string | number>, "x"];
+    };
     assertType<Result, Expected>(0);
   });
 });

@@ -11,14 +11,16 @@ named captures.
 - Implicit placeholders at key `K` become `Capture<K, Shape[K]>`.
 - Explicit `Capture<Name, V>` retains `V`. If `V` is `unknown`, it is upgraded
   to the corresponding type from `Shape` at the same position.
-- Objects, tuples, and arrays are traversed recursively.
+- Objects, tuples, and arrays are traversed recursively. Bound objects and
+  sequences are readonly: the result describes a pattern, not a value to
+  write.
 - A root-level placeholder (no key context):
   - If `Shape` is a tuple, binds each index:
     `[Capture<"0", T0>, Capture<"1", T1>, …]`.
   - If `Shape` is an array, binds to
     `ReadonlyArray<Capture<`${number}`, Elem>>`.
   - If `Shape` is an object, binds every top-level key:
-    `{ [K in keyof Shape]: Capture<K, Shape[K]> }`.
+    `{ readonly [K in keyof Shape]: Capture<K, Shape[K]> }`.
   - Otherwise, resolves to `never`.
 
 ## Sequence Spreads (arrays/tuples)

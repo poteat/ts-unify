@@ -23,6 +23,11 @@ contract of this provider.
     `NodeByKind[K]`.
 - `BindCaptures` aligns explicit/implicit capture tokens with the node kind so
   extracted capture bags reflect the actual AST shape.
+- The discriminant and pattern calls yield a readonly shape: `type` and every
+  bound property are `readonly`. A pattern is a description and nothing writes
+  it, so a module-scope pattern reads as immutable to a readonly lint and can
+  be passed through `Object.freeze` (inline or not) without a change of type.
+  The capture bag extracted from it stays writable.
 - Internal ESTree fields (`parent`, `loc`, `range`) are excluded from input and
   output shapes, except on `Comment`, whose `loc` and `range` are data: a rule
   about layout reads the comment's column from a `loc` capture.

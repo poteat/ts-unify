@@ -32,11 +32,11 @@ export type PatternBuilder<K extends NodeKind> = {
 
   /** Match a `K` pattern (supports `$`). Returns fluent node. */
   <P extends Pattern<NodeByKind[K]>>(pattern: P): FluentNode<
-    { type: NodeByKind[K]["type"] } & BindAgainstNodeKind<P, K>
+    { readonly type: NodeByKind[K]["type"] } & BindAgainstNodeKind<P, K>
   >;
 
   /** Match any `K`. Returns `{ type: … }` with fluent helpers. */
-  (): FluentNode<{ type: NodeByKind[K]["type"] }>;
+  (): FluentNode<{ readonly type: NodeByKind[K]["type"] }>;
 } & { readonly [PATTERN_BUILDER_BRAND]: true };
 
 /**
