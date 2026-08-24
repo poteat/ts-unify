@@ -5,6 +5,8 @@ import {
   $,
   REST_CAPTURE,
   CONFIG_BRAND,
+  isStringPredicate,
+  testString,
 } from "@ts-unify/core/internal";
 import type { ProxyNode, ChainEntry } from "@ts-unify/core/internal";
 import { symGet } from "../sym-get";
@@ -175,8 +177,8 @@ function matchInner(
       continue;
     }
 
-    if (expected instanceof RegExp) {
-      if (!regExpTest(expected, actual)) return null;
+    if (isStringPredicate(expected)) {
+      if (!testString(expected, actual)) return null;
       continue;
     }
 
@@ -334,8 +336,8 @@ function matchValueInner(
     const defaultVal = configDefaults[expected.name];
     return actual === defaultVal ? {} : null;
   }
-  if (expected instanceof RegExp) {
-    return regExpTest(expected, actual) ? {} : null;
+  if (isStringPredicate(expected)) {
+    return testString(expected, actual) ? {} : null;
   }
   if (isProxyNode(expected)) {
     return matchProxyNode(actual, expected, namedBindings, configDefaults, key, ctx, path);
@@ -791,13 +793,6 @@ function isConfigSlot(v: unknown): v is { name: string } {
 function isRawComment(v: unknown): boolean {
   const t = (v as { type?: unknown } | null | undefined)?.type;
   return t === "Line" || t === "Block";
-}
-
-/** Test a string against a pattern RegExp; other values never match. */
-function regExpTest(re: RegExp, actual: unknown): boolean {
-  if (typeof actual !== "string") return false;
-  re.lastIndex = 0;
-  return re.test(actual);
 }
 
 function isProxyNode(v: unknown): boolean {

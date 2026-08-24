@@ -12,8 +12,8 @@ success, or `null` on mismatch.
   or any specific parser.
 - Handles named captures (`$("name")`), anonymous captures (`$`), nested proxy
   nodes (typed sub-patterns), `or(...)` disjunctions, `maybeBlock(...)` sugar,
-  array patterns with spread elements, plain literal equality, and `RegExp`
-  tests on string positions.
+  array patterns with spread elements, plain literal equality, and string
+  predicates (`U.string.*`, or a bare `RegExp`) on string positions.
 - Matches comments: a `Comment` node (see `comment-nodes`) matches
   `U.Comment(...)` like any node, and a raw parser comment found under a
   `Program` being matched is seen through its node view.
@@ -40,8 +40,9 @@ success, or `null` on mismatch.
 - `applyChainModifiers` -- post-processes a nested sub-pattern's bag based on
   chain entries `seal` and `bind`. See "Seal and bind" below.
 - `deepEqual` -- structural equality ignoring `parent`, `loc`, `range` keys.
-- `regExpTest` -- a pattern `RegExp` against a string; `lastIndex` is reset
-  first so a global flag does not alternate results. Non-strings never match.
+- String predicates are recognised with core's `isStringPredicate` and
+  applied with `testString`; non-strings never match. See
+  `string-predicate.spec.md` in core.
 - `isCapture`, `isProxyNode`, `isSpread`, `isRawComment` -- brand and shape
   checks.
 
