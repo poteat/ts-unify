@@ -44,6 +44,25 @@ describe("createRule", () => {
     expect(typeof visitors.IfStatement).toBe("function");
   });
 
+  it("runs a Comment entry from the Program visitor and reports at the comment's loc", () => {
+    const rule = createRule(U.Comment({ kind: "line" }) as any);
+    const reported: any[] = [];
+    const visitors = rule.create({ report: (d: any) => reported.push(d) } as any);
+    expect(Object.keys(visitors)).toEqual(["Program"]);
+    const loc = { start: { line: 1, column: 0 }, end: { line: 1, column: 4 } };
+    const program = {
+      type: "Program",
+      body: [],
+      range: [5, 7],
+      comments: [{ type: "Line", value: " a", range: [0, 4], loc }],
+      tokens: [{ type: "Identifier", value: "x", range: [5, 6] }],
+    };
+    visitors.Program(program as any);
+    expect(reported).toHaveLength(1);
+    expect(reported[0].loc).toBe(loc);
+    expect(reported[0].node).toBeUndefined();
+  });
+
   it("visitor calls context.report when a node matches", () => {
     const rule = createRule(id, { message: "Found {{n}}" });
 

@@ -19,7 +19,8 @@ at the type level.
 ## Supporting types (private)
 
 - `RuleContext` -- subset of ESLint's context: `report()`, `sourceCode` /
-  `getSourceCode()`.
+  `getSourceCode()`. A report names either the matched `node` or, for a
+  comment match, the comment's `loc`.
 - `RuleFixer` -- `replaceText(node, text)`.
 - `RuleFix` -- `{ range, text }`.
 

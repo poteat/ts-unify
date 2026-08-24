@@ -1,6 +1,6 @@
 import { NODE, CONFIG_BRAND } from "@ts-unify/core/internal";
 import type { ProxyNode, ChainEntry } from "@ts-unify/core/internal";
-import { matchWithSites, applyRewrites, symGet } from "@ts-unify/engine";
+import { matchWithSites, applyRewrites, symGet, commentNodes } from "@ts-unify/engine";
 import { extractRuleMeta } from "@ts-unify/runner";
 import type { TSESTree } from "@typescript-eslint/types";
 import type { RuleModule } from "../rule-module";
@@ -116,7 +116,7 @@ export function createRule(
       }
 
       for (const [tag, candidates] of byTag) {
-        visitors[tag] = (node: TSESTree.Node) => {
+        const visit = (node: TSESTree.Node) => {
           let first: ReturnType<typeof matchWithSites> = null;
           for (const { pattern, chain } of candidates) {
             first = matchWithSites(node, pattern, chain);
@@ -146,7 +146,8 @@ export function createRule(
           const canFix = sites.length > 0;
 
           context.report({
-            node,
+            // A comment is not an ESLint node; its loc is the report site.
+            ...(tag === "Comment" ? { loc: node.loc } : { node }),
             messageId: "match",
             data,
             ...(canFix
@@ -192,6 +193,22 @@ export function createRule(
               : {}),
           });
         };
+        // Comments are not visited by ESLint; run them from the Program.
+        if (tag === "Comment") {
+          const prev = visitors.Program;
+          visitors.Program = (program: TSESTree.Node) => {
+            prev?.(program);
+            for (const c of commentNodes(program)) visit(c as unknown as TSESTree.Node);
+          };
+        } else if (tag === "Program" && visitors.Program) {
+          const prev = visitors.Program;
+          visitors.Program = (program: TSESTree.Node) => {
+            visit(program);
+            prev(program);
+          };
+        } else {
+          visitors[tag] = visit;
+        }
       }
 
       return visitors;

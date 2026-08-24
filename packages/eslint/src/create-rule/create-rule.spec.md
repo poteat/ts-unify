@@ -21,6 +21,12 @@ between ts-unify's pattern language and the ESLint rule API.
 - When `opts.fix` is `true` and the transform carries a `.to(factory)` chain
   entry, the rule additionally supplies a `fix` function that reifies the
   factory output and replaces the matched node's text.
+- A `Comment` entry has no ESLint visitor of its own. The rule visits
+  `Program` and runs the entry over `commentNodes(program)` from
+  `@ts-unify/engine`, which reads the `comments` and `tokens` the ESLint
+  parser leaves on the AST. A comment report carries the comment's `loc`, so
+  ESLint highlights the comment itself. A `Program` entry in the same rule
+  runs before the comment entries.
 
 ## Inputs
 

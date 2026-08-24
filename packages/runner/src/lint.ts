@@ -1,4 +1,4 @@
-import { matchWithSites, applyRewrites } from "@ts-unify/engine";
+import { matchWithSites, applyRewrites, commentNodes } from "@ts-unify/engine";
 import type { RuleMeta, Bag, WithFn } from "./extract-rule-meta";
 
 export type LintMatch = {
@@ -40,56 +40,63 @@ export function lint(ast: unknown, rules: RuleMeta[]): LintMatch[] {
   const found: LintMatch[] = [];
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function check(node: any) {
+    for (const { kebab, message, patterns, factory, withs } of rules) {
+      for (const { tag, pattern, chain } of patterns) {
+        if (node.type !== tag) continue;
+        const result = matchWithSites(node, pattern, chain);
+        if (!result) continue;
+
+        // Apply withs to the bag in place so all sites (including the
+        // root `.to()` site) see the extra fields.
+        if (withs.length > 0) {
+          const transformed = applyWiths(result.bag, withs);
+          for (const k of Object.keys(transformed)) {
+            result.bag[k] = transformed[k];
+          }
+        }
+
+        // For OR-rooted rules, the per-branch chain doesn't carry the
+        // outer `.to()` — extractRuleMeta extracts it as `factory`.
+        // Inject it as a root site if matchWithSites didn't already.
+        const sites = [...result.sites];
+        if (factory && !sites.some((s) => s.path.length === 0)) {
+          sites.push({ path: [], factory, scopeBag: result.bag });
+        }
+
+        let reified: unknown = null;
+        try {
+          reified = applyRewrites(node, sites, result.capturePaths);
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.warn(`[ts-unify] rewrite failed for ${kebab}:`, e);
+          reified = null;
+        }
+
+        found.push({
+          rule: kebab,
+          message,
+          line: node.loc?.start?.line ?? 0,
+          column: (node.loc?.start?.column ?? 0) + 1,
+          endLine: node.loc?.end?.line ?? 0,
+          endColumn: (node.loc?.end?.column ?? 0) + 1,
+          reified,
+        });
+      }
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function walk(node: any, parent?: any) {
     if (!node || typeof node !== "object") return;
     if (node.type) {
       node.parent = parent;
-      for (const { kebab, message, patterns, factory, withs } of rules) {
-        for (const { tag, pattern, chain } of patterns) {
-          if (node.type !== tag) continue;
-          const result = matchWithSites(node, pattern, chain);
-          if (!result) continue;
-
-          // Apply withs to the bag in place so all sites (including the
-          // root `.to()` site) see the extra fields.
-          if (withs.length > 0) {
-            const transformed = applyWiths(result.bag, withs);
-            for (const k of Object.keys(transformed)) {
-              result.bag[k] = transformed[k];
-            }
-          }
-
-          // For OR-rooted rules, the per-branch chain doesn't carry the
-          // outer `.to()` — extractRuleMeta extracts it as `factory`.
-          // Inject it as a root site if matchWithSites didn't already.
-          const sites = [...result.sites];
-          if (factory && !sites.some((s) => s.path.length === 0)) {
-            sites.push({ path: [], factory, scopeBag: result.bag });
-          }
-
-          let reified: unknown = null;
-          try {
-            reified = applyRewrites(node, sites, result.capturePaths);
-          } catch (e) {
-            // eslint-disable-next-line no-console
-            console.warn(`[ts-unify] rewrite failed for ${kebab}:`, e);
-            reified = null;
-          }
-
-          found.push({
-            rule: kebab,
-            message,
-            line: node.loc?.start?.line ?? 0,
-            column: (node.loc?.start?.column ?? 0) + 1,
-            endLine: node.loc?.end?.line ?? 0,
-            endColumn: (node.loc?.end?.column ?? 0) + 1,
-            reified,
-          });
-        }
-      }
+      check(node);
+      // Comments live beside the tree; their node views are checked from the Program.
+      if (node.type === "Program") for (const c of commentNodes(node)) check(c);
     }
     for (const key of Object.keys(node)) {
-      if (key === "parent") continue;
+      if (key === "parent" || key === "comments" || key === "tokens") continue;
       const child = node[key];
       if (Array.isArray(child)) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

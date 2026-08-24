@@ -26,6 +26,9 @@
     "eslint": "^10.1.0",
     "recast": "^0.23.11"
   },
+  "devDependencies": {
+    "@typescript-eslint/typescript-estree": "^8.57.2"
+  },
   "files": [
     "dist"
   ],

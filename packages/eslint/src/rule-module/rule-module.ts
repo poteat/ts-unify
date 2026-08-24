@@ -4,7 +4,9 @@ type RuleContext = {
   sourceCode?: { getText(node?: TSESTree.Node): string };
   getSourceCode?(): { getText(node?: TSESTree.Node): string };
   report(descriptor: {
-    node: TSESTree.Node;
+    /** The matched node, or the location of a comment match. */
+    node?: TSESTree.Node;
+    loc?: TSESTree.SourceLocation;
     messageId: string;
     data?: Record<string, string>;
     fix?: (fixer: RuleFixer) => RuleFix | RuleFix[];
