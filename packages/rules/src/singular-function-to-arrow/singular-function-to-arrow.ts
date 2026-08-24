@@ -64,12 +64,13 @@ export const singularFunctionToArrow = U.fromNode({
       .until(fnBoundary)
       .none(),
   )
-  .with(({ async, params, body, returnType }) => ({
+  .with(({ async, params, body, returnType, typeParameters }) => ({
     init: U.ArrowFunctionExpression({
       async,
       params,
       body,
       returnType,
+      typeParameters,
     }),
   }))
   .to(({ id, init }) =>

@@ -18,6 +18,17 @@ const OPERAND_KEYS: Record<string, readonly string[]> = {
   ChainExpression: [],
 };
 
+/** Type kinds that need parentheses as an array's element or an operator's operand. */
+const COMPOUND_TYPES = new Set([
+  "TSUnionType",
+  "TSIntersectionType",
+  "TSFunctionType",
+  "TSConstructorType",
+  "TSConditionalType",
+  "TSTypeOperator",
+  "TSInferType",
+]);
+
 /** TS signature kinds whose return annotation recast reads as `typeAnnotation`. */
 const RETURN_AS_TYPE_ANNOTATION = new Set([
   "TSFunctionType",
@@ -35,7 +46,9 @@ const RETURN_AS_TYPE_ANNOTATION = new Set([
  * works; the input is left untouched. A RegExp (a Literal's `value`) is a
  * value, not a node, and passes through whole. An `as`/`satisfies`/`<T>`
  * expression standing as a member's object or a call's callee is marked
- * parenthesized, which recast omits and the grammar requires.
+ * parenthesized, which recast omits and the grammar requires; so is a
+ * union, intersection, function or conditional type as an array's element
+ * or a `keyof`/`readonly` operand (`(string | undefined)[]`).
  */
 function toRecastShape(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(toRecastShape);
@@ -52,6 +65,13 @@ function toRecastShape(value: unknown): unknown {
     !READS_TYPE_ARGUMENTS.has(copy.type as string)
   ) {
     copy.typeParameters = copy.typeArguments;
+  }
+  if (copy.type === "TSArrayType" || copy.type === "TSTypeOperator") {
+    const key = copy.type === "TSArrayType" ? "elementType" : "typeAnnotation";
+    const inner = copy[key] as Record<string, unknown> | undefined;
+    if (inner && COMPOUND_TYPES.has(inner.type as string)) {
+      copy[key] = { type: "TSParenthesizedType", typeAnnotation: inner };
+    }
   }
   for (const key of OPERAND_KEYS[copy.type as string] ?? []) {
     const operand = copy[key] as Record<string, unknown> | undefined;
