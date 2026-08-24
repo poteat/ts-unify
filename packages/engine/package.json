@@ -18,6 +18,9 @@
   "dependencies": {
     "@ts-unify/core": "0.0.1"
   },
+  "devDependencies": {
+    "@typescript-eslint/typescript-estree": "^8.57.2"
+  },
   "files": [
     "dist"
   ],

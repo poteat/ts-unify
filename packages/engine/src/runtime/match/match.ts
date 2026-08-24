@@ -8,6 +8,7 @@ import {
 } from "@ts-unify/core/internal";
 import type { ProxyNode, ChainEntry } from "@ts-unify/core/internal";
 import { symGet } from "../sym-get";
+import { commentNodeOf } from "../comment-nodes";
 
 type NamedBinding = { name: string; value: unknown };
 
@@ -45,6 +46,8 @@ export type MatchResult = {
 type Ctx = {
   sites: RewriteSite[];
   capturePaths: Record<string, Path>;
+  /** The `Program` being matched, when known; raw comments under it get their node view. */
+  program?: unknown;
 };
 
 /**
@@ -76,6 +79,7 @@ export function matchWithSites(
   const configDefaults = chain ? extractConfigDefaults(chain) : {};
   const namedBindings: NamedBinding[] = [];
   const ctx: Ctx = { sites: [], capturePaths: {} };
+  if ((node as { type?: unknown } | null)?.type === "Program") ctx.program = node;
   // A root proxy (`U.X(...)`) carries its tag and chain itself: match it as
   // a nested proxy would be, so the tag is checked and its guards apply.
   const bag = isProxyNode(pattern)
@@ -168,6 +172,11 @@ function matchInner(
     if (isConfigSlot(expected)) {
       const defaultVal = configDefaults[expected.name];
       if (actual !== defaultVal) return null;
+      continue;
+    }
+
+    if (expected instanceof RegExp) {
+      if (!regExpTest(expected, actual)) return null;
       continue;
     }
 
@@ -273,6 +282,12 @@ function matchProxyNode(
     if (!applyWhenGuards(inner.chain, maybeBlockBag)) return null;
     resultBag = applyChainModifiers(inner.chain, maybeBlockBag, actual, parentKey);
   } else {
+    // A raw parser comment (`Line`/`Block`) matches `U.Comment` through its
+    // node view, which exists relative to the program being matched.
+    if (inner.tag === "Comment" && isRawComment(actual)) {
+      actual = ctx?.program ? commentNodeOf(ctx.program, actual) : undefined;
+      if (!actual) return null;
+    }
     if ((actual as Record<string, unknown> | null | undefined)?.type !== inner.tag) return null;
     const innerPattern = inner.args[0] ?? {};
     const innerBag = matchInner(actual, innerPattern, namedBindings, configDefaults, ctx, path);
@@ -318,6 +333,9 @@ function matchValueInner(
   if (isConfigSlot(expected)) {
     const defaultVal = configDefaults[expected.name];
     return actual === defaultVal ? {} : null;
+  }
+  if (expected instanceof RegExp) {
+    return regExpTest(expected, actual) ? {} : null;
   }
   if (isProxyNode(expected)) {
     return matchProxyNode(actual, expected, namedBindings, configDefaults, key, ctx, path);
@@ -768,6 +786,18 @@ function isCapture(v: unknown): v is { name: string } {
 
 function isConfigSlot(v: unknown): v is { name: string } {
   return v != null && typeof v === "object" && symGet(v, CONFIG_BRAND) === true;
+}
+
+function isRawComment(v: unknown): boolean {
+  const t = (v as { type?: unknown } | null | undefined)?.type;
+  return t === "Line" || t === "Block";
+}
+
+/** Test a string against a pattern RegExp; other values never match. */
+function regExpTest(re: RegExp, actual: unknown): boolean {
+  if (typeof actual !== "string") return false;
+  re.lastIndex = 0;
+  return re.test(actual);
 }
 
 function isProxyNode(v: unknown): boolean {

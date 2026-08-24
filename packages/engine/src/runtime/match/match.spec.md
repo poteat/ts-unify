@@ -12,7 +12,11 @@ success, or `null` on mismatch.
   or any specific parser.
 - Handles named captures (`$("name")`), anonymous captures (`$`), nested proxy
   nodes (typed sub-patterns), `or(...)` disjunctions, `maybeBlock(...)` sugar,
-  array patterns with spread elements, and plain literal equality.
+  array patterns with spread elements, plain literal equality, and `RegExp`
+  tests on string positions.
+- Matches comments: a `Comment` node (see `comment-nodes`) matches
+  `U.Comment(...)` like any node, and a raw parser comment found under a
+  `Program` being matched is seen through its node view.
 
 ## Design
 
@@ -36,7 +40,23 @@ success, or `null` on mismatch.
 - `applyChainModifiers` -- post-processes a nested sub-pattern's bag based on
   chain entries `seal` and `bind`. See "Seal and bind" below.
 - `deepEqual` -- structural equality ignoring `parent`, `loc`, `range` keys.
-- `isCapture`, `isProxyNode`, `isSpread` -- brand checks.
+- `regExpTest` -- a pattern `RegExp` against a string; `lastIndex` is reset
+  first so a global flag does not alternate results. Non-strings never match.
+- `isCapture`, `isProxyNode`, `isSpread`, `isRawComment` -- brand and shape
+  checks.
+
+## Comments
+
+- A value whose `type` is `"Comment"` matches a `Comment` pattern directly;
+  callers that visit comments (rule compilers) pass the nodes from
+  `commentNodes(program)`.
+- When the root `node` is a `Program`, its raw `comments` entries (`Line`,
+  `Block`) matched against a `Comment` pattern are replaced by their node view
+  from `commentNodeOf(program, raw)`, so
+  `U.Program({ comments: [...$, U.Comment({ kind: "jsdoc" }), ...$] })` reads
+  as written. A raw comment met outside a `Program` match has no view and
+  matches nothing.
+- A spread over `comments` captures the raw entries, untouched.
 
 ## Seal and bind
 
