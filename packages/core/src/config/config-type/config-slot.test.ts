@@ -1,9 +1,9 @@
 import AssertType from '@/test-utils/assert-type'
 
-import { CONFIG_BRAND } from './config-type'
-import type { ConfigSlot } from './config-type'
+import { CONFIG_BRAND } from './config-brand'
+import type { ConfigSlot } from './config-slot'
 
-describe('ConfigSlot type', () => {
+describe('config-slot', () => {
   it('should preserve literal name types', () => {
     type TestSlot = ConfigSlot<'theme'>
     type Name = TestSlot['name']

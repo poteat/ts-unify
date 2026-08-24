@@ -2,57 +2,33 @@ import type { TSESTree } from '@typescript-eslint/types'
 
 import type { OR_BRAND } from '@/ast/or'
 import type { Sealed } from '@/ast/sealed'
-import type { CoalesceUnionOfBags } from '@/pattern/coalesce-union-of-bags'
 import type { StripOr } from '@/pattern/strip-or'
 import type { StripSeal } from '@/pattern/strip-seal'
-import type { UnionToIntersection, Values } from '@/type-utils'
+import type { UnionToIntersection } from '@/type-utils'
 
-type Walk<P, Token> = {
-  [K in keyof P]-?: CoalesceUnionOfBags<PropertyValue<P[K], Token>>
-} extends infer M
-  ? Values<M & {}> extends infer U
-    ? [U] extends [never]
-      ? {}
-      : UnionToIntersection<U>
-    : never
-  : never
-
-type PropertyValue<T, Token> = T extends TSESTree.Node
-  ? {}
-  : T extends Token
-    ? T extends {
-        readonly name: infer Name extends string
-        readonly value?: () => infer V
-      }
-      ? { [K in Name]: V }
-      : {}
-    : T extends object
-      ? Walk<T, Token>
-      : {}
+import type { ExtractFromObject } from './extract-from-object'
+import type { TokenBag } from './token-bag'
 
 /**
- * Generic pattern walker that recursively extracts named tokens from a
- * pattern structure. Parameterized by `Token` — the branded type to
- * collect (e.g. `Capture` or `ConfigSlot`).
+ * The bag of every `Token` in a pattern, keyed by the token's name; `Token`
+ * is the branded shape to collect, `Capture` or `ConfigSlot`.
+ *
+ * A seal is looked through, an or-combinator distributes over its branches,
+ * and an AST node is not walked.
  */
 export type ExtractFromPattern<P, Token, Key extends string = ''> =
   P extends Sealed<infer _Inner>
     ? ExtractFromPattern<StripSeal<P>, Token, Key>
     : P extends { readonly [OR_BRAND]: true }
       ? StripOr<P> extends infer U
-        ? U extends any
+        ? U extends unknown
           ? ExtractFromPattern<U, Token, Key>
           : never
         : never
       : P extends TSESTree.Node
         ? {}
         : P extends Token
-          ? P extends {
-              readonly name: infer Name extends string
-              readonly value?: () => infer V
-            }
-            ? { [K in Name]: V }
-            : {}
+          ? TokenBag<P>
           : P extends readonly [...infer Items]
             ? UnionToIntersection<
                 {
@@ -64,5 +40,5 @@ export type ExtractFromPattern<P, Token, Key extends string = ''> =
                 }[number]
               >
             : P extends object
-              ? Walk<P, Token>
+              ? ExtractFromObject<P, Token>
               : {}

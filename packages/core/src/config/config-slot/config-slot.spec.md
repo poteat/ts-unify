@@ -17,9 +17,7 @@ config counterpart to `$` for captures. The returned object carries the
 ## Signature
 
 ```typescript
-interface C {
-  <const Name extends string>(name: Name): ConfigSlot<Name, unknown>;
-}
+const C: <const Name extends string>(name: Name) => ConfigSlot<Name, unknown>;
 ```
 
 ## Examples

@@ -1,3 +1,3 @@
-export * from './config-slot'
+export * from './c'
 
 export * as default from '.'

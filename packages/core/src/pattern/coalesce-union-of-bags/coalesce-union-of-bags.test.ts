@@ -2,7 +2,7 @@ import AssertType from '@/test-utils/assert-type'
 
 import type { CoalesceUnionOfBags } from './coalesce-union-of-bags'
 
-describe('CoalesceUnionOfBags', () => {
+describe('coalesce-union-of-bags', () => {
   it('merges disjoint keys from a union of bags', () => {
     type Bags = { a: number } | { b: string }
     type Result = CoalesceUnionOfBags<Bags>
@@ -10,9 +10,9 @@ describe('CoalesceUnionOfBags', () => {
   })
 
   it('unions value types for overlapping keys', () => {
-    type Bags = { a: number } | { a: string; b: boolean }
+    type Bags = { a: number } | { a: string; isOn: boolean }
     type Result = CoalesceUnionOfBags<Bags>
-    AssertType.assertType<Result, { a: number | string; b: boolean }>(0)
+    AssertType.assertType<Result, { a: number | string; isOn: boolean }>(0)
   })
 
   it('handles a single-member union (identity)', () => {

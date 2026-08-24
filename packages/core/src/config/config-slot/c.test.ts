@@ -2,9 +2,9 @@ import ConfigType from '@/config/config-type'
 import type { ConfigSlot } from '@/config/config-type'
 import AssertType from '@/test-utils/assert-type'
 
-import { C } from './config-slot'
+import { C } from './c'
 
-describe('C (config slot factory)', () => {
+describe('c', () => {
   it('should create a config slot with the given name', () => {
     expect(C('theme').name).toBe('theme')
   })

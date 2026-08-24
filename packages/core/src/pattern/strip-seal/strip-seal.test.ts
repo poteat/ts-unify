@@ -3,7 +3,7 @@ import AssertType from '@/test-utils/assert-type'
 
 import type { StripSeal } from './strip-seal'
 
-describe('StripSeal', () => {
+describe('strip-seal', () => {
   it('unwraps Sealed brand', () => {
     type Inner = { type: 'ReturnStatement'; argument: unknown }
     type Wrapped = Sealed<Inner>
