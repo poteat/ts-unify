@@ -18,8 +18,13 @@ types a pattern targets and what shape to match against.
 ## Design
 
 - **Input**: `rule` -- any value carrying a `[NODE]` proxy descriptor.
-- **Output**: `Array<{ tag: string; pattern: any }>` -- one entry per visitor
-  the consumer should register.
+- **Output**: `Array<{ tag: string; pattern: any; chain: ChainEntry[] }>` --
+  one entry per branch. Two branches with the same tag give two entries with
+  that tag; a consumer registering visitors merges them per tag.
+- For a root `U.or`, each branch's `chain` is the branch's own chain followed
+  by the root's `when`, `where` and `config` entries, so a guard written on
+  the disjunction applies to whichever branch matched. The root's `to`,
+  `message` and `recommended` stay on the root for `extractRuleMeta`.
 
 ## Internal helper
 

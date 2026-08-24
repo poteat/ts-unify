@@ -1,4 +1,5 @@
 import { extractPatterns } from "./extract-patterns";
+import { U } from "@ts-unify/core";
 import { NODE } from "@ts-unify/core/internal";
 import type { ProxyNode } from "@ts-unify/core/internal";
 
@@ -83,5 +84,29 @@ describe("extractPatterns", () => {
 
     const result = extractPatterns(proxy);
     expect(result[0].chain).toBe(chain);
+  });
+
+  it("keeps one entry per branch when branches share a tag", () => {
+    const or = (U as any).or(
+      (U as any).VariableDeclaration({ kind: "let" }),
+      (U as any).VariableDeclaration({ kind: "var" }),
+    );
+    const result = extractPatterns(or);
+    expect(result.map((e) => e.tag)).toEqual(["VariableDeclaration", "VariableDeclaration"]);
+    expect(result.map((e) => e.pattern.kind)).toEqual(["let", "var"]);
+  });
+
+  it("appends a root or's .when(), .where() and .config() to each branch chain", () => {
+    const guard = () => true;
+    const branchGuard = () => true;
+    const or = (U as any)
+      .or((U as any).Identifier().when(branchGuard), (U as any).Literal())
+      .when(guard)
+      .message("m");
+    const result = extractPatterns(or);
+    expect(result[0].chain.map((c) => c.method)).toEqual(["when", "when"]);
+    expect(result[0].chain[0].args[0]).toBe(branchGuard);
+    expect(result[0].chain[1].args[0]).toBe(guard);
+    expect(result[1].chain.map((c) => c.method)).toEqual(["when"]);
   });
 });
