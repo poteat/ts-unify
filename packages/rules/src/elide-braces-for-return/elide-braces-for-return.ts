@@ -13,14 +13,10 @@ export const elideBracesForReturn = U.BlockStatement({
   parent: U.ArrowFunctionExpression(),
   body: [anyReturn],
 })
-  .to(bag => {
-    const argument = (bag as { argument?: { type?: string } }).argument
-
-    return argument &&
-      typeof argument === 'object' &&
-      PARENTHESIZED_BODY.has(argument.type ?? '')
+  .to(({ argument }) =>
+    PARENTHESIZED_BODY.has(argument.type)
       ? { ...argument, extra: { parenthesized: true } }
-      : argument
-  })
+      : argument,
+  )
   .message('Elide braces for single-return arrow functions')
   .recommended()

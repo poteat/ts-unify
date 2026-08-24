@@ -7,7 +7,7 @@ import type { Bag } from '../bag'
  * @param bag the captures so far, extended in place
  * @param part the part's captures, or null where it did not match
  */
-export function absorb(bag: Bag, part: Bag | null): boolean {
+export function absorb(bag: Bag, part: Bag | null) {
   if (!part) return false
   Object.assign(bag, part)
 

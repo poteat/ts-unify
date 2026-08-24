@@ -3,8 +3,8 @@ import type { TSESTree } from '@typescript-eslint/types'
 
 import { attachedDeclaration } from './attached-declaration'
 import type { CommentSetting } from './comment-setting'
-import { jsdocLines } from './jsdoc-lines'
 import { jsdocParts } from './jsdoc-parts'
+import Lines from './lines'
 
 /**
  * The `Comment` node of one raw parser comment.
@@ -18,7 +18,7 @@ export function toCommentNode(
 ): CommentNode {
   const kind: CommentKind =
     raw.type === 'Line' ? 'line' : raw.value.startsWith('*') ? 'jsdoc' : 'block'
-  const lines = kind === 'jsdoc' ? jsdocLines(raw.value) : null
+  const lines = kind === 'jsdoc' ? Lines.jsdocLines(raw.value) : null
   const parts = jsdocParts(lines ?? [])
 
   return {

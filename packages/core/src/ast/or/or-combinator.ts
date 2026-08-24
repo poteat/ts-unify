@@ -1,7 +1,6 @@
-import type { FluentNode } from '@/ast/fluent-node'
 import type { UnwrapFluent } from '@/ast/unwrap-fluent'
 
-import type { OR_BRAND } from './or-brand'
+import type { OrNode } from './or-node'
 import type { PrimitiveLiteral } from './primitive-literal'
 
 /**
@@ -20,7 +19,5 @@ export type OrCombinator = {
   <B1, Rest extends readonly unknown[]>(
     first: B1,
     ...rest: Rest
-  ): FluentNode<UnwrapFluent<B1> | UnwrapFluent<Rest[number]>> & {
-    readonly [OR_BRAND]: true
-  }
+  ): OrNode<UnwrapFluent<B1> | UnwrapFluent<Rest[number]>>
 }
