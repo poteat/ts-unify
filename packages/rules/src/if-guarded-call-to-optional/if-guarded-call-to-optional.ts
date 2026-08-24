@@ -3,14 +3,16 @@ import { U, $ } from "@ts-unify/core";
 const callConsequent = U.maybeBlock(
   U.ExpressionStatement({
     expression: U.CallExpression({
-      callee: $,
+      callee: $("callee"),
       arguments: $("args"),
     }),
   }),
 );
 
 /**
- * Transform if-guarded function calls into optional chaining
+ * Transform if-guarded function calls into optional chaining: the test and
+ * the call's callee are one capture, so only a call of the thing tested
+ * matches, not any call under any guard.
  *
  * @example
  * ```ts
