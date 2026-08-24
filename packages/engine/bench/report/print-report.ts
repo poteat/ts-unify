@@ -17,6 +17,7 @@ export function printReport(
     t.rule,
     t.tags.join(','),
     t.tried,
+    t.admitted,
     t.matched,
     t.matchMs,
     t.guardMs,
@@ -28,6 +29,7 @@ export function printReport(
   const sum = (pick: (t: RuleTiming) => number) =>
     timings.reduce((n, t) => n + pick(t), 0)
   const tried = sum(t => t.tried)
+  const admitted = sum(t => t.admitted)
   const matched = sum(t => t.matched)
   const matchMs = sum(t => t.matchMs)
   const guardMs = sum(t => t.guardMs)
@@ -42,6 +44,7 @@ export function printReport(
         'rule',
         'tags',
         'tried',
+        'admitted',
         'matched',
         'match ms',
         'guard ms',
@@ -54,8 +57,8 @@ export function printReport(
     ),
     '',
     `corpus: ${corpus.files} files, ${corpus.nodes} nodes`,
-    `match: ${tried} tries, ${matched} matches in ${matchMs.toFixed(1)} ms` +
-      ` (${rate(tried, matchMs)} tries/s);` +
+    `match: ${tried} tries, ${admitted} admitted, ${matched} matches` +
+      ` in ${matchMs.toFixed(1)} ms (${rate(tried, matchMs)} tries/s);` +
       ` ${guardMs.toFixed(1)} ms of it in the rules' own guards,` +
       ` ${engineMs.toFixed(1)} ms in the engine` +
       ` (${rate(tried, engineMs)} tries/s)`,

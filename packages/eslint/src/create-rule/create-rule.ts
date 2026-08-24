@@ -1,4 +1,9 @@
-import { matchWithSites, applyRewrites, proxyNodeOf } from '@ts-unify/engine'
+import {
+  matchAdmitted,
+  applyRewrites,
+  dispatcherOf,
+  proxyNodeOf,
+} from '@ts-unify/engine'
 import { extractRuleMeta, rootSites } from '@ts-unify/runner'
 import type { TSESTree } from '@typescript-eslint/types'
 
@@ -33,6 +38,9 @@ export function createRule(
   const proxyNode = proxyNodeOf(transform)
   const isFixable = factory !== null || patternContainsInnerTo(entries)
   const importMap = proxyNode ? Imports.resolveImports(proxyNode.chain) : null
+  const dispatchers = [...Visitors.groupByTag(entries)].map(
+    ([tag, candidates]) => [tag, dispatcherOf(candidates)] as const,
+  )
 
   return {
     meta: ruleMeta(message, isFixable),
@@ -40,12 +48,12 @@ export function createRule(
       const sourceCode = context.sourceCode ?? context.getSourceCode?.()
       let visitors: ReadonlyMap<string, RuleModule.Visitor> = new Map()
 
-      for (const [tag, candidates] of Visitors.groupByTag(entries)) {
+      for (const [tag, admitted] of dispatchers) {
         function visit(node: TSESTree.Node) {
-          let first: ReturnType<typeof matchWithSites> = null
+          let first: ReturnType<typeof matchAdmitted> = null
 
-          for (const { pattern, chain } of candidates) {
-            first = matchWithSites(node, pattern, chain)
+          for (const { pattern, chain } of admitted(node)) {
+            first = matchAdmitted(node, pattern, chain)
 
             if (first) break
           }

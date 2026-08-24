@@ -1,4 +1,5 @@
 export * from './ast-node'
+export * from './dispatch'
 export * from './is-ast-node'
 export * from './lint'
 export * from './lint-match'

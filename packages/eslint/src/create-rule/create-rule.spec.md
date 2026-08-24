@@ -47,6 +47,9 @@ A `RuleModule` with:
 
 ## Design details
 
+- Each tag's visitor holds a dispatcher (the engine's `dispatcherOf`) over
+  the rule's entries of that tag: a node reads the entries' root literals
+  once and only the entries those admit are matched, in order.
 - Captures are stringified for the `data` bag passed to `context.report`.
   `Identifier` nodes use their `.name`; everything else uses `String(v)`.
 - Fix generation uses `applyRewrites` followed by `printNode` to produce the

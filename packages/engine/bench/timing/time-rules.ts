@@ -19,10 +19,11 @@ export const timeRules = (
   byType: ReadonlyMap<string, readonly object[]>,
 ): RuleTiming[] =>
   rules.map(({ meta, transform }) => {
-    const tried = { count: 0 }
+    const tried = { count: 0, admitted: 0 }
     const clock = { ms: 0 }
     const matching = bestOf(ROUNDS.match, () => {
       tried.count = 0
+      tried.admitted = 0
       clock.ms = 0
 
       return {
@@ -48,6 +49,7 @@ export const timeRules = (
       rule: meta.kebab,
       tags: Array.from(new Set(meta.patterns.map(p => p.tag))),
       tried: tried.count,
+      admitted: tried.admitted,
       matched: matching.result.records.length,
       matchMs: matching.ms,
       guardMs: matching.result.guardMs,

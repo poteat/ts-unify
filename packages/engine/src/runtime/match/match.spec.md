@@ -47,6 +47,15 @@ An array is an array pattern under a property of a fields record
 (`fieldPlanOf`) and a fields record with index keys anywhere else
 (`planOf`), as the matchers read it either way.
 
+## Root literals
+
+Before a context is made for a match, `matchWithSites` reads the pattern's
+root literals (`literals.spec.md`: its literal fields, the types its
+nested proxies imply, the elements before an array's first spread) off
+the node, and a node missing one is a mismatch at once. `matchAdmitted`
+is the same match without that read, for a caller that has read the
+literals through a dispatcher (`dispatch.spec.md`).
+
 ## Helpers (private)
 
 - `matchFields` -- object-key matching over a fields plan; `matchInner` is

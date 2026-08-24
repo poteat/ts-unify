@@ -1,5 +1,6 @@
 export * from './apply-rewrites'
 export * from './comment-nodes'
+export * from './dispatch'
 export * from './extract-patterns'
 export * from './match'
 export * from './reify'

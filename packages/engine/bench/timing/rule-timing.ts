@@ -1,6 +1,6 @@
 /**
- * What one rule cost: the nodes tried, the matches made, and the
- * milliseconds of each phase.
+ * What one rule cost: the nodes tried, the entries the dispatcher admitted
+ * for them, the matches made, and the milliseconds of each phase.
  *
  * Of the match phase, `guardMs` is the part spent in the rule's own root
  * `.when()` guards.
@@ -9,6 +9,7 @@ export type RuleTiming = {
   rule: string
   tags: string[]
   tried: number
+  admitted: number
   matched: number
   matchMs: number
   guardMs: number
