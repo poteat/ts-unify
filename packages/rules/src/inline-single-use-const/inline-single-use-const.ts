@@ -151,9 +151,10 @@ function moves(read: { node: Node; above: Node[] }, stmt: Node, init: Node): boo
 
 /**
  * The first const of a block that one read in the very next statement
- * consumes, with that read; null when there is none.
+ * consumes, with that read; null when there is none. Exported so a
+ * wrapper can see which const a report is about.
  */
-function inlinable(body: unknown): { index: number; name: string; init: Node; read: Node } | null {
+export function inlinableConst(body: unknown): { index: number; name: string; init: Node; read: Node } | null {
   if (!Array.isArray(body)) return null;
   for (let i = 0; i + 1 < body.length; i++) {
     const s = body[i];
@@ -216,9 +217,9 @@ const substituted = <T>(tree: T, target: Node, replacement: Node): T => {
  * ```
  */
 export const inlineSingleUseConst = U.BlockStatement({ body: $("body") })
-  .when(({ body }) => inlinable(body) !== null)
+  .when(({ body }) => inlinableConst(body) !== null)
   .to(({ body }) => {
-    const it = inlinable(body);
+    const it = inlinableConst(body);
     const list = body as unknown[];
     if (it === null) return { type: "BlockStatement", body: list };
     const next = substituted(list[it.index + 1], it.read, it.init);
