@@ -5,7 +5,7 @@ import AssertType from '@/test-utils/assert-type'
 
 import { ifReturnToTernary } from './if-return-to-ternary'
 
-describe('ifReturnToTernary (type-level)', () => {
+describe('if-return-to-ternary', () => {
   it('captures test, consequent, and alternate', () => {
     type Bag = ExtractCaptures<(typeof ifReturnToTernary)['from']>
     AssertType.assertType<

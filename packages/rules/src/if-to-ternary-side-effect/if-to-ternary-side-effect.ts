@@ -1,34 +1,12 @@
 import { U, $ } from '@ts-unify/core'
 
-const anyExprForm = U.maybeBlock(
-  U.ExpressionStatement({ expression: $ }),
-).seal()
+import { anyExprForm } from './any-expr-form'
 
 /**
- * If both branches are side-effect expressions, convert to a single expression
- * statement with a ternary expression.
+ * An `if` whose two branches are each one expression statement is one
+ * statement of a ternary.
  *
- * @example
- * ```ts
- * // Before
- * if (cond) {
- *   expr1;
- * } else {
- *   expr2;
- * }
- *
- * // After
- * cond ? expr1 : expr2;
- * ```
- *
- * @example
- * ```ts
- * // Before
- * if (cond) expr1; else expr2;
- *
- * // After
- * cond ? expr1 : expr2;
- * ```
+ * @example `if (c) f(); else g()` becomes `c ? f() : g()`
  */
 export const ifToTernarySideEffect = U.IfStatement({
   test: $,

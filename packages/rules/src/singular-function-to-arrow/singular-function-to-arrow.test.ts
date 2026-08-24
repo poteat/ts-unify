@@ -5,7 +5,7 @@ import AssertType from '@/test-utils/assert-type'
 
 import { singularFunctionToArrow } from './singular-function-to-arrow'
 
-describe('singularFunctionToArrow (type-level)', () => {
+describe('singular-function-to-arrow', () => {
   it('captures function components and derived init', () => {
     type Bag = ExtractCaptures<(typeof singularFunctionToArrow)['from']>
     AssertType.assertType<Bag['async'], boolean>(0)

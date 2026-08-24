@@ -1,29 +1,12 @@
 import { U, $ } from '@ts-unify/core'
 
-const callConsequent = U.maybeBlock(
-  U.ExpressionStatement({
-    expression: U.CallExpression({
-      callee: $('callee'),
-      arguments: $('args'),
-    }),
-  }),
-)
+import { callConsequent } from './call-consequent'
 
 /**
- * Transform if-guarded function calls into optional chaining: the test and
- * the call's callee are one capture, so only a call of the thing tested
- * matches, not any call under any guard.
+ * An `if` that tests a value and only calls it is an optional call. The
+ * test and the callee are one capture, so a call of another thing stays.
  *
- * @example
- * ```ts
- * // Before
- * if (func) {
- *   func(arg1, arg2);
- * }
- *
- * // After
- * func?.(arg1, arg2);
- * ```
+ * @example `if (f) { f(a) }` becomes `f?.(a)`
  */
 export const ifGuardedCallToOptional = U.IfStatement({
   test: $('callee'),

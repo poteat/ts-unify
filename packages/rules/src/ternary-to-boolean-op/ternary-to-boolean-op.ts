@@ -1,152 +1,22 @@
 import { U, $ } from '@ts-unify/core'
 
-/**
- * Whether an expression is boolean by shape: a comparison, a negation, a
- * logical of such, or a boolean literal. For any other test the ternary's
- * value may differ from the operator's (`x ? true : r` is `true` where
- * `x || r` is `x`), so only a boolean-shaped test is rewritten.
- */
-function booleanShaped(e: unknown): boolean {
-  if (e === null || typeof e !== 'object') return false
-
-  const n = e as {
-    type: string
-    operator?: string
-    left?: unknown
-    right?: unknown
-    argument?: unknown
-    value?: unknown
-  }
-
-  return n.type === 'BinaryExpression'
-    ? [
-        '===',
-        '!==',
-        '==',
-        '!=',
-        '<',
-        '<=',
-        '>',
-        '>=',
-        'in',
-        'instanceof',
-      ].includes(n.operator ?? '')
-    : n.type === 'UnaryExpression'
-      ? n.operator === '!'
-      : n.type === 'LogicalExpression'
-        ? (n.operator === '&&' || n.operator === '||') &&
-          booleanShaped(n.left) &&
-          booleanShaped(n.right)
-        : n.type === 'Literal' && typeof n.value === 'boolean'
-}
-
-type Arm = { type: string; value?: unknown }
-
-const isBool = (e: unknown, value: boolean) =>
-  typeof e === 'object' &&
-  e !== null &&
-  (e as Arm).type === 'Literal' &&
-  (e as Arm).value === value
-
-const isLiteral = (e: unknown) =>
-  typeof e === 'object' && e !== null && (e as Arm).type === 'Literal'
-
-const FLIPPED: Record<string, string> = {
-  '===': '!==',
-  '!==': '===',
-  '==': '!=',
-  '!=': '==',
-}
-
-/**
- * The negation of a boolean-shaped test: an equality flipped, anything else
- * under `!`.
- */
-function negated(test: unknown): unknown {
-  const n = test as {
-    type: string
-    operator?: string
-    left?: unknown
-    right?: unknown
-  }
-
-  return n.type === 'BinaryExpression' &&
-    n.operator !== undefined &&
-    n.operator in FLIPPED
-    ? U.BinaryExpression({
-        operator: FLIPPED[n.operator] as never,
-        left: n.left as never,
-        right: n.right as never,
-      })
-    : U.UnaryExpression({
-        operator: '!',
-        prefix: true,
-        argument: test as never,
-      })
-}
-
-/**
- * The operator form a ternary with a boolean literal arm stands for, or
- * null when it has none: `c ? true : r` -> `c || r`, `c ? r : false` ->
- * `c && r`, `c ? false : r` -> `!c && r`, `c ? true : false` -> `c`,
- * `c ? false : true` -> `!c`.
- */
-function form(bag: {
-  test?: unknown
-  consequent?: unknown
-  alternate?: unknown
-}): unknown {
-  const { test, consequent, alternate } = bag
-
-  return !booleanShaped(test)
-    ? null
-    : isBool(consequent, true) && isBool(alternate, false)
-      ? test
-      : isBool(consequent, false) && isBool(alternate, true)
-        ? negated(test)
-        : isBool(consequent, true)
-          ? U.LogicalExpression({
-              operator: '||',
-              left: test as never,
-              right: alternate as never,
-            })
-          : isBool(alternate, false) && !isLiteral(consequent)
-            ? U.LogicalExpression({
-                operator: '&&',
-                left: test as never,
-                right: consequent as never,
-              })
-            : isBool(consequent, false) && !isLiteral(alternate)
-              ? U.LogicalExpression({
-                  operator: '&&',
-                  left: negated(test) as never,
-                  right: alternate as never,
-                })
-              : null
-}
+import Parts from './parts'
 
 /**
  * A ternary with a boolean literal arm is a boolean operator: `c ? true : r`
- * is `c || r`, `c ? r : false` is `c && r`, `c ? false : r` is `!c && r`,
- * `c ? true : false` is `c`, `c ? false : true` is `!c` (an equality
- * flipped). Only when `c` is boolean by shape — a
- * comparison, a negation, a logical of those — since for any other value
- * the ternary and the operator differ in what they yield.
+ * is `c || r`, `c ? r : false` is `c && r`, `c ? false : r` is `!c && r`.
  *
- * @example
- * ```ts
- * // Before
- * x === 1 ? true : rest
+ * `c ? true : false` is `c`, and `c ? false : true` is `!c`, an equality
+ * flipped. Only a test boolean by shape is rewritten: a comparison, a
+ * negation, a logical of those.
  *
- * // After
- * x === 1 || rest
- * ```
+ * @example `x === 1 ? true : rest` becomes `x === 1 || rest`
  */
 export const ternaryToBooleanOp = U.ConditionalExpression({
   test: $('test'),
   consequent: $('consequent'),
   alternate: $('alternate'),
 })
-  .when(bag => form(bag) !== null)
-  .to(bag => form(bag))
+  .when(bag => Parts.form(bag) !== null)
+  .to(bag => Parts.form(bag))
   .message('A ternary with a boolean literal arm is a boolean operator')

@@ -1,62 +1,22 @@
-import { U, $ } from '@ts-unify/core'
+import { U } from '@ts-unify/core'
 
-const flipOp = { '!==': '===', '!=': '==' } as const
-
-const negatedTernary = U.ConditionalExpression({
-  test: U.UnaryExpression({ operator: '!', argument: $('condition') }),
-  ...$,
-})
-
-const inequalityTernary = U.ConditionalExpression({
-  test: U.BinaryExpression($),
-  ...$,
-}).when(it => it.operator in flipOp)
+import { inequalityTernary } from './inequality-ternary'
+import { negatedTernary } from './negated-ternary'
+import { positiveTest } from './positive-test'
 
 /**
- * Normalize ternary expressions to have positive conditions first
+ * A ternary tested on a negation or an inequality has its branches
+ * swapped and the test made positive.
  *
- * @example
- * ```ts
- * // Before
- * !condition ? consequent : alternate
- *
- * // After
- * condition ? alternate : consequent
- * ```
- *
- * @example
- * ```ts
- * // Before
- * x !== y ? consequent : alternate
- *
- * // After
- * x === y ? alternate : consequent
- * ```
- *
- * @example
- * ```ts
- * // Before
- * x != y ? consequent : alternate
- *
- * // After
- * x == y ? alternate : consequent
- * ```
+ * @example `!c ? a : b` becomes `c ? b : a`; `x !== y ? a : b` becomes
+ * `x === y ? b : a`
  */
-
 export const normalizeTernaryOrder = U.or(negatedTernary, inequalityTernary)
   .with(({ consequent: alternate, alternate: consequent }) => ({
     consequent,
     alternate,
   }))
-  .with(bag => ({
-    test: bag.condition
-      ? bag.condition
-      : U.BinaryExpression({
-          operator: flipOp[bag.operator as keyof typeof flipOp] ?? bag.operator,
-          left: bag.left,
-          right: bag.right,
-        }),
-  }))
+  .with(bag => ({ test: positiveTest(bag) }))
   .to(bag => U.ConditionalExpression(bag))
   .message('Normalize ternary to use positive condition')
   .recommended()

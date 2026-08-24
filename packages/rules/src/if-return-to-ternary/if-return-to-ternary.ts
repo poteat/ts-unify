@@ -1,35 +1,11 @@
 import { U, $ } from '@ts-unify/core'
 
-const anyReturnForm = U.maybeBlock(U.ReturnStatement({ argument: $ }))
-  .defaultUndefined()
-  .seal()
+import { anyReturnForm } from './any-return-form'
 
 /**
- * If both branches are return statements, convert to a single return with
- * a ternary expression.
+ * An `if` whose two branches each return is one return of a ternary.
  *
- * @example
- * ```ts
- * // Before
- * if (cond) {
- *   return expr1;
- * } else {
- *   return expr2;
- * }
- *
- * // After
- * return cond ? expr1 : expr2;
- * ```
- *
- * @example
- * ```ts
- * // Before
- * if (cond) return expr1
- * else return expr2;
- *
- * // After
- * return cond ? expr1 : expr2;
- * ```
+ * @example `if (c) return a; else return b` becomes `return c ? a : b`
  */
 export const ifReturnToTernary = U.IfStatement({
   test: $,

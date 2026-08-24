@@ -1,16 +1,10 @@
 import { U, $ } from '@ts-unify/core'
 
 /**
- * Replace Object.assign with spread syntax
+ * An `Object.assign` onto an empty literal is an object literal spreading
+ * its sources.
  *
- * @example
- * ```ts
- * // Before
- * Object.assign({}, a, b)
- *
- * // After
- * { ...a, ...b }
- * ```
+ * @example `Object.assign({}, a, b)` becomes `{ ...a, ...b }`
  */
 export const objectAssignToSpread = U.CallExpression({
   callee: U.MemberExpression({
@@ -19,7 +13,7 @@ export const objectAssignToSpread = U.CallExpression({
     computed: false,
     optional: false,
   }),
-  arguments: [U.ObjectExpression({ properties: [] }), ...$('sources')],
+  arguments: [U.ObjectExpression({ properties: [] as const }), ...$('sources')],
   optional: false,
 })
   .to(it =>

@@ -1,33 +1,12 @@
 import { U, $ } from '@ts-unify/core'
 
-const anyReturnForm = U.maybeBlock(U.ReturnStatement({ argument: $ }))
-  .defaultUndefined()
-  .seal()
+import { anyReturnForm } from './any-return-form'
 
 /**
- * Collapse if-guarded return patterns into ternary expressions
+ * An `if` with no `else` that returns, followed by a return, is one return
+ * of a ternary.
  *
- * @example
- * ```ts
- * // Before
- * if (condition) {
- *   return valueA;
- * }
- * return valueB;
- *
- * // After
- * return condition ? valueA : valueB;
- * ```
- *
- * @example
- * ```ts
- * // Before
- * if (condition) return valueA;
- * return valueB;
- *
- * // After
- * return condition ? valueA : valueB;
- * ```
+ * @example `if (c) return a; return b` becomes `return c ? a : b`
  */
 export const ifGuardedReturnToTernary = U.BlockStatement({
   body: [

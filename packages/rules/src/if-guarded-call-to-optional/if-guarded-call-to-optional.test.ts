@@ -5,7 +5,7 @@ import AssertType from '@/test-utils/assert-type'
 
 import { ifGuardedCallToOptional } from './if-guarded-call-to-optional'
 
-describe('ifGuardedCallToOptional (type-level)', () => {
+describe('if-guarded-call-to-optional', () => {
   it('captures callee and args', () => {
     type Bag = ExtractCaptures<(typeof ifGuardedCallToOptional)['from']>
     AssertType.assertType<

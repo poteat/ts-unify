@@ -5,7 +5,7 @@ import AssertType from '@/test-utils/assert-type'
 
 import { collapseNullGuard } from './collapse-null-guard'
 
-describe('collapseNullGuard (type-level)', () => {
+describe('collapse-null-guard', () => {
   it('captures body, value, fallback, and typeAnnotation', () => {
     type Bag = ExtractCaptures<(typeof collapseNullGuard)['from']>
     AssertType.assertType<

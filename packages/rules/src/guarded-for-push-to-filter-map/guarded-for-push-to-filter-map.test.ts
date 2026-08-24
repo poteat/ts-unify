@@ -5,7 +5,7 @@ import AssertType from '@/test-utils/assert-type'
 
 import { guardedForPushToFilterMap } from './guarded-for-push-to-filter-map'
 
-describe('guardedForPushToFilterMap (type-level)', () => {
+describe('guarded-for-push-to-filter-map', () => {
   it('captures all loop and array components', () => {
     type Bag = ExtractCaptures<(typeof guardedForPushToFilterMap)['from']>
     AssertType.assertType<

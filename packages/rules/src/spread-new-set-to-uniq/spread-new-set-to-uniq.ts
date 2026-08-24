@@ -1,16 +1,10 @@
 import { U, $, C } from '@ts-unify/core'
 
 /**
- * Replace [...new Set(array)] with uniq(array)
+ * A spread of a new `Set` over an array is a `uniq` of the array, imported
+ * from the configured module.
  *
- * @example
- * ```ts
- * // Before
- * [...new Set(myArray)]
- *
- * // After
- * uniq(myArray)
- * ```
+ * @example `[...new Set(xs)]` becomes `uniq(xs)`
  */
 export const spreadNewSetToUniq = U.ArrayExpression({
   elements: [

@@ -5,7 +5,7 @@ import AssertType from '@/test-utils/assert-type'
 
 import { typeofUndefinedToNullishCheck } from './typeof-undefined-to-nullish-check'
 
-describe('typeofUndefinedToNullishCheck (type-level)', () => {
+describe('typeof-undefined-to-nullish-check', () => {
   it('captures the expression being checked', () => {
     type Bag = ExtractCaptures<(typeof typeofUndefinedToNullishCheck)['from']>
     AssertType.assertType<Bag, { expr: TSESTree.Expression }>(0)

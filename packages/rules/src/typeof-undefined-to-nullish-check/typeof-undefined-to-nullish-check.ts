@@ -1,16 +1,10 @@
 import { U, $ } from '@ts-unify/core'
 
 /**
- * Replace typeof x === "undefined" with x == null
+ * A `typeof` compared to `"undefined"` is a loose comparison of the value
+ * to `null`.
  *
- * @example
- * ```ts
- * // Before
- * typeof x === "undefined"
- *
- * // After
- * x == null
- * ```
+ * @example `typeof x === "undefined"` becomes `x == null`
  */
 export const typeofUndefinedToNullishCheck = U.BinaryExpression({
   operator: U.or('===', '=='),

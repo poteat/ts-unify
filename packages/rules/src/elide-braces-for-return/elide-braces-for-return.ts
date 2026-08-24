@@ -1,24 +1,13 @@
 import { U, $ } from '@ts-unify/core'
 
-/**
- * Elide braces for arrow functions that return a single expression. An
- * object literal or a sequence is parenthesized as the body.
- *
- * @example
- * ```ts
- * // Before
- * (x) => { return x + 1; }
- *
- * // After
- * (x) => x + 1
- * ```
- */
-/**
- * Expression kinds an arrow body must wrap in parentheses: an object literal
- * would read as a block, a sequence would end the arrow at its first comma.
- */
-const PARENTHESIZED_BODY = new Set(['ObjectExpression', 'SequenceExpression'])
+import { PARENTHESIZED_BODY } from './parenthesized-body'
 
+/**
+ * An arrow whose block is one `return` has that expression as its body;
+ * an object literal or a sequence there is parenthesized.
+ *
+ * @example `x => { return x + 1 }` becomes `x => x + 1`
+ */
 export const elideBracesForReturn = U.BlockStatement({
   parent: U.ArrowFunctionExpression(),
   body: [U.ReturnStatement({ argument: $ }).defaultUndefined()],

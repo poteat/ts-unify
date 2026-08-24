@@ -1,16 +1,10 @@
 import { U, $ } from '@ts-unify/core'
 
 /**
- * Replace guard-and-access with optional chaining
+ * A guard on a value and a member read of the same value is an optional
+ * member read.
  *
- * @example
- * ```ts
- * // Before
- * obj && obj.prop
- *
- * // After
- * obj?.prop
- * ```
+ * @example `obj && obj.prop` becomes `obj?.prop`
  */
 export const guardAndAccessToOptionalChain = U.LogicalExpression({
   operator: '&&',

@@ -5,7 +5,7 @@ import AssertType from '@/test-utils/assert-type'
 
 import { objectAssignToSpread } from './object-assign-to-spread'
 
-describe('objectAssignToSpread (type-level)', () => {
+describe('object-assign-to-spread', () => {
   it('captures the spread sources', () => {
     type Bag = ExtractCaptures<(typeof objectAssignToSpread)['from']>
     AssertType.assertType<

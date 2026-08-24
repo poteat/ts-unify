@@ -5,7 +5,7 @@ import AssertType from '@/test-utils/assert-type'
 
 import { spreadNewSetToUniq } from './spread-new-set-to-uniq'
 
-describe('spreadNewSetToUniq (type-level)', () => {
+describe('spread-new-set-to-uniq', () => {
   it('captures the array argument', () => {
     type Bag = ExtractCaptures<(typeof spreadNewSetToUniq)['from']>
     AssertType.assertType<

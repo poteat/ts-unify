@@ -1,77 +1,31 @@
 import { U, $ } from '@ts-unify/core'
 
-const returnFallback = U.ReturnStatement({ argument: $('fallback') })
-
-const nullCheck = U.IfStatement({
-  test: U.BinaryExpression({
-    operator: '===',
-    left: $('value'),
-    right: U.Literal({ value: null }),
-  }),
-  consequent: U.or(
-    U.BlockStatement({
-      body: [returnFallback],
-    }),
-    returnFallback,
-  ).truthy(),
-  alternate: null,
-})
-
-const returnOfValue = U.ReturnStatement({
-  argument: U.or(
-    $('value'),
-    U.TSAsExpression({
-      expression: $('value'),
-      typeAnnotation: $,
-    }),
-  ),
-})
+import { coalesced } from './coalesced'
+import { nullCheck } from './null-check'
+import { returnOfValue } from './return-of-value'
 
 /**
- * Collapse null guard with early return into nullish coalescing.
+ * A guard that returns a fallback when a value is `null`, followed by a
+ * return of the value, is one return of `value ?? fallback`.
  *
- * Precondition: `value` has type `T | null` where `T` never includes
- * `undefined`. Using `??` checks for `null | undefined`.
+ * The value's type has to be `T | null` with no `undefined` in `T`, since
+ * `??` also takes `undefined`. An `as` on the returned value moves onto
+ * the coalesced one.
  *
- * @example
- * ```ts
- * if (value === null) return def;
- * return value;
- * // → return value ?? def;
- * ```
- *
- * Also preserves type assertions:
- * ```ts
- * if (value === null) return def;
- * return value as T;
- * // → return (value ?? def) as T;
- * ```
+ * @example `if (v === null) return d; return v` becomes `return v ?? d`
  */
 export const collapseNullGuard = U.BlockStatement({
   body: [...$, nullCheck, returnOfValue],
 })
-  .to(({ body, value, fallback, typeAnnotation }) => {
-    const coalesce = U.LogicalExpression({
-      operator: '??',
-      left: value,
-      right: fallback,
-    })
-
-    const argument = typeAnnotation
-      ? U.TSAsExpression({
-          expression: coalesce,
-          typeAnnotation,
-        })
-      : coalesce
-
-    return U.BlockStatement({
+  .to(({ body, value, fallback, typeAnnotation }) =>
+    U.BlockStatement({
       body: [
         ...body,
         U.ReturnStatement({
-          argument,
+          argument: coalesced(value, fallback, typeAnnotation),
         }),
       ],
-    })
-  })
+    }),
+  )
   .message('Collapse null guard with early return into nullish coalescing')
   .recommended()

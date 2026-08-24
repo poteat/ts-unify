@@ -5,7 +5,7 @@ import AssertType from '@/test-utils/assert-type'
 
 import { guardAndAccessToOptionalChain } from './guard-and-access-to-optional-chain'
 
-describe('guardAndAccessToOptionalChain (type-level)', () => {
+describe('guard-and-access-to-optional-chain', () => {
   it('captures obj and prop', () => {
     type Bag = ExtractCaptures<(typeof guardAndAccessToOptionalChain)['from']>
     AssertType.assertType<

@@ -5,7 +5,7 @@ import AssertType from '@/test-utils/assert-type'
 
 import { arrayFromMapToArrayFrom } from './array-from-map-to-array-from'
 
-describe('arrayFromMapToArrayFrom (type-level)', () => {
+describe('array-from-map-to-array-from', () => {
   it('captures the iterable and mapFn arguments', () => {
     type Bag = ExtractCaptures<(typeof arrayFromMapToArrayFrom)['from']>
     AssertType.assertType<

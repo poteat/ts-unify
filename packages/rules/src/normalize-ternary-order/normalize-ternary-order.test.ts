@@ -6,7 +6,7 @@ import AssertType from '@/test-utils/assert-type'
 
 import { normalizeTernaryOrder } from './normalize-ternary-order'
 
-describe('normalizeTernaryOrder (type-level)', () => {
+describe('normalize-ternary-order', () => {
   it('captures ternary components and binary operator parts', () => {
     type Bag = ExtractCaptures<(typeof normalizeTernaryOrder)['from']>
     AssertType.assertType<Bag['condition'], TSESTree.Expression>(0)

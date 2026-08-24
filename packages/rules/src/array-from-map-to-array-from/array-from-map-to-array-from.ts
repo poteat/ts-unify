@@ -1,26 +1,16 @@
 import { U, $ } from '@ts-unify/core'
 
+import { arrayFrom } from './array-from'
+
 /**
- * Collapse Array.from(x).map(fn) into Array.from(x, fn)
+ * A `map` over `Array.from(x)` is the second argument of `Array.from`.
  *
- * @example
- * ```ts
- * // Before
- * Array.from(iterable).map(mapFn)
- *
- * // After
- * Array.from(iterable, mapFn)
- * ```
+ * @example `Array.from(xs).map(f)` becomes `Array.from(xs, f)`
  */
 export const arrayFromMapToArrayFrom = U.CallExpression({
   callee: U.MemberExpression({
     object: U.CallExpression({
-      callee: U.MemberExpression({
-        object: U.Identifier({ name: 'Array' }),
-        property: U.Identifier({ name: 'from' }),
-        computed: false,
-        optional: false,
-      }),
+      callee: arrayFrom,
       arguments: [$('iterable')],
       optional: false,
     }),
@@ -33,12 +23,7 @@ export const arrayFromMapToArrayFrom = U.CallExpression({
 })
   .to(({ iterable, mapFn }) =>
     U.CallExpression({
-      callee: U.MemberExpression({
-        object: U.Identifier({ name: 'Array' }),
-        property: U.Identifier({ name: 'from' }),
-        computed: false,
-        optional: false,
-      }),
+      callee: arrayFrom,
       arguments: [iterable, mapFn],
       optional: false,
     }),

@@ -5,7 +5,7 @@ import AssertType from '@/test-utils/assert-type'
 
 import { ifToTernarySideEffect } from './if-to-ternary-side-effect'
 
-describe('ifToTernarySideEffect (type-level)', () => {
+describe('if-to-ternary-side-effect', () => {
   it('captures test, consequent, and alternate', () => {
     type Bag = ExtractCaptures<(typeof ifToTernarySideEffect)['from']>
     AssertType.assertType<
