@@ -119,6 +119,9 @@ function jsdocParts(lines: string[]): { summary: string[]; body: string[]; tags:
   if (i < lines.length && lines[i] === "") {
     i++;
     while (i < lines.length && !isTagLine(lines[i])) body.push(lines[i++]);
+    // A blank line before the first tag separates the prose from the tags
+    // and is no line of the body.
+    if (body.length > 0 && body[body.length - 1] === "" && i < lines.length) body.pop();
   }
   const tags: JsdocTag[] = [];
   while (i < lines.length) {
