@@ -1,1 +1,3 @@
-export * from "./node-with-seal";
+export * from './node-with-seal'
+
+export * as default from '.'

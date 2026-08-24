@@ -1,4 +1,4 @@
-import type { LastOf } from "@/type-utils/last-of";
+import type { LastOf } from '@/type-utils/last-of'
 
 /**
  * Converts a union type to a tuple type.
@@ -11,7 +11,7 @@ import type { LastOf } from "@/type-utils/last-of";
 export type UnionToTuple<T, Acc extends readonly any[] = []> = 0 extends 1
   ? never
   : [T] extends [never]
-  ? Acc
-  : LastOf<T> extends infer Last
-  ? UnionToTuple<Exclude<T, Last>, [...Acc, Last]>
-  : never;
+    ? Acc
+    : LastOf<T> extends infer Last
+      ? UnionToTuple<Exclude<T, Last>, [...Acc, Last]>
+      : never

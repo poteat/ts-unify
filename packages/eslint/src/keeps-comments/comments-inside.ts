@@ -1,9 +1,9 @@
-import type { TSESTree } from "@typescript-eslint/types"
+import type { TSESTree } from '@typescript-eslint/types'
 
 /**
- * The comments inside a node, read from ESLint"s `SourceCode`; none when
+ * The comments inside a node, read from ESLint's `SourceCode`; none when
  * the surface handed in does not carry `getCommentsInside`.
- * @param sourceCode the rule context"s source
+ * @param sourceCode the rule context's source
  * @param node the node
  */
 export function commentsInside(
@@ -11,10 +11,10 @@ export function commentsInside(
   node: TSESTree.Node,
 ): readonly TSESTree.Comment[] {
   if (
-    typeof sourceCode !== "object" ||
+    typeof sourceCode !== 'object' ||
     !sourceCode ||
-    !("getCommentsInside" in sourceCode) ||
-    typeof sourceCode.getCommentsInside !== "function"
+    !('getCommentsInside' in sourceCode) ||
+    typeof sourceCode.getCommentsInside !== 'function'
   ) {
     return []
   }

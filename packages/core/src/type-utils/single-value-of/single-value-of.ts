@@ -1,4 +1,4 @@
-import type { SingleKeyOf } from "@/type-utils/single-key-of";
+import type { SingleKeyOf } from '@/type-utils/single-key-of'
 
 /**
  * SingleValueOf<T>
@@ -13,4 +13,4 @@ export type SingleValueOf<T> = T extends object
   ? SingleKeyOf<T> extends infer K
     ? T[K & keyof T]
     : never
-  : never;
+  : never

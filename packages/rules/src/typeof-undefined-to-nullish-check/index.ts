@@ -1,1 +1,3 @@
-export * from "./typeof-undefined-to-nullish-check";
+export * from './typeof-undefined-to-nullish-check'
+
+export * as default from '.'

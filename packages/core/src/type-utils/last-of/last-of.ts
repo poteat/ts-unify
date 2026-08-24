@@ -1,4 +1,4 @@
-import type { UnionToIntersection } from "@/type-utils/union-to-intersection";
+import type { UnionToIntersection } from '@/type-utils/union-to-intersection'
 
 /**
  * Extracts the last element of a union using variance.
@@ -7,8 +7,7 @@ import type { UnionToIntersection } from "@/type-utils/union-to-intersection";
  * @example
  * type Result = LastOf<1 | 2 | 3>; // 3
  */
-export type LastOf<T> = UnionToIntersection<
-  T extends any ? () => T : never
-> extends () => infer R
-  ? R
-  : never;
+export type LastOf<T> =
+  UnionToIntersection<T extends any ? () => T : never> extends () => infer R
+    ? R
+    : never

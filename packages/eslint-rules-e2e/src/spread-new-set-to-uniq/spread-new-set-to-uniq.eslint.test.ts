@@ -1,32 +1,32 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { RuleTester } = require("@typescript-eslint/rule-tester");
-import { createRule } from "@ts-unify/eslint/internal";
-import { spreadNewSetToUniq } from "@ts-unify/rules";
+const { RuleTester } = require('@typescript-eslint/rule-tester')
+import { createRule } from '@ts-unify/eslint/internal'
+import { spreadNewSetToUniq } from '@ts-unify/rules'
 
 const tester = new RuleTester({
   languageOptions: {
-    parser: require("@typescript-eslint/parser"),
+    parser: require('@typescript-eslint/parser'),
   },
-});
+})
 
 tester.run(
-  "spread-new-set-to-uniq",
+  'spread-new-set-to-uniq',
   createRule(spreadNewSetToUniq, {
-    message: "Use uniq() instead of [...new Set()]",
+    message: 'Use uniq() instead of [...new Set()]',
     fix: true,
   }),
   {
     valid: [
-      "const x = new Set(arr);",
-      "const x = [...arr];",
-      "const x = Array.from(new Set(arr));",
+      'const x = new Set(arr);',
+      'const x = [...arr];',
+      'const x = Array.from(new Set(arr));',
     ],
     invalid: [
       {
-        code: "const x = [...new Set(arr)];",
-        errors: [{ messageId: "match" }],
+        code: 'const x = [...new Set(arr)];',
+        errors: [{ messageId: 'match' }],
         output: 'import { uniq } from "lodash";\nconst x = uniq(arr);',
       },
     ],
-  }
-);
+  },
+)

@@ -1,2 +1,3 @@
-export * from "./or";
+export * from './or'
 
+export * as default from '.'

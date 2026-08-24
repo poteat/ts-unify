@@ -1,16 +1,16 @@
-import { U, $ } from "@ts-unify/core";
+import { U, $ } from '@ts-unify/core'
 
-const flipOp = { "!==": "===", "!=": "==" } as const;
+const flipOp = { '!==': '===', '!=': '==' } as const
 
 const negatedTernary = U.ConditionalExpression({
-  test: U.UnaryExpression({ operator: "!", argument: $("condition") }),
+  test: U.UnaryExpression({ operator: '!', argument: $('condition') }),
   ...$,
-});
+})
 
 const inequalityTernary = U.ConditionalExpression({
   test: U.BinaryExpression($),
   ...$,
-}).when(({ operator }) => operator in flipOp);
+}).when(it => it.operator in flipOp)
 
 /**
  * Normalize ternary expressions to have positive conditions first
@@ -48,7 +48,7 @@ export const normalizeTernaryOrder = U.or(negatedTernary, inequalityTernary)
     consequent,
     alternate,
   }))
-  .with((bag) => ({
+  .with(bag => ({
     test: bag.condition
       ? bag.condition
       : U.BinaryExpression({
@@ -57,6 +57,6 @@ export const normalizeTernaryOrder = U.or(negatedTernary, inequalityTernary)
           right: bag.right,
         }),
   }))
-  .to((bag) => U.ConditionalExpression(bag))
-  .message("Normalize ternary to use positive condition")
-  .recommended();
+  .to(bag => U.ConditionalExpression(bag))
+  .message('Normalize ternary to use positive condition')
+  .recommended()

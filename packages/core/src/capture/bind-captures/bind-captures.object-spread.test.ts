@@ -1,28 +1,27 @@
-import type { BindCaptures, Capture } from "@/capture";
-import { $ } from "@/capture";
-import type { DollarObjectSpread } from "@/capture";
-import { assertType } from "@/test-utils/assert-type";
+import SrcCapture from '@/capture'
+import type { BindCaptures, Capture, DollarObjectSpread } from '@/capture'
+import AssertType from '@/test-utils/assert-type'
 
-describe("BindCaptures with object spread-$ (type-level)", () => {
-  it("binds omitted keys when using { ...$, explicit: $ }", () => {
-    type Shape = { a: number; b: string };
-    type Pattern = { a: $ } & DollarObjectSpread;
-    type Bound = BindCaptures<Pattern, Shape>;
+describe('BindCaptures with object spread-$ (type-level)', () => {
+  it('binds omitted keys when using { ...$, explicit: $ }', () => {
+    type Shape = { a: number; b: string }
+    type Pattern = { a: SrcCapture.$ } & DollarObjectSpread
+    type Bound = BindCaptures<Pattern, Shape>
     type Expected = {
-      readonly a: Capture<"a", number>;
-      readonly b: Capture<"b", string>;
-    };
-    assertType<Bound, Expected>(0);
-  });
+      readonly a: Capture<'a', number>
+      readonly b: Capture<'b', string>
+    }
+    AssertType.assertType<Bound, Expected>(0)
+  })
 
   it("does not capture 'type' from shape extras", () => {
-    type Shape = { type: "ReturnStatement"; a: number; b: string };
-    type Pattern = { a: Capture<"a", number> } & DollarObjectSpread;
-    type Bound = BindCaptures<Pattern, Shape>;
+    type Shape = { type: 'ReturnStatement'; a: number; b: string }
+    type Pattern = { a: Capture<'a', number> } & DollarObjectSpread
+    type Bound = BindCaptures<Pattern, Shape>
     type Expected = {
-      readonly a: Capture<"a", number>;
-      readonly b: Capture<"b", string>;
-    };
-    assertType<Bound, Expected>(0);
-  });
-});
+      readonly a: Capture<'a', number>
+      readonly b: Capture<'b', string>
+    }
+    AssertType.assertType<Bound, Expected>(0)
+  })
+})

@@ -9,5 +9,4 @@
  * type U = { a: 1 } | { b: 2 };
  * type K = KeysOfUnion<U>; // "a" | "b"
  */
-export type KeysOfUnion<T> = T extends any ? keyof T : never;
-
+export type KeysOfUnion<T> = T extends any ? keyof T : never

@@ -1,15 +1,18 @@
-import type { RuleTester } from "eslint";
-import { U, $ } from "@ts-unify/core";
-import { createRule } from "../create-rule";
+import { U, $ } from '@ts-unify/core'
+import type { RuleTester } from 'eslint'
 
-/** The rule type `RuleTester.run` accepts. */
-type TesterRule = Parameters<RuleTester["run"]>[1];
+import CreateRule from '../create-rule'
 
-const id = U.Identifier({ name: $("n") });
+/**
+ * The rule type `RuleTester.run` accepts.
+ */
+type TesterRule = Parameters<RuleTester['run']>[1]
 
-describe("RuleModule", () => {
-  it("is the rule type RuleTester.run takes", () => {
-    const rule: TesterRule = createRule(id);
-    expect(rule.meta?.type).toBe("suggestion");
-  });
-});
+const id = U.Identifier({ name: $('n') })
+
+describe('RuleModule', () => {
+  it('is the rule type RuleTester.run takes', () => {
+    const rule: TesterRule = CreateRule.createRule(id)
+    expect(rule.meta?.type).toBe('suggestion')
+  })
+})

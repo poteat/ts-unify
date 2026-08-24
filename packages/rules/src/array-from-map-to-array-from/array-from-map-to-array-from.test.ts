@@ -1,17 +1,19 @@
-import type { ExtractCaptures } from "@/pattern";
-import { assertType } from "@/test-utils/assert-type";
-import type { TSESTree } from "@typescript-eslint/types";
-import { arrayFromMapToArrayFrom } from "./array-from-map-to-array-from";
+import type { TSESTree } from '@typescript-eslint/types'
 
-describe("arrayFromMapToArrayFrom (type-level)", () => {
-  it("captures the iterable and mapFn arguments", () => {
-    type Bag = ExtractCaptures<typeof arrayFromMapToArrayFrom["from"]>;
-    assertType<
+import type { ExtractCaptures } from '@/pattern'
+import AssertType from '@/test-utils/assert-type'
+
+import { arrayFromMapToArrayFrom } from './array-from-map-to-array-from'
+
+describe('arrayFromMapToArrayFrom (type-level)', () => {
+  it('captures the iterable and mapFn arguments', () => {
+    type Bag = ExtractCaptures<(typeof arrayFromMapToArrayFrom)['from']>
+    AssertType.assertType<
       Bag,
       {
-        iterable: TSESTree.Expression | TSESTree.SpreadElement;
-        mapFn: TSESTree.Expression | TSESTree.SpreadElement;
+        iterable: TSESTree.Expression | TSESTree.SpreadElement
+        mapFn: TSESTree.Expression | TSESTree.SpreadElement
       }
-    >(0);
-  });
-});
+    >(0)
+  })
+})

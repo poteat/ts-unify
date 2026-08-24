@@ -1,11 +1,11 @@
-import { U, $ } from "@ts-unify/core";
+import { U, $ } from '@ts-unify/core'
 
-const returnFallback = U.ReturnStatement({ argument: $("fallback") });
+const returnFallback = U.ReturnStatement({ argument: $('fallback') })
 
 const nullCheck = U.IfStatement({
   test: U.BinaryExpression({
-    operator: "===",
-    left: $("value"),
+    operator: '===',
+    left: $('value'),
     right: U.Literal({ value: null }),
   }),
   consequent: U.or(
@@ -15,17 +15,17 @@ const nullCheck = U.IfStatement({
     returnFallback,
   ).truthy(),
   alternate: null,
-});
+})
 
 const returnOfValue = U.ReturnStatement({
   argument: U.or(
-    $("value"),
+    $('value'),
     U.TSAsExpression({
-      expression: $("value"),
+      expression: $('value'),
       typeAnnotation: $,
     }),
   ),
-});
+})
 
 /**
  * Collapse null guard with early return into nullish coalescing.
@@ -50,27 +50,28 @@ const returnOfValue = U.ReturnStatement({
 export const collapseNullGuard = U.BlockStatement({
   body: [...$, nullCheck, returnOfValue],
 })
-  .to(({ body, value: left, fallback: right, typeAnnotation }) => {
+  .to(({ body, value, fallback, typeAnnotation }) => {
     const coalesce = U.LogicalExpression({
-      operator: "??",
-      left,
-      right,
-    });
+      operator: '??',
+      left: value,
+      right: fallback,
+    })
 
     const argument = typeAnnotation
-      ? U.TSAsExpression({ expression: coalesce, typeAnnotation })
-      : coalesce;
+      ? U.TSAsExpression({
+          expression: coalesce,
+          typeAnnotation,
+        })
+      : coalesce
 
-    const block = U.BlockStatement({
+    return U.BlockStatement({
       body: [
         ...body,
         U.ReturnStatement({
           argument,
         }),
       ],
-    });
-
-    return block;
+    })
   })
-  .message("Collapse null guard with early return into nullish coalescing")
-  .recommended();
+  .message('Collapse null guard with early return into nullish coalescing')
+  .recommended()

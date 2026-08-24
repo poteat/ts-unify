@@ -1,4 +1,4 @@
-import { Equal } from "@/test-utils/equal";
+import Equal from '@/test-utils/equal'
 
 /**
  * Type-safe expectation helper that enforces exact type equality at compile
@@ -13,8 +13,8 @@ import { Equal } from "@/test-utils/equal";
  * @returns Object with toBe method for type-safe equality checking
  */
 export const expectType = <const T>(value: T) => ({
-  toBe: <U>(expected: Equal<T, U> extends true ? U : never) => {
-    expect(value).toBe(expected);
-    return expected;
+  toBe: <U>(expected: Equal.Equal<T, U> extends true ? U : never) => {
+    expect(value).toBe(expected)
+    return expected
   },
-});
+})

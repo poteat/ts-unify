@@ -1,45 +1,74 @@
-import { match, extractPatterns } from "@ts-unify/engine";
-import { guardAndAccessToOptionalChain } from "@ts-unify/rules";
+import { match, extractPatterns } from '@ts-unify/engine'
+import { guardAndAccessToOptionalChain } from '@ts-unify/rules'
 
-describe("guardAndAccessToOptionalChain matching", () => {
-  const rule = extractPatterns(guardAndAccessToOptionalChain)[0]!;
+describe('guardAndAccessToOptionalChain matching', () => {
+  const rule = extractPatterns(guardAndAccessToOptionalChain)[0]!
 
-  it("matches obj && obj.prop", () => {
-    const obj = { type: "Identifier", name: "obj" };
-    const ast = {
-      type: "LogicalExpression",
-      operator: "&&",
-      left: obj,
-      right: {
-        type: "MemberExpression",
-        object: obj,
-        property: { type: "Identifier", name: "prop" },
-        computed: false,
-        optional: false,
+  it('matches obj && obj.prop', () => {
+    const obj = {
+      type: 'Identifier',
+      name: 'obj',
+    }
+
+    const bag = match(
+      {
+        type: 'LogicalExpression',
+        operator: '&&',
+        left: obj,
+
+        right: {
+          type: 'MemberExpression',
+          object: obj,
+
+          property: {
+            type: 'Identifier',
+            name: 'prop',
+          },
+
+          computed: false,
+          optional: false,
+        },
       },
-    };
+      rule.pattern,
+    )
 
-    const bag = match(ast, rule.pattern);
-    expect(bag).not.toBeNull();
-    expect(bag!.obj).toEqual(obj);
-    expect(bag!.prop).toEqual({ type: "Identifier", name: "prop" });
-  });
+    expect(bag).not.toBeNull()
+    expect(bag!.obj).toEqual(obj)
 
-  it("rejects obj || obj.prop", () => {
-    const obj = { type: "Identifier", name: "obj" };
-    const ast = {
-      type: "LogicalExpression",
-      operator: "||",
-      left: obj,
-      right: {
-        type: "MemberExpression",
-        object: obj,
-        property: { type: "Identifier", name: "prop" },
-        computed: false,
-        optional: false,
-      },
-    };
+    expect(bag!.prop).toEqual({
+      type: 'Identifier',
+      name: 'prop',
+    })
+  })
 
-    expect(match(ast, rule.pattern)).toBeNull();
-  });
-});
+  it('rejects obj || obj.prop', () => {
+    const obj = {
+      type: 'Identifier',
+      name: 'obj',
+    }
+
+    expect(
+      match(
+        {
+          type: 'LogicalExpression',
+          operator: '||',
+          left: obj,
+
+          right: {
+            type: 'MemberExpression',
+            object: obj,
+
+            property: {
+              type: 'Identifier',
+              name: 'prop',
+            },
+
+            computed: false,
+            optional: false,
+          },
+        },
+        rule.pattern,
+      ),
+    ).toBeNull()
+  })
+})

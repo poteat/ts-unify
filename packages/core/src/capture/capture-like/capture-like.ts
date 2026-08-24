@@ -1,5 +1,5 @@
-import type { Capture } from "@/capture/capture-type";
-import type { $ } from "@/capture/dollar";
+import type { Capture } from '@/capture/capture-type'
+import type { $ } from '@/capture/dollar'
 
 /**
  * CaptureLike is a type-level token that represents either a placeholder
@@ -8,4 +8,4 @@ import type { $ } from "@/capture/dollar";
 export type CaptureLike<Value = unknown> =
   | $
   | Capture<string, Value>
-  | Capture<string, unknown>;
+  | Capture<string, unknown>

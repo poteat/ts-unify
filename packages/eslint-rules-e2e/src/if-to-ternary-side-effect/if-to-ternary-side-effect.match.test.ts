@@ -1,66 +1,150 @@
-import { match, extractPatterns } from "@ts-unify/engine";
-import { ifToTernarySideEffect } from "@ts-unify/rules";
+import { match, extractPatterns } from '@ts-unify/engine'
+import { ifToTernarySideEffect } from '@ts-unify/rules'
 
-describe("ifToTernarySideEffect matching", () => {
-  const rule = extractPatterns(ifToTernarySideEffect)[0]!;
+describe('ifToTernarySideEffect matching', () => {
+  const rule = extractPatterns(ifToTernarySideEffect)[0]!
 
-  it("extracts as an IfStatement pattern", () => {
-    expect(rule.tag).toBe("IfStatement");
-  });
+  it('extracts as an IfStatement pattern', () => {
+    expect(rule.tag).toBe('IfStatement')
+  })
 
-  it("matches if (c) { expr1; } else { expr2; }", () => {
-    const ast = {
-      type: "IfStatement",
-      test: { type: "Identifier", name: "cond" },
-      consequent: {
-        type: "BlockStatement",
-        body: [{ type: "ExpressionStatement", expression: { type: "Identifier", name: "a" } }],
+  it('matches if (c) { expr1; } else { expr2; }', () => {
+    const bag = match(
+      {
+        type: 'IfStatement',
+
+        test: {
+          type: 'Identifier',
+          name: 'cond',
+        },
+
+        consequent: {
+          type: 'BlockStatement',
+
+          body: [
+            {
+              type: 'ExpressionStatement',
+
+              expression: {
+                type: 'Identifier',
+                name: 'a',
+              },
+            },
+          ],
+        },
+
+        alternate: {
+          type: 'BlockStatement',
+
+          body: [
+            {
+              type: 'ExpressionStatement',
+
+              expression: {
+                type: 'Identifier',
+                name: 'b',
+              },
+            },
+          ],
+        },
       },
-      alternate: {
-        type: "BlockStatement",
-        body: [{ type: "ExpressionStatement", expression: { type: "Identifier", name: "b" } }],
-      },
-    };
+      rule.pattern,
+    )
 
-    const bag = match(ast, rule.pattern);
-    expect(bag).not.toBeNull();
-    expect(bag!.test).toEqual({ type: "Identifier", name: "cond" });
-  });
+    expect(bag).not.toBeNull()
 
-  it("matches if (c) expr1; else expr2; (blockless)", () => {
-    const ast = {
-      type: "IfStatement",
-      test: { type: "Identifier", name: "cond" },
-      consequent: { type: "ExpressionStatement", expression: { type: "Identifier", name: "a" } },
-      alternate: { type: "ExpressionStatement", expression: { type: "Identifier", name: "b" } },
-    };
+    expect(bag!.test).toEqual({
+      type: 'Identifier',
+      name: 'cond',
+    })
+  })
 
-    const bag = match(ast, rule.pattern);
-    expect(bag).not.toBeNull();
-  });
+  it('matches if (c) expr1; else expr2; (blockless)', () => {
+    expect(
+      match(
+        {
+          type: 'IfStatement',
 
-  it("rejects an IfStatement with null alternate", () => {
-    const ast = {
-      type: "IfStatement",
-      test: { type: "Identifier", name: "flag" },
-      consequent: {
-        type: "ExpressionStatement",
-        expression: { type: "Identifier", name: "a" },
-      },
-      alternate: null,
-    };
+          test: {
+            type: 'Identifier',
+            name: 'cond',
+          },
 
-    expect(match(ast, rule.pattern)).toBeNull();
-  });
+          consequent: {
+            type: 'ExpressionStatement',
 
-  it("rejects when branches are not expression statements", () => {
-    const ast = {
-      type: "IfStatement",
-      test: { type: "Identifier", name: "flag" },
-      consequent: { type: "VariableDeclaration", kind: "const", declarations: [] },
-      alternate: { type: "VariableDeclaration", kind: "let", declarations: [] },
-    };
+            expression: {
+              type: 'Identifier',
+              name: 'a',
+            },
+          },
 
-    expect(match(ast, rule.pattern)).toBeNull();
-  });
-});
+          alternate: {
+            type: 'ExpressionStatement',
+
+            expression: {
+              type: 'Identifier',
+              name: 'b',
+            },
+          },
+        },
+        rule.pattern,
+      ),
+    ).not.toBeNull()
+  })
+
+  it('rejects an IfStatement with null alternate', () => {
+    expect(
+      match(
+        {
+          type: 'IfStatement',
+
+          test: {
+            type: 'Identifier',
+            name: 'flag',
+          },
+
+          consequent: {
+            type: 'ExpressionStatement',
+
+            expression: {
+              type: 'Identifier',
+              name: 'a',
+            },
+          },
+
+          alternate: null,
+        },
+        rule.pattern,
+      ),
+    ).toBeNull()
+  })
+
+  it('rejects when branches are not expression statements', () => {
+    expect(
+      match(
+        {
+          type: 'IfStatement',
+
+          test: {
+            type: 'Identifier',
+            name: 'flag',
+          },
+
+          consequent: {
+            type: 'VariableDeclaration',
+            kind: 'const',
+            declarations: [],
+          },
+
+          alternate: {
+            type: 'VariableDeclaration',
+            kind: 'let',
+            declarations: [],
+          },
+        },
+        rule.pattern,
+      ),
+    ).toBeNull()
+  })
+})

@@ -1,4 +1,4 @@
-import { Equal } from "@/test-utils/equal";
+import Equal from '@/test-utils/equal'
 
 /**
  * Compile-time assertion that two types are exactly equal.
@@ -12,5 +12,6 @@ import { Equal } from "@/test-utils/equal";
  * @typeParam T - Actual type
  * @typeParam U - Expected type
  */
-export const assertType = <T, U>(val: Equal<T, U> extends true ? 0 : never) =>
-  val;
+export const assertType = <T, U>(
+  val: Equal.Equal<T, U> extends true ? 0 : never,
+) => val

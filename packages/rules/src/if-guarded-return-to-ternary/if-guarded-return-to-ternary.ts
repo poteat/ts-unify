@@ -1,8 +1,8 @@
-import { U, $ } from "@ts-unify/core";
+import { U, $ } from '@ts-unify/core'
 
 const anyReturnForm = U.maybeBlock(U.ReturnStatement({ argument: $ }))
   .defaultUndefined()
-  .seal();
+  .seal()
 
 /**
  * Collapse if-guarded return patterns into ternary expressions
@@ -37,7 +37,7 @@ export const ifGuardedReturnToTernary = U.BlockStatement({
       consequent: anyReturnForm,
       alternate: null,
     }),
-    U.ReturnStatement({ argument: $("alternate") }).defaultUndefined(),
+    U.ReturnStatement({ argument: $('alternate') }).defaultUndefined(),
   ],
 })
   .to(({ body, ...bag }) =>
@@ -50,5 +50,5 @@ export const ifGuardedReturnToTernary = U.BlockStatement({
       ],
     }),
   )
-  .message("Collapse if-guarded return into ternary")
-  .recommended();
+  .message('Collapse if-guarded return into ternary')
+  .recommended()

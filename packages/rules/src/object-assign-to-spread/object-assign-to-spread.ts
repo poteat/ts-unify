@@ -1,4 +1,4 @@
-import { U, $ } from "@ts-unify/core";
+import { U, $ } from '@ts-unify/core'
 
 /**
  * Replace Object.assign with spread syntax
@@ -14,18 +14,18 @@ import { U, $ } from "@ts-unify/core";
  */
 export const objectAssignToSpread = U.CallExpression({
   callee: U.MemberExpression({
-    object: U.Identifier({ name: "Object" }),
-    property: U.Identifier({ name: "assign" }),
+    object: U.Identifier({ name: 'Object' }),
+    property: U.Identifier({ name: 'assign' }),
     computed: false,
     optional: false,
   }),
-  arguments: [U.ObjectExpression({ properties: [] }), ...$("sources")],
+  arguments: [U.ObjectExpression({ properties: [] }), ...$('sources')],
   optional: false,
 })
-  .to(({ sources }) =>
+  .to(it =>
     U.ObjectExpression({
-      properties: sources.map((src) => U.SpreadElement({ argument: src })),
+      properties: it.sources.map(src => U.SpreadElement({ argument: src })),
     }),
   )
-  .message("Use object spread instead of Object.assign()")
-  .recommended();
+  .message('Use object spread instead of Object.assign()')
+  .recommended()

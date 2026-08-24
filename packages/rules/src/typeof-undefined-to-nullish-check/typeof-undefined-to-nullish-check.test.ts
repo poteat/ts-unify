@@ -1,11 +1,13 @@
-import type { ExtractCaptures } from "@/pattern";
-import { assertType } from "@/test-utils/assert-type";
-import type { TSESTree } from "@typescript-eslint/types";
-import { typeofUndefinedToNullishCheck } from "./typeof-undefined-to-nullish-check";
+import type { TSESTree } from '@typescript-eslint/types'
 
-describe("typeofUndefinedToNullishCheck (type-level)", () => {
-  it("captures the expression being checked", () => {
-    type Bag = ExtractCaptures<typeof typeofUndefinedToNullishCheck["from"]>;
-    assertType<Bag, { expr: TSESTree.Expression }>(0);
-  });
-});
+import type { ExtractCaptures } from '@/pattern'
+import AssertType from '@/test-utils/assert-type'
+
+import { typeofUndefinedToNullishCheck } from './typeof-undefined-to-nullish-check'
+
+describe('typeofUndefinedToNullishCheck (type-level)', () => {
+  it('captures the expression being checked', () => {
+    type Bag = ExtractCaptures<(typeof typeofUndefinedToNullishCheck)['from']>
+    AssertType.assertType<Bag, { expr: TSESTree.Expression }>(0)
+  })
+})

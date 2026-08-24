@@ -1,4 +1,4 @@
-import type { UnionToIntersection } from "@/type-utils/union-to-intersection";
+import type { UnionToIntersection } from '@/type-utils/union-to-intersection'
 
 /**
  * SingleKeyOf<T>
@@ -14,4 +14,4 @@ export type SingleKeyOf<T> = [keyof T] extends [never]
   ? never
   : [keyof T] extends [UnionToIntersection<keyof T>]
     ? keyof T
-    : never;
+    : never

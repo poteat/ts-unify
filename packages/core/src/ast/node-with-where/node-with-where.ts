@@ -6,7 +6,7 @@
  * is a pattern carrying a quantifier terminal (`.none()`, `.some()`, etc.)
  * and an optional scope modifier (`.until()`, `.global()`, `.project()`).
  */
-import type { FluentNode } from "@/ast/fluent-node";
+import type { FluentNode } from '@/ast/fluent-node'
 
 export type NodeWithWhere<N> = {
   /**
@@ -19,5 +19,5 @@ export type NodeWithWhere<N> = {
    * @param constraints Patterns with quantifier terminals.
    * @returns The same node shape, chainable.
    */
-  where(...constraints: unknown[]): FluentNode<N>;
-};
+  readonly where: (...constraints: unknown[]) => FluentNode<N>
+}

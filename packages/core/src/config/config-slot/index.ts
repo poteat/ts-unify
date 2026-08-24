@@ -1,1 +1,3 @@
-export * from "./config-slot";
+export * from './config-slot'
+
+export * as default from '.'

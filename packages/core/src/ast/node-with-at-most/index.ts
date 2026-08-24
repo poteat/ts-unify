@@ -1,1 +1,3 @@
-export * from "./node-with-at-most";
+export * from './node-with-at-most'
+
+export * as default from '.'

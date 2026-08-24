@@ -1,2 +1,2 @@
-export * from "./create-plugin";
-export * from "./rule-module";
+export * from './create-plugin'
+export * from './rule-module'

@@ -1,15 +1,15 @@
-import { SPREAD_BRAND } from "./spread";
-import { $ } from "@/capture";
+import Capture from '@/capture'
 
-describe("Spread token", () => {
-  it("exports a brand symbol", () => {
-    expect(typeof SPREAD_BRAND).toBe("symbol");
-  });
+import { SPREAD_BRAND } from './spread'
 
-  it("$ spread sugar yields exactly one token at runtime", () => {
-    const rest = $<"rest", number>("rest");
-    const tokens = [...rest];
-    expect(Array.isArray(tokens)).toBe(true);
-    expect(tokens).toHaveLength(1);
-  });
-});
+describe('Spread token', () => {
+  it('exports a brand symbol', () => {
+    expect(typeof SPREAD_BRAND).toBe('symbol')
+  })
+
+  it('$ spread sugar yields exactly one token at runtime', () => {
+    const tokens = [...Capture.$<'rest', number>('rest')]
+    expect(Array.isArray(tokens)).toBe(true)
+    expect(tokens).toHaveLength(1)
+  })
+})

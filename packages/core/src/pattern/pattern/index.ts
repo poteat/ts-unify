@@ -1,1 +1,3 @@
-export * from "./pattern";
+export * from './pattern'
+
+export * as default from '.'

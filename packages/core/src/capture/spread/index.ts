@@ -1,2 +1,3 @@
-export * from "./spread";
+export * from './spread'
 
+export * as default from '.'

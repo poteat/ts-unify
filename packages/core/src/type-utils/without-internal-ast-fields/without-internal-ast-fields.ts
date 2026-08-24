@@ -3,5 +3,5 @@
  * union of AST node shapes.
  */
 export type WithoutInternalAstFields<T> = T extends any
-  ? Omit<T, "parent" | "loc" | "range">
-  : never;
+  ? Omit<T, 'parent' | 'loc' | 'range'>
+  : never

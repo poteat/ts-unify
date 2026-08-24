@@ -1,1 +1,3 @@
-export * from "./create-plugin";
+export * from './create-plugin'
+
+export * as default from '.'

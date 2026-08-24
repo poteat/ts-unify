@@ -1,4 +1,4 @@
-import { U, $, C } from "@ts-unify/core";
+import { U, $, C } from '@ts-unify/core'
 
 /**
  * Replace [...new Set(array)] with uniq(array)
@@ -16,18 +16,18 @@ export const spreadNewSetToUniq = U.ArrayExpression({
   elements: [
     U.SpreadElement({
       argument: U.NewExpression({
-        callee: U.Identifier({ name: "Set" }),
-        arguments: [$("array")],
+        callee: U.Identifier({ name: 'Set' }),
+        arguments: [$('array')],
       }),
     }),
   ],
 })
-  .to(({ array }) =>
+  .to(it =>
     U.CallExpression({
-      callee: U.Identifier({ name: "uniq" }),
-      arguments: [array],
+      callee: U.Identifier({ name: 'uniq' }),
+      arguments: [it.array],
     }),
   )
-  .imports({ uniq: C("from") })
-  .config({ from: "lodash" })
-  .message("Use uniq() instead of [...new Set()]");
+  .imports({ uniq: C('from') })
+  .config({ from: 'lodash' })
+  .message('Use uniq() instead of [...new Set()]')

@@ -1,11 +1,16 @@
-import { not, regex } from "@/string-predicate/string-predicate";
-import { reserved } from "@/string-predicate/reserved";
-import { identifierName } from "@/string-predicate/identifier-name";
+import IdentifierName from '@/string-predicate/identifier-name'
+import Reserved from '@/string-predicate/reserved'
+import StringPredicate from '@/string-predicate/string-predicate'
 
 /**
  * The string predicates, exposed as `U.string`. Each is usable in a string
  * position of a pattern and callable on a captured value.
  */
-export const stringPredicates = { regex, not, reserved, identifierName } as const;
+export const stringPredicates = {
+  regex: StringPredicate.regex,
+  not: StringPredicate.not,
+  reserved: Reserved.reserved,
+  identifierName: IdentifierName.identifierName,
+} as const
 
-export type StringPredicates = typeof stringPredicates;
+export type StringPredicates = typeof stringPredicates

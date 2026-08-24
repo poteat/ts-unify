@@ -1,1 +1,3 @@
-export * from "./comment-nodes";
+export * from './comment-nodes'
+
+export * as default from '.'

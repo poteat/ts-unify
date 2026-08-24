@@ -1,9 +1,12 @@
-import { stringPredicate, type StringPredicate } from "@/string-predicate/string-predicate";
+import StringPredicate from '@/string-predicate/string-predicate'
 
-const IDENTIFIER_NAME = /^[\p{ID_Start}$_][\p{ID_Continue}$‌‍]*$/u;
+const IDENTIFIER_NAME = /^[\p{ID_Start}$_][\p{ID_Continue}$‌‍]*$/u
 
-/** The identifierName predicate narrows its argument to `string` when true. */
-export type IdentifierNamePredicate = ((value: unknown) => value is string) & StringPredicate;
+/**
+ * The identifierName predicate narrows its argument to `string` when true.
+ */
+export type IdentifierNamePredicate = ((value: unknown) => value is string) &
+  StringPredicate.StringPredicate
 
 /**
  * A string predicate: the string is an ECMAScript IdentifierName, an
@@ -20,6 +23,7 @@ export type IdentifierNamePredicate = ((value: unknown) => value is string) & St
  * U.string.identifierName()("class")     // true
  * U.string.identifierName()("foo-bar")   // false
  */
-export function identifierName(): IdentifierNamePredicate {
-  return stringPredicate((value) => IDENTIFIER_NAME.test(value)) as IdentifierNamePredicate;
-}
+export const identifierName = (): IdentifierNamePredicate =>
+  StringPredicate.stringPredicate(value =>
+    IDENTIFIER_NAME.test(value),
+  ) as IdentifierNamePredicate

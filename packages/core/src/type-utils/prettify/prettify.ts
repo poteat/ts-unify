@@ -7,5 +7,5 @@
  * //   ^? { a: 1; b: 2 }
  */
 export type Prettify<T> = {
-  [K in keyof T]: T[K];
-} & {};
+  [K in keyof T]: T[K]
+} & {}

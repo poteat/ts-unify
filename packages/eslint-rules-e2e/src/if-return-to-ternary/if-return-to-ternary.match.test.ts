@@ -1,66 +1,162 @@
-import { match, extractPatterns } from "@ts-unify/engine";
-import { ifReturnToTernary } from "@ts-unify/rules";
+import { match, extractPatterns } from '@ts-unify/engine'
+import { ifReturnToTernary } from '@ts-unify/rules'
 
-describe("ifReturnToTernary matching", () => {
-  const rule = extractPatterns(ifReturnToTernary)[0]!;
+describe('ifReturnToTernary matching', () => {
+  const rule = extractPatterns(ifReturnToTernary)[0]!
 
-  it("extracts as an IfStatement pattern", () => {
-    expect(rule.tag).toBe("IfStatement");
-  });
+  it('extracts as an IfStatement pattern', () => {
+    expect(rule.tag).toBe('IfStatement')
+  })
 
-  it("matches if (c) { return a; } else { return b; }", () => {
-    const ast = {
-      type: "IfStatement",
-      test: { type: "Identifier", name: "cond" },
-      consequent: {
-        type: "BlockStatement",
-        body: [{ type: "ReturnStatement", argument: { type: "Literal", value: 1 } }],
+  it('matches if (c) { return a; } else { return b; }', () => {
+    const bag = match(
+      {
+        type: 'IfStatement',
+
+        test: {
+          type: 'Identifier',
+          name: 'cond',
+        },
+
+        consequent: {
+          type: 'BlockStatement',
+
+          body: [
+            {
+              type: 'ReturnStatement',
+
+              argument: {
+                type: 'Literal',
+                value: 1,
+              },
+            },
+          ],
+        },
+
+        alternate: {
+          type: 'BlockStatement',
+
+          body: [
+            {
+              type: 'ReturnStatement',
+
+              argument: {
+                type: 'Literal',
+                value: 2,
+              },
+            },
+          ],
+        },
       },
-      alternate: {
-        type: "BlockStatement",
-        body: [{ type: "ReturnStatement", argument: { type: "Literal", value: 2 } }],
-      },
-    };
+      rule.pattern,
+    )
 
-    const bag = match(ast, rule.pattern);
-    expect(bag).not.toBeNull();
-    expect(bag!.test).toEqual({ type: "Identifier", name: "cond" });
-  });
+    expect(bag).not.toBeNull()
 
-  it("matches if (c) return a; else return b; (blockless)", () => {
-    const ast = {
-      type: "IfStatement",
-      test: { type: "Identifier", name: "cond" },
-      consequent: { type: "ReturnStatement", argument: { type: "Literal", value: 1 } },
-      alternate: { type: "ReturnStatement", argument: { type: "Literal", value: 2 } },
-    };
+    expect(bag!.test).toEqual({
+      type: 'Identifier',
+      name: 'cond',
+    })
+  })
 
-    const bag = match(ast, rule.pattern);
-    expect(bag).not.toBeNull();
-  });
+  it('matches if (c) return a; else return b; (blockless)', () => {
+    expect(
+      match(
+        {
+          type: 'IfStatement',
 
-  it("rejects an IfStatement without an alternate branch", () => {
-    const ast = {
-      type: "IfStatement",
-      test: { type: "Identifier", name: "cond" },
-      consequent: {
-        type: "BlockStatement",
-        body: [{ type: "ReturnStatement", argument: { type: "Literal", value: 1 } }],
-      },
-      alternate: null,
-    };
+          test: {
+            type: 'Identifier',
+            name: 'cond',
+          },
 
-    expect(match(ast, rule.pattern)).toBeNull();
-  });
+          consequent: {
+            type: 'ReturnStatement',
 
-  it("rejects when consequent is not a return statement", () => {
-    const ast = {
-      type: "IfStatement",
-      test: { type: "Identifier", name: "cond" },
-      consequent: { type: "ThrowStatement", argument: { type: "Literal", value: "err" } },
-      alternate: { type: "ReturnStatement", argument: { type: "Literal", value: 2 } },
-    };
+            argument: {
+              type: 'Literal',
+              value: 1,
+            },
+          },
 
-    expect(match(ast, rule.pattern)).toBeNull();
-  });
-});
+          alternate: {
+            type: 'ReturnStatement',
+
+            argument: {
+              type: 'Literal',
+              value: 2,
+            },
+          },
+        },
+        rule.pattern,
+      ),
+    ).not.toBeNull()
+  })
+
+  it('rejects an IfStatement without an alternate branch', () => {
+    expect(
+      match(
+        {
+          type: 'IfStatement',
+
+          test: {
+            type: 'Identifier',
+            name: 'cond',
+          },
+
+          consequent: {
+            type: 'BlockStatement',
+
+            body: [
+              {
+                type: 'ReturnStatement',
+
+                argument: {
+                  type: 'Literal',
+                  value: 1,
+                },
+              },
+            ],
+          },
+
+          alternate: null,
+        },
+        rule.pattern,
+      ),
+    ).toBeNull()
+  })
+
+  it('rejects when consequent is not a return statement', () => {
+    expect(
+      match(
+        {
+          type: 'IfStatement',
+
+          test: {
+            type: 'Identifier',
+            name: 'cond',
+          },
+
+          consequent: {
+            type: 'ThrowStatement',
+
+            argument: {
+              type: 'Literal',
+              value: 'err',
+            },
+          },
+
+          alternate: {
+            type: 'ReturnStatement',
+
+            argument: {
+              type: 'Literal',
+              value: 2,
+            },
+          },
+        },
+        rule.pattern,
+      ),
+    ).toBeNull()
+  })
+})

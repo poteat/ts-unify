@@ -1,5 +1,5 @@
-import type { FluentNode } from "@/ast/fluent-node";
+import type { FluentNode } from '@/ast/fluent-node'
 
 export type NodeWithExactly<N> = {
-  exactly(n: number): FluentNode<N>;
-};
+  readonly exactly: (n: number) => FluentNode<N>
+}

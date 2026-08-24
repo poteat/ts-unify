@@ -10,4 +10,4 @@
  *
  * Commonly used to merge capture bags or refine mapped types.
  */
-export type Overwrite<Left, Right> = Omit<Left, keyof Right> & Right;
+export type Overwrite<Left, Right> = Omit<Left, keyof Right> & Right

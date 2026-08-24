@@ -1,1 +1,3 @@
-export * from "./node-with-seq";
+export * from './node-with-seq'
+
+export * as default from '.'

@@ -1,1 +1,3 @@
-export * from "./has-never";
+export * from './has-never'
+
+export * as default from '.'

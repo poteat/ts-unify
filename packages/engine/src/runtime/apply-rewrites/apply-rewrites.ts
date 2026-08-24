@@ -1,30 +1,36 @@
-import { reify } from "../reify";
-import type { Path, RewriteSite } from "../match";
+import type { Path, RewriteSite } from '../match'
+import Reify from '../reify'
 
-const SKIP_KEYS = new Set(["parent", "loc", "range", "tokens", "comments"]);
+const SKIP_KEYS = new Set(['parent', 'loc', 'range', 'tokens', 'comments'])
 
 /**
  * Deep-clone an AST node, dropping non-structural metadata (parent links,
  * source positions) so the clone is safe to mutate and serialize.
  */
 function cloneNode(node: unknown): unknown {
-  if (Array.isArray(node)) return node.map(cloneNode);
-  if (node == null || typeof node !== "object") return node;
-  const out: Record<string, unknown> = {};
+  if (Array.isArray(node)) return node.map(cloneNode)
+  if (node == null || typeof node !== 'object') return node
+  const out: Record<string, unknown> = {}
+
   for (const key of Object.keys(node as Record<string, unknown>)) {
-    if (SKIP_KEYS.has(key)) continue;
-    out[key] = cloneNode((node as Record<string, unknown>)[key]);
+    if (SKIP_KEYS.has(key)) continue
+    out[key] = cloneNode((node as Record<string, unknown>)[key])
   }
-  return out;
+
+  return out
 }
 
-/** True iff `prefix` is a prefix of `path` (or equal to it). */
-function isPathPrefix(prefix: Path, path: Path): boolean {
-  if (prefix.length > path.length) return false;
+/**
+ * True iff `prefix` is a prefix of `path` (or equal to it).
+ */
+function isPathPrefix(prefix: Path, path: Path) {
+  if (prefix.length > path.length) return false
+
   for (let i = 0; i < prefix.length; i++) {
-    if (prefix[i] !== path[i]) return false;
+    if (prefix[i] !== path[i]) return false
   }
-  return true;
+
+  return true
 }
 
 /**
@@ -35,18 +41,23 @@ function isPathPrefix(prefix: Path, path: Path): boolean {
 function locateParent(
   root: Record<string, unknown> | unknown[],
   path: Path,
-): { parent: Record<string, unknown> | unknown[] | null; key: string | number | null } {
-  if (path.length === 0) return { parent: null, key: null };
-  let cursor: unknown = root;
+): {
+  parent: Record<string, unknown> | unknown[] | null
+  key: string | number | null
+} {
+  if (path.length === 0) return { parent: null, key: null }
+  let cursor: unknown = root
+
   for (let i = 0; i < path.length - 1; i++) {
-    const seg = path[i];
-    cursor = (cursor as Record<string | number, unknown>)[seg as never];
-    if (cursor == null) return { parent: null, key: null };
+    const seg = path[i]
+    cursor = (cursor as Record<string | number, unknown>)[seg as never]
+    if (cursor == null) return { parent: null, key: null }
   }
+
   return {
     parent: cursor as Record<string, unknown> | unknown[],
     key: path[path.length - 1],
-  };
+  }
 }
 
 /**
@@ -71,51 +82,50 @@ export function applyRewrites(
   capturePaths: Record<string, Path> = {},
   sourceCode?: unknown,
 ): unknown {
-  if (sites.length === 0) return null;
+  if (sites.length === 0) return null
 
-  let root: unknown = cloneNode(matchedNode);
+  let root: unknown = cloneNode(matchedNode)
 
   // Deepest-first; ties broken arbitrarily (sibling sites are spatially
   // disjoint by construction so order between them doesn't matter).
-  const ordered = [...sites].sort((a, b) => b.path.length - a.path.length);
+  const ordered = [...sites].sort((a, b) => b.path.length - a.path.length)
 
   for (const site of ordered) {
-    const result = site.factory(site.scopeBag);
-    const reified = reify(result, sourceCode);
+    const reified = Reify.reify(site.factory(site.scopeBag), sourceCode)
 
     if (site.path.length === 0) {
-      // Root replacement.
-      root = reified;
-      // Rebind every capture (they all live at-or-under the root).
+      root = reified
+
       for (const name of Object.keys(capturePaths)) {
-        site.scopeBag[name] = reified;
+        site.scopeBag[name] = reified
       }
-      continue;
+
+      continue
     }
 
-    const { parent, key } = locateParent(root as Record<string, unknown> | unknown[], site.path);
-    if (parent == null || key == null) continue;
+    const { parent, key } = locateParent(
+      root as Record<string, unknown> | unknown[],
+      site.path,
+    )
 
-    if (Array.isArray(parent) && typeof key === "number") {
-      const span = site.span ?? 1;
-      const replacement = Array.isArray(reified) ? reified : [reified];
-      parent.splice(key, span, ...replacement);
-    } else {
-      (parent as Record<string, unknown>)[key as string] = reified;
-    }
+    if (!parent || key == null) continue
 
-    // Rebind captures whose source was at-or-under this site's path.
-    // Skip for seq sites (span > 1): the seq's factory already consumed
-    // its inner captures, and the multi-element span makes "what would
-    // the new value of an inner capture be" ill-defined.
+    Array.isArray(parent) && typeof key === 'number'
+      ? parent.splice(
+          key,
+          site.span ?? 1,
+          ...(Array.isArray(reified) ? reified : [reified]),
+        )
+      : ((parent as Record<string, unknown>)[key as string] = reified)
+
     if (site.span === undefined || site.span === 1) {
       for (const [name, capPath] of Object.entries(capturePaths)) {
         if (isPathPrefix(site.path, capPath)) {
-          site.scopeBag[name] = reified;
+          site.scopeBag[name] = reified
         }
       }
     }
   }
 
-  return root;
+  return root
 }

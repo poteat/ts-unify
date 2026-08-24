@@ -1,1 +1,3 @@
-export * from "./reify";
+export * from './reify'
+
+export * as default from '.'

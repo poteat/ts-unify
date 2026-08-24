@@ -1,11 +1,11 @@
-import type { Capture } from "@/capture/capture-type";
-import { CAPTURE_BRAND } from "@/capture/capture-type";
+import CaptureType from '@/capture/capture-type'
+import type { Capture } from '@/capture/capture-type'
 
 /**
  * Type guard to check if a value is a capture sentinel.
  */
 export const isCapture = (value: unknown): value is Capture =>
-  typeof value === "object" &&
+  typeof value === 'object' &&
   value !== null &&
-  CAPTURE_BRAND in value &&
-  value[CAPTURE_BRAND] === true;
+  CaptureType.CAPTURE_BRAND in value &&
+  value[CaptureType.CAPTURE_BRAND] === true

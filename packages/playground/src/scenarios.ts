@@ -1,9 +1,9 @@
-export type Scenario = { key: string; label: string; code: string };
+export type Scenario = { key: string; label: string; code: string }
 
 export const SCENARIOS: Scenario[] = [
   {
-    key: "starter",
-    label: "starter",
+    key: 'starter',
+    label: 'starter',
     code: `declare const x: unknown;
 declare const obj: { prop: string };
 
@@ -20,8 +20,8 @@ const b = obj && obj.prop;
 `,
   },
   {
-    key: "grading",
-    label: "grading",
+    key: 'grading',
+    label: 'grading',
     code: `// A grade calculator. Every rule that fires here is from the
 // branch-collapsing cluster — if/else → ternary, null guard → ??.
 
@@ -66,8 +66,8 @@ function display(name: string | null): string {
 `,
   },
   {
-    key: "config",
-    label: "config",
+    key: 'config',
+    label: 'config',
     code: `// Reading from a deeply-optional app config. Every rule that fires
 // here is from the nullable-access cluster — guards → optional chain.
 
@@ -102,8 +102,8 @@ const ttl = config.cache && config.cache.ttl;
 `,
   },
   {
-    key: "analytics",
-    label: "analytics",
+    key: 'analytics',
+    label: 'analytics',
     code: `// Aggregating an array of raw analytics events. Every rule that
 // fires here is from the functional/array cluster — no branches,
 // no nullable chains.
@@ -147,6 +147,6 @@ const summary = Object.assign({}, defaults, {
 });
 `,
   },
-];
+]
 
-export const DEFAULT_CODE = SCENARIOS[0].code;
+export const DEFAULT_CODE = SCENARIOS[0].code

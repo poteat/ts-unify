@@ -1,2 +1,3 @@
-export * from "./capture-cardinality";
+export * from './capture-cardinality'
 
+export * as default from '.'

@@ -1,12 +1,12 @@
-import type { Capture } from "@/capture";
-import type { $ } from "@/capture";
-import type { CaptureLike } from "./capture-like";
-import { assertType } from "@/test-utils/assert-type";
+import type { Capture, $ } from '@/capture'
+import AssertType from '@/test-utils/assert-type'
 
-describe("CaptureLike", () => {
-  it("default CaptureLike is $ | Capture<string, unknown>", () => {
-    type U = $ | Capture;
-    assertType<CaptureLike, U>(0);
-    assertType<U, CaptureLike>(0);
-  });
-});
+import type { CaptureLike } from './capture-like'
+
+describe('CaptureLike', () => {
+  it('default CaptureLike is $ | Capture<string, unknown>', () => {
+    type U = $ | Capture
+    AssertType.assertType<CaptureLike, U>(0)
+    AssertType.assertType<U, CaptureLike>(0)
+  })
+})

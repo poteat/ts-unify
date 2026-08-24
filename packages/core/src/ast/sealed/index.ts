@@ -1,1 +1,3 @@
-export * from "./sealed";
+export * from './sealed'
+
+export * as default from '.'

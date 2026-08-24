@@ -1,2 +1,3 @@
-export * from "./normalize-captured";
+export * from './normalize-captured'
 
+export * as default from '.'

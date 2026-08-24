@@ -1,1 +1,3 @@
-export * from "./prettify";
+export * from './prettify'
+
+export * as default from '.'

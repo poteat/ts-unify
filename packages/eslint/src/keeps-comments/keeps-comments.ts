@@ -1,4 +1,4 @@
-import type { TSESTree } from "@typescript-eslint/types"
+import type { TSESTree } from '@typescript-eslint/types'
 
 /**
  * Whether a replacement carries every comment of the range it replaces.

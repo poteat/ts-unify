@@ -1,28 +1,33 @@
-import type { Capture } from "@/capture/capture-type";
-import { CAPTURE_BRAND } from "@/capture/capture-type";
-import type { Spread } from "@/capture/spread/spread";
-import { SPREAD_BRAND } from "@/capture/spread/spread";
-import type { DollarObjectSpread } from "@/capture/dollar-spread/dollar-spread";
-import type { FluentCapture, FluentOps } from "@/capture/fluent-capture";
+import CaptureType from '@/capture/capture-type'
+import type { Capture } from '@/capture/capture-type'
+import type { DollarObjectSpread } from '@/capture/dollar-spread/dollar-spread'
+import type { FluentCapture, FluentOps } from '@/capture/fluent-capture'
+import CaptureSpread from '@/capture/spread'
+import type { Spread } from '@/capture/spread/spread'
 
 /**
  * Symbol marker that `{ ...$ }` copies into the pattern object to signal
  * that unmatched properties should be captured into the bag at runtime.
  */
-export const REST_CAPTURE = Symbol.for("ts-unify.rest-capture");
+export const REST_CAPTURE = Symbol.for('ts-unify.rest-capture')
 
 export interface $
-  extends DollarObjectSpread,
-    Iterable<Spread<"", unknown>>,
+  extends
+    DollarObjectSpread,
+    Iterable<Spread<'', unknown>>,
     FluentOps<$, unknown> {
-  <const Name extends string>(name: Name): Capture<Name, unknown> &
+  <const Name extends string>(
+    name: Name,
+  ): Capture<Name, unknown> &
     Iterable<Spread<Name, unknown>> &
     DollarObjectSpread &
-    FluentCapture<Name, unknown>;
-  <const Name extends string, Value>(name: Name): Capture<Name, Value> &
+    FluentCapture<Name, unknown>
+  <const Name extends string, Value>(
+    name: Name,
+  ): Capture<Name, Value> &
     Iterable<Spread<Name, Value>> &
     DollarObjectSpread &
-    FluentCapture<Name, Value>;
+    FluentCapture<Name, Value>
 }
 
 /**
@@ -41,28 +46,29 @@ export interface $
  */
 const __dollar = (<const Name extends string, Value = unknown>(name: Name) => {
   // Create capture token object
-  const obj = ({
-    [CAPTURE_BRAND]: true,
+  const obj = {
+    [CaptureType.CAPTURE_BRAND]: true,
     name,
-  } as unknown) as Capture<Name, Value> & Iterable<Spread<Name, Value>>;
+  } as unknown as Capture<Name, Value> & Iterable<Spread<Name, Value>>
   // Define iterator as non-enumerable so `{ ...$ }` spreads nothing
   Object.defineProperty(obj as object, Symbol.iterator, {
     enumerable: false,
     configurable: false,
     writable: false,
     value: function* (): IterableIterator<Spread<Name, Value>> {
-      // Yield a single spread token for sequence spread sugar `...$('name')`.
-      // The spread token is a type-level marker; runtime consumers may inspect
-      // the brand and name when interpreting sequence patterns.
-      const token = { [SPREAD_BRAND]: true, name } as unknown as Spread<Name, Value>;
-      yield token;
+      yield {
+        [CaptureSpread.SPREAD_BRAND]: true,
+        name,
+      } as unknown as Spread<Name, Value>
     },
-  });
-  return Object.freeze(obj) as Capture<Name, Value> & Iterable<Spread<Name, Value>>;
-// The intermediate type is `unknown` because __dollar must satisfy a complex
-// intersection (DollarObjectSpread & Iterable & FluentOps) that cannot be
-// expressed as a function literal.  The final export re-casts to `$`.
-}) as unknown;
+  })
+
+  return Object.freeze(obj) as Capture<Name, Value> &
+    Iterable<Spread<Name, Value>>
+  // The intermediate type is `unknown` because __dollar must satisfy a complex
+  // intersection (DollarObjectSpread & Iterable & FluentOps) that cannot be
+  // expressed as a function literal.  The final export re-casts to `$`.
+}) as unknown
 
 // Also allow anonymous sequence spread with `...$` by making the function itself
 // iterable. The yielded spread has an empty name which is re-keyed by
@@ -71,11 +77,13 @@ Object.defineProperty(__dollar as object, Symbol.iterator, {
   enumerable: false,
   configurable: false,
   writable: false,
-  value: function* (): IterableIterator<Spread<"", unknown>> {
-    const token = { [SPREAD_BRAND]: true, name: "" } as unknown as Spread<"", unknown>;
-    yield token;
+  value: function* (): IterableIterator<Spread<'', unknown>> {
+    yield {
+      [CaptureSpread.SPREAD_BRAND]: true,
+      name: '',
+    } as unknown as Spread<'', unknown>
   },
-});
+})
 
 // Mark `$` with an enumerable Symbol property so that `{ ...$ }` copies
 // the REST_CAPTURE marker into the resulting pattern object.
@@ -84,6 +92,6 @@ Object.defineProperty(__dollar as object, REST_CAPTURE, {
   configurable: false,
   writable: false,
   value: true,
-});
+})
 
-export const $ = __dollar as $;
+export const $ = __dollar as $

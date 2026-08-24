@@ -1,13 +1,13 @@
-import { U, $ } from "@ts-unify/core";
+import { U, $ } from '@ts-unify/core'
 
 const callConsequent = U.maybeBlock(
   U.ExpressionStatement({
     expression: U.CallExpression({
-      callee: $("callee"),
-      arguments: $("args"),
+      callee: $('callee'),
+      arguments: $('args'),
     }),
   }),
-);
+)
 
 /**
  * Transform if-guarded function calls into optional chaining: the test and
@@ -26,7 +26,7 @@ const callConsequent = U.maybeBlock(
  * ```
  */
 export const ifGuardedCallToOptional = U.IfStatement({
-  test: $("callee"),
+  test: $('callee'),
   consequent: callConsequent,
   alternate: null,
 })
@@ -41,5 +41,5 @@ export const ifGuardedCallToOptional = U.IfStatement({
       }),
     }),
   )
-  .message("Use optional call instead of if-guarded function call")
-  .recommended();
+  .message('Use optional call instead of if-guarded function call')
+  .recommended()

@@ -1,15 +1,15 @@
-import { U, $ } from "@ts-unify/core";
-import { AST_NODE_TYPES } from "@typescript-eslint/types";
+import { U, $ } from '@ts-unify/core'
+import { AST_NODE_TYPES } from '@typescript-eslint/types'
 
 const returnBlock = U.BlockStatement({
   body: [U.ReturnStatement({ argument: $ }).defaultUndefined()],
-}).seal();
+}).seal()
 
 const exprBlock = U.BlockStatement({
   body: [U.ExpressionStatement({ expression: $ })],
-}).bind();
+}).bind()
 
-const fnBoundary = U.or(U.FunctionDeclaration(), U.FunctionExpression());
+const fnBoundary = U.or(U.FunctionDeclaration(), U.FunctionExpression())
 
 /**
  * Convert function declarations and expressions with single-statement bodies to
@@ -41,26 +41,31 @@ const fnBoundary = U.or(U.FunctionDeclaration(), U.FunctionExpression());
  * lose the method syntax (`run(x) {}` cannot become `run x => ...`) and its
  * own `this`.
  */
-const isMethodBody = (parent: unknown): boolean => {
-  if (parent === null || typeof parent !== "object") return false;
-  const p = parent as { type?: string; method?: boolean; kind?: string };
+function isMethodBody(parent: unknown) {
+  if (parent === null || typeof parent !== 'object') return false
+  const p = parent as { type?: string; method?: boolean; kind?: string }
+
   return (
-    p.type === "MethodDefinition" ||
-    p.type === "TSAbstractMethodDefinition" ||
-    (p.type === "Property" && (p.method === true || p.kind === "get" || p.kind === "set"))
-  );
-};
+    p.type === 'MethodDefinition' ||
+    p.type === 'TSAbstractMethodDefinition' ||
+    (p.type === 'Property' &&
+      (p.method === true || p.kind === 'get' || p.kind === 'set'))
+  )
+}
 
 export const singularFunctionToArrow = U.fromNode({
-  type: U.or(AST_NODE_TYPES.FunctionDeclaration, AST_NODE_TYPES.FunctionExpression),
+  type: U.or(
+    AST_NODE_TYPES.FunctionDeclaration,
+    AST_NODE_TYPES.FunctionExpression,
+  ),
   body: U.or(returnBlock, exprBlock),
   generator: false,
-  parent: $("parent"),
+  parent: $('parent'),
   ...$,
 })
-  .when((bag) => !isMethodBody((bag as { parent?: unknown }).parent))
+  .when(bag => !isMethodBody((bag as { parent?: unknown }).parent))
   .where(
-    U.or(U.ThisExpression(), U.Identifier({ name: "arguments" }))
+    U.or(U.ThisExpression(), U.Identifier({ name: 'arguments' }))
       .until(fnBoundary)
       .none(),
   )
@@ -76,7 +81,7 @@ export const singularFunctionToArrow = U.fromNode({
   .to(({ id, init }) =>
     id
       ? U.VariableDeclaration({
-          kind: "const",
+          kind: 'const',
           declarations: [
             U.VariableDeclarator({
               id,
@@ -86,4 +91,4 @@ export const singularFunctionToArrow = U.fromNode({
         })
       : init,
   )
-  .message("Convert single-statement function to arrow function");
+  .message('Convert single-statement function to arrow function')

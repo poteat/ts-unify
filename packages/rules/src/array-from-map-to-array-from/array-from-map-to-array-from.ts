@@ -1,4 +1,4 @@
-import { U, $ } from "@ts-unify/core";
+import { U, $ } from '@ts-unify/core'
 
 /**
  * Collapse Array.from(x).map(fn) into Array.from(x, fn)
@@ -16,26 +16,26 @@ export const arrayFromMapToArrayFrom = U.CallExpression({
   callee: U.MemberExpression({
     object: U.CallExpression({
       callee: U.MemberExpression({
-        object: U.Identifier({ name: "Array" }),
-        property: U.Identifier({ name: "from" }),
+        object: U.Identifier({ name: 'Array' }),
+        property: U.Identifier({ name: 'from' }),
         computed: false,
         optional: false,
       }),
-      arguments: [$("iterable")],
+      arguments: [$('iterable')],
       optional: false,
     }),
-    property: U.Identifier({ name: "map" }),
+    property: U.Identifier({ name: 'map' }),
     computed: false,
     optional: false,
   }),
-  arguments: [$("mapFn")],
+  arguments: [$('mapFn')],
   optional: false,
 })
   .to(({ iterable, mapFn }) =>
     U.CallExpression({
       callee: U.MemberExpression({
-        object: U.Identifier({ name: "Array" }),
-        property: U.Identifier({ name: "from" }),
+        object: U.Identifier({ name: 'Array' }),
+        property: U.Identifier({ name: 'from' }),
         computed: false,
         optional: false,
       }),
@@ -43,5 +43,5 @@ export const arrayFromMapToArrayFrom = U.CallExpression({
       optional: false,
     }),
   )
-  .message("Collapse Array.from().map() into Array.from(_, mapFn)")
-  .recommended();
+  .message('Collapse Array.from().map() into Array.from(_, mapFn)')
+  .recommended()

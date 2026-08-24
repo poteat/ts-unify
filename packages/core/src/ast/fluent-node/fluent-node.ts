@@ -1,20 +1,20 @@
-import type { NodeWithWhen } from "@/ast/node-with-when";
-import type { NodeWithTo } from "@/ast/node-with-to";
-import type { NodeWithSeal } from "@/ast/node-with-seal";
-import type { NodeWithDefault } from "@/ast/node-with-default";
-import type { NodeWithDefaultUndefined } from "@/ast/node-with-default-undefined";
-import type { NodeWithTruthy } from "@/ast/node-with-truthy";
-import type { NodeWithWith } from "@/ast/node-with-with";
-import type { NodeWithBind } from "@/ast/node-with-bind";
-import type { NodeWithUntil } from "@/ast/node-with-until";
-import type { NodeWithWhere } from "@/ast/node-with-where";
-import type { NodeWithNone } from "@/ast/node-with-none";
-import type { NodeWithSome } from "@/ast/node-with-some";
-import type { NodeWithAtLeast } from "@/ast/node-with-at-least";
-import type { NodeWithAtMost } from "@/ast/node-with-at-most";
-import type { NodeWithExactly } from "@/ast/node-with-exactly";
+import type { NodeWithAtLeast } from '@/ast/node-with-at-least'
+import type { NodeWithAtMost } from '@/ast/node-with-at-most'
+import type { NodeWithBind } from '@/ast/node-with-bind'
+import type { NodeWithDefault } from '@/ast/node-with-default'
+import type { NodeWithDefaultUndefined } from '@/ast/node-with-default-undefined'
+import type { NodeWithExactly } from '@/ast/node-with-exactly'
+import type { NodeWithNone } from '@/ast/node-with-none'
+import type { NodeWithSeal } from '@/ast/node-with-seal'
+import type { NodeWithSome } from '@/ast/node-with-some'
+import type { NodeWithTo } from '@/ast/node-with-to'
+import type { NodeWithTruthy } from '@/ast/node-with-truthy'
+import type { NodeWithUntil } from '@/ast/node-with-until'
+import type { NodeWithWhen } from '@/ast/node-with-when'
+import type { NodeWithWhere } from '@/ast/node-with-where'
+import type { NodeWithWith } from '@/ast/node-with-with'
 
-export declare const FLUENT_INNER: unique symbol;
+export declare const FLUENT_INNER: unique symbol
 
 /**
  * A node shape `N` augmented with fluent pattern helpers:
@@ -22,8 +22,7 @@ export declare const FLUENT_INNER: unique symbol;
  * `.where()`, `.until()`, `.none()`, `.some()`,
  * `.atLeast()`, `.atMost()`, `.exactly()`, etc.
  */
-export type FluentNode<N> = { readonly [FLUENT_INNER]: N } &
-  NodeWithWhen<N> &
+export type FluentNode<N> = { readonly [FLUENT_INNER]: N } & NodeWithWhen<N> &
   NodeWithDefault<N> &
   NodeWithDefaultUndefined<N> &
   NodeWithTruthy<N> &
@@ -38,7 +37,11 @@ export type FluentNode<N> = { readonly [FLUENT_INNER]: N } &
   NodeWithAtLeast<N> &
   NodeWithAtMost<N> &
   NodeWithExactly<N> & {
-    /** Rule metadata — available on FluentNode for rules with seq rewrites (no top-level .to()). */
-    message(text: string): FluentNode<N>;
-    recommended(): FluentNode<N>;
-  };
+    /**
+     * Rule metadata — available on FluentNode for rules with seq rewrites (no
+     * top-level .to()).
+     */
+    readonly message: (text: string) => FluentNode<N>
+
+    readonly recommended: () => FluentNode<N>
+  }

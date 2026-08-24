@@ -1,1 +1,3 @@
-export * from "./bind-captures";
+export * from './bind-captures'
+
+export * as default from '.'

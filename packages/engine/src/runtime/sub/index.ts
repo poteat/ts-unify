@@ -1,1 +1,3 @@
-export * from "./sub";
+export * from './sub'
+
+export * as default from '.'

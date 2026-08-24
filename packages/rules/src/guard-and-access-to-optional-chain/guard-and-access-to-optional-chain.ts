@@ -1,4 +1,4 @@
-import { U, $ } from "@ts-unify/core";
+import { U, $ } from '@ts-unify/core'
 
 /**
  * Replace guard-and-access with optional chaining
@@ -13,11 +13,11 @@ import { U, $ } from "@ts-unify/core";
  * ```
  */
 export const guardAndAccessToOptionalChain = U.LogicalExpression({
-  operator: "&&",
-  left: $("obj"),
+  operator: '&&',
+  left: $('obj'),
   right: U.MemberExpression({
-    object: $("obj"),
-    property: $("prop"),
+    object: $('obj'),
+    property: $('prop'),
     computed: false,
     optional: false,
   }),
@@ -32,5 +32,5 @@ export const guardAndAccessToOptionalChain = U.LogicalExpression({
       }),
     }),
   )
-  .message("Use optional chaining instead of guard-and-access")
-  .recommended();
+  .message('Use optional chaining instead of guard-and-access')
+  .recommended()

@@ -1,4 +1,4 @@
-import { U, $ } from "@ts-unify/core";
+import { U, $ } from '@ts-unify/core'
 
 /**
  * Replace typeof x === "undefined" with x == null
@@ -13,19 +13,19 @@ import { U, $ } from "@ts-unify/core";
  * ```
  */
 export const typeofUndefinedToNullishCheck = U.BinaryExpression({
-  operator: U.or("===", "=="),
+  operator: U.or('===', '=='),
   left: U.UnaryExpression({
-    operator: "typeof",
-    argument: $("expr"),
+    operator: 'typeof',
+    argument: $('expr'),
   }),
-  right: U.Literal({ value: "undefined" }),
+  right: U.Literal({ value: 'undefined' }),
 })
-  .to(({ expr }) =>
+  .to(it =>
     U.BinaryExpression({
-      operator: "==",
-      left: expr,
+      operator: '==',
+      left: it.expr,
       right: U.Literal({ value: null }),
     }),
   )
   .message("Use == null instead of typeof === 'undefined'")
-  .recommended();
+  .recommended()

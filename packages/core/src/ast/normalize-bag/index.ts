@@ -1,2 +1,3 @@
-export * from "./normalize-bag";
+export * from './normalize-bag'
 
+export * as default from '.'

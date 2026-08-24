@@ -1,815 +1,1333 @@
-import { match } from "./match";
-import { U, NODE, $, C } from "@ts-unify/core/internal";
+import { U, NODE, $, C } from '@ts-unify/core/internal'
+
+import { match } from './match'
 
 function extractFirstPattern(proxy: any) {
-  const node = proxy[NODE];
-  return { tag: node.tag, pattern: node.args[0] ?? {}, chain: node.chain };
+  const node = proxy[NODE]
+
+  return { tag: node.tag, pattern: node.args[0] ?? {}, chain: node.chain }
 }
 
 // Suppress "unused" warnings for destructured bindings used only for assertion
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-describe("match - seal", () => {
-  it("re-keys a single inner capture to the parent property name", () => {
-    // U.ReturnStatement({ argument: $ }).seal() used inside a parent object
-    const sealedReturn = (U as any)
-      .ReturnStatement({ argument: $ })
-      .seal();
+describe('match - seal', () => {
+  it('re-keys a single inner capture to the parent property name', () => {
+    const bag = match(
+      {
+        type: 'IfStatement',
 
-    const pattern = {
-      test: $,
-      consequent: sealedReturn,
-    };
+        test: {
+          type: 'Identifier',
+          name: 'cond',
+        },
 
-    const ast = {
-      type: "IfStatement",
-      test: { type: "Identifier", name: "cond" },
-      consequent: {
-        type: "ReturnStatement",
-        argument: { type: "Literal", value: 42 },
+        consequent: {
+          type: 'ReturnStatement',
+
+          argument: {
+            type: 'Literal',
+            value: 42,
+          },
+        },
       },
-    };
+      {
+        test: $,
 
-    const bag = match(ast, pattern);
-    expect(bag).not.toBeNull();
-    // The inner capture "argument" should be re-keyed to "consequent"
-    expect(bag!.consequent).toEqual({ type: "Literal", value: 42 });
-    expect(bag!.argument).toBeUndefined();
-    expect(bag!.test).toEqual({ type: "Identifier", name: "cond" });
-  });
+        consequent: (U as any)
+          .ReturnStatement({
+            argument: $,
+          })
+          .seal(),
+      },
+    )
 
-  it("passes through empty bag when seal has zero captures", () => {
-    const sealedLiteral = (U as any)
-      .Identifier({ name: "foo" })
-      .seal();
+    expect(bag).not.toBeNull()
 
-    const pattern = { value: sealedLiteral };
-    const ast = {
-      type: "SomeNode",
-      value: { type: "Identifier", name: "foo" },
-    };
+    expect(bag!.consequent).toEqual({
+      type: 'Literal',
+      value: 42,
+    })
 
-    const bag = match(ast, pattern);
-    expect(bag).not.toBeNull();
-    expect(Object.keys(bag!)).toHaveLength(0);
-  });
+    expect(bag!.argument).toBeUndefined()
 
-  it("works with maybeBlock + seal (if-return-to-ternary pattern)", () => {
+    expect(bag!.test).toEqual({
+      type: 'Identifier',
+      name: 'cond',
+    })
+  })
+
+  it('passes through empty bag when seal has zero captures', () => {
+    const bag = match(
+      {
+        type: 'SomeNode',
+
+        value: {
+          type: 'Identifier',
+          name: 'foo',
+        },
+      },
+      {
+        value: (U as any)
+          .Identifier({
+            name: 'foo',
+          })
+          .seal(),
+      },
+    )
+
+    expect(bag).not.toBeNull()
+    expect(Object.keys(bag!)).toHaveLength(0)
+  })
+
+  it('works with maybeBlock + seal (if-return-to-ternary pattern)', () => {
     const anyReturnForm = (U as any)
-      .maybeBlock((U as any).ReturnStatement({ argument: $ }))
-      .seal();
+      .maybeBlock(
+        (U as any).ReturnStatement({
+          argument: $,
+        }),
+      )
+      .seal()
 
     const pattern = {
       test: $,
       consequent: anyReturnForm,
       alternate: anyReturnForm,
-    };
+    }
 
-    // Blocked form
-    const ast1 = {
-      type: "IfStatement",
-      test: { type: "Identifier", name: "cond" },
-      consequent: {
-        type: "BlockStatement",
-        body: [
-          {
-            type: "ReturnStatement",
-            argument: { type: "Literal", value: 1 },
+    const bag1 = match(
+      {
+        type: 'IfStatement',
+
+        test: {
+          type: 'Identifier',
+          name: 'cond',
+        },
+
+        consequent: {
+          type: 'BlockStatement',
+
+          body: [
+            {
+              type: 'ReturnStatement',
+
+              argument: {
+                type: 'Literal',
+                value: 1,
+              },
+            },
+          ],
+        },
+
+        alternate: {
+          type: 'BlockStatement',
+
+          body: [
+            {
+              type: 'ReturnStatement',
+
+              argument: {
+                type: 'Literal',
+                value: 2,
+              },
+            },
+          ],
+        },
+      },
+      pattern,
+    )
+
+    expect(bag1).not.toBeNull()
+
+    expect(bag1!.consequent).toEqual({
+      type: 'Literal',
+      value: 1,
+    })
+
+    expect(bag1!.alternate).toEqual({
+      type: 'Literal',
+      value: 2,
+    })
+
+    expect(bag1!.test).toEqual({
+      type: 'Identifier',
+      name: 'cond',
+    })
+
+    const bag2 = match(
+      {
+        type: 'IfStatement',
+
+        test: {
+          type: 'Identifier',
+          name: 'x',
+        },
+
+        consequent: {
+          type: 'ReturnStatement',
+
+          argument: {
+            type: 'Identifier',
+            name: 'a',
           },
-        ],
-      },
-      alternate: {
-        type: "BlockStatement",
-        body: [
-          {
-            type: "ReturnStatement",
-            argument: { type: "Literal", value: 2 },
+        },
+
+        alternate: {
+          type: 'ReturnStatement',
+
+          argument: {
+            type: 'Identifier',
+            name: 'b',
           },
-        ],
+        },
       },
-    };
+      pattern,
+    )
 
-    const bag1 = match(ast1, pattern);
-    expect(bag1).not.toBeNull();
-    expect(bag1!.consequent).toEqual({ type: "Literal", value: 1 });
-    expect(bag1!.alternate).toEqual({ type: "Literal", value: 2 });
-    expect(bag1!.test).toEqual({ type: "Identifier", name: "cond" });
+    expect(bag2).not.toBeNull()
 
-    // Blockless form
-    const ast2 = {
-      type: "IfStatement",
-      test: { type: "Identifier", name: "x" },
-      consequent: {
-        type: "ReturnStatement",
-        argument: { type: "Identifier", name: "a" },
-      },
-      alternate: {
-        type: "ReturnStatement",
-        argument: { type: "Identifier", name: "b" },
-      },
-    };
+    expect(bag2!.consequent).toEqual({
+      type: 'Identifier',
+      name: 'a',
+    })
 
-    const bag2 = match(ast2, pattern);
-    expect(bag2).not.toBeNull();
-    expect(bag2!.consequent).toEqual({ type: "Identifier", name: "a" });
-    expect(bag2!.alternate).toEqual({ type: "Identifier", name: "b" });
-  });
-});
+    expect(bag2!.alternate).toEqual({
+      type: 'Identifier',
+      name: 'b',
+    })
+  })
+})
 
-describe("match - bind", () => {
-  it("zero-arg bind() embedded under a property re-keys to that property", () => {
-    // Per node-with-bind.spec.md: `.bind()` is sugar for `.bind("node")`
-    // + Sealed. The Sealed half re-keys the single-key bag to the
-    // embedding property name. Net effect: under `body: exprBlock`, the
-    // captured value lands under `body`.
+describe('match - bind', () => {
+  it('zero-arg bind() embedded under a property re-keys to that property', () => {
     const exprBlock = (U as any)
       .BlockStatement({
-        body: [(U as any).ExpressionStatement({ expression: $ })],
+        body: [
+          (U as any).ExpressionStatement({
+            expression: $,
+          }),
+        ],
       })
-      .bind();
+      .bind()
 
     const ast = {
-      type: "BlockStatement",
+      type: 'BlockStatement',
+
       body: [
         {
-          type: "ExpressionStatement",
-          expression: { type: "Identifier", name: "x" },
+          type: 'ExpressionStatement',
+
+          expression: {
+            type: 'Identifier',
+            name: 'x',
+          },
         },
       ],
-    };
+    }
 
-    const extracted = extractFirstPattern(exprBlock);
-    expect(extracted.tag).toBe("BlockStatement");
+    expect(extractFirstPattern(exprBlock).tag).toBe('BlockStatement')
 
-    const parentPattern = { body: exprBlock };
-    const parentAst = { type: "SomeNode", body: ast };
-    const bag = match(parentAst, parentPattern);
-    expect(bag).not.toBeNull();
-    // Re-keyed from "node" to the embedding property "body".
-    expect(bag!.body).toBe(ast);
-    expect(bag!.node).toBeUndefined();
-    // Inner captures (expression) should NOT leak.
-    expect(bag!.expression).toBeUndefined();
-  });
+    const bag = match(
+      {
+        type: 'SomeNode',
+        body: ast,
+      },
+      {
+        body: exprBlock,
+      },
+    )
 
+    expect(bag).not.toBeNull()
+    expect(bag!.body).toBe(ast)
+    expect(bag!.node).toBeUndefined()
+    expect(bag!.expression).toBeUndefined()
+  })
 
   it("captures the whole node under a custom name with bind('name')", () => {
     const namedBind = (U as any)
       .BlockStatement({
-        body: [(U as any).ExpressionStatement({ expression: $ })],
+        body: [
+          (U as any).ExpressionStatement({
+            expression: $,
+          }),
+        ],
       })
-      .bind("myBlock");
+      .bind('myBlock')
 
     const ast = {
-      type: "BlockStatement",
+      type: 'BlockStatement',
+
       body: [
         {
-          type: "ExpressionStatement",
-          expression: { type: "Literal", value: 42 },
+          type: 'ExpressionStatement',
+
+          expression: {
+            type: 'Literal',
+            value: 42,
+          },
         },
       ],
-    };
+    }
 
-    const parentPattern = { body: namedBind };
-    const parentAst = { type: "SomeNode", body: ast };
-    const bag = match(parentAst, parentPattern);
-    expect(bag).not.toBeNull();
-    expect(bag!.myBlock).toBe(ast);
-    expect(bag!.expression).toBeUndefined();
-  });
+    const bag = match(
+      {
+        type: 'SomeNode',
+        body: ast,
+      },
+      {
+        body: namedBind,
+      },
+    )
 
-  it("still validates structure before binding", () => {
-    const bound = (U as any)
-      .BlockStatement({
-        body: [(U as any).ReturnStatement({ argument: $ })],
-      })
-      .bind("result");
+    expect(bag).not.toBeNull()
+    expect(bag!.myBlock).toBe(ast)
+    expect(bag!.expression).toBeUndefined()
+  })
 
-    const wrongAst = {
-      type: "BlockStatement",
-      body: [{ type: "ThrowStatement" }],
-    };
+  it('still validates structure before binding', () => {
+    expect(
+      match(
+        {
+          type: 'SomeNode',
 
-    const parentPattern = { body: bound };
-    const parentAst = { type: "SomeNode", body: wrongAst };
-    const bag = match(parentAst, parentPattern);
-    expect(bag).toBeNull();
-  });
-});
+          body: {
+            type: 'BlockStatement',
 
-describe("match - defaultUndefined", () => {
-  it("is a type-level-only modifier ($ already captures null)", () => {
-    const returnStmt = (U as any)
-      .ReturnStatement({ argument: $ })
-      .defaultUndefined();
+            body: [
+              {
+                type: 'ThrowStatement',
+              },
+            ],
+          },
+        },
+        {
+          body: (U as any)
+            .BlockStatement({
+              body: [
+                (U as any).ReturnStatement({
+                  argument: $,
+                }),
+              ],
+            })
+            .bind('result'),
+        },
+      ),
+    ).toBeNull()
+  })
+})
 
-    const ast = {
-      type: "ReturnStatement",
-      argument: null,
-    };
+describe('match - defaultUndefined', () => {
+  it('is a type-level-only modifier ($ already captures null)', () => {
+    const bag = match(
+      {
+        type: 'SomeNode',
 
-    const parentPattern = { stmt: returnStmt };
-    const parentAst = { type: "SomeNode", stmt: ast };
-    const bag = match(parentAst, parentPattern);
-    expect(bag).not.toBeNull();
-    expect(bag!.argument).toBeNull();
-  });
+        stmt: {
+          type: 'ReturnStatement',
+          argument: null,
+        },
+      },
+      {
+        stmt: (U as any)
+          .ReturnStatement({
+            argument: $,
+          })
+          .defaultUndefined(),
+      },
+    )
 
-  it("works with seal (captures null, re-keyed)", () => {
-    const sealedReturn = (U as any)
-      .ReturnStatement({ argument: $ })
-      .defaultUndefined()
-      .seal();
+    expect(bag).not.toBeNull()
+    expect(bag!.argument).toBeNull()
+  })
 
-    const ast = {
-      type: "ReturnStatement",
-      argument: null,
-    };
+  it('works with seal (captures null, re-keyed)', () => {
+    const bag = match(
+      {
+        type: 'SomeNode',
 
-    const parentPattern = { stmt: sealedReturn };
-    const parentAst = { type: "SomeNode", stmt: ast };
-    const bag = match(parentAst, parentPattern);
-    expect(bag).not.toBeNull();
-    // argument is re-keyed to "stmt"
-    expect(bag!.stmt).toBeNull();
-    expect(bag!.argument).toBeUndefined();
-  });
+        stmt: {
+          type: 'ReturnStatement',
+          argument: null,
+        },
+      },
+      {
+        stmt: (U as any)
+          .ReturnStatement({
+            argument: $,
+          })
+          .defaultUndefined()
+          .seal(),
+      },
+    )
 
-  it("does NOT make the proxy match when the actual node is null", () => {
-    // defaultUndefined is about inner captures, not about the node itself
-    const sealedReturn = (U as any)
-      .maybeBlock((U as any).ReturnStatement({ argument: $ }))
-      .defaultUndefined()
-      .seal();
+    expect(bag).not.toBeNull()
+    expect(bag!.stmt).toBeNull()
+    expect(bag!.argument).toBeUndefined()
+  })
 
-    const parentPattern = { alternate: sealedReturn };
-    const parentAst = { type: "IfStatement", alternate: null };
-    const bag = match(parentAst, parentPattern);
-    expect(bag).toBeNull();
-  });
-});
+  it('does NOT make the proxy match when the actual node is null', () => {
+    expect(
+      match(
+        {
+          type: 'IfStatement',
+          alternate: null,
+        },
+        {
+          alternate: (U as any)
+            .maybeBlock(
+              (U as any).ReturnStatement({
+                argument: $,
+              }),
+            )
+            .defaultUndefined()
+            .seal(),
+        },
+      ),
+    ).toBeNull()
+  })
+})
 
-describe("match - config slots (C)", () => {
-  it("matches a config slot value against the config default", () => {
-    const pattern = {
-      callee: { type: "Identifier", name: C("fn") },
-    };
+describe('match - config slots (C)', () => {
+  it('matches a config slot value against the config default', () => {
+    expect(
+      match(
+        {
+          type: 'CallExpression',
 
-    const chain = [{ method: "config", args: [{ fn: "uniq" }] }];
+          callee: {
+            type: 'Identifier',
+            name: 'uniq',
+          },
+        },
+        {
+          callee: {
+            type: 'Identifier',
+            name: C('fn'),
+          },
+        },
+        [
+          {
+            method: 'config',
 
-    const ast = {
-      type: "CallExpression",
-      callee: { type: "Identifier", name: "uniq" },
-    };
-
-    const bag = match(ast, pattern, chain);
-    expect(bag).not.toBeNull();
-  });
+            args: [
+              {
+                fn: 'uniq',
+              },
+            ],
+          },
+        ],
+      ),
+    ).not.toBeNull()
+  })
 
   it("rejects when config slot value doesn't match", () => {
-    const pattern = {
-      callee: { type: "Identifier", name: C("fn") },
-    };
-
-    const chain = [{ method: "config", args: [{ fn: "uniq" }] }];
-
-    const ast = {
-      type: "CallExpression",
-      callee: { type: "Identifier", name: "map" },
-    };
-
-    const bag = match(ast, pattern, chain);
-    expect(bag).toBeNull();
-  });
-
-  it("works with config slots in arrays", () => {
-    const pattern = {
-      elements: [C("val")],
-    };
-
-    const chain = [{ method: "config", args: [{ val: "hello" }] }];
-
-    const ast = {
-      type: "ArrayExpression",
-      elements: ["hello"],
-    };
-
-    const bag = match(ast, pattern, chain);
-    expect(bag).not.toBeNull();
-  });
-
-  it("rejects with missing config defaults", () => {
-    const pattern = {
-      name: C("fn"),
-    };
-
-    // No config entry in chain
-    const chain: { method: string; args: any[] }[] = [];
-
-    const ast = { type: "Identifier", name: "foo" };
-    const bag = match(ast, pattern, chain);
-    expect(bag).toBeNull(); // undefined !== "foo"
-  });
-});
-
-describe("match - combined seal + bind + or", () => {
-  it("handles the singular-function-to-arrow pattern (or with seal and bind branches)", () => {
-    const returnBlock = (U as any)
-      .BlockStatement({
-        body: [(U as any).ReturnStatement({ argument: $ }).defaultUndefined()],
-      })
-      .seal();
-
-    const exprBlock = (U as any)
-      .BlockStatement({
-        body: [(U as any).ExpressionStatement({ expression: $ })],
-      })
-      .bind();
-
-    const orPattern = (U as any).or(returnBlock, exprBlock);
-
-    // Test with return block
-    const returnAst = {
-      type: "BlockStatement",
-      body: [
+    expect(
+      match(
         {
-          type: "ReturnStatement",
-          argument: { type: "Literal", value: 42 },
+          type: 'CallExpression',
+
+          callee: {
+            type: 'Identifier',
+            name: 'map',
+          },
         },
-      ],
-    };
-
-    const parentPattern1 = { body: orPattern };
-    const parentAst1 = { type: "SomeNode", body: returnAst };
-    const bag1 = match(parentAst1, parentPattern1);
-    expect(bag1).not.toBeNull();
-    // seal re-keys "argument" to "body"
-    expect(bag1!.body).toEqual({ type: "Literal", value: 42 });
-
-    // Test with expression block
-    const exprAst = {
-      type: "BlockStatement",
-      body: [
         {
-          type: "ExpressionStatement",
-          expression: { type: "Identifier", name: "doStuff" },
+          callee: {
+            type: 'Identifier',
+            name: C('fn'),
+          },
         },
-      ],
-    };
+        [
+          {
+            method: 'config',
 
-    const parentPattern2 = { body: orPattern };
-    const parentAst2 = { type: "SomeNode", body: exprAst };
-    const bag2 = match(parentAst2, parentPattern2);
-    expect(bag2).not.toBeNull();
-    // Zero-arg bind() = bind("node") + seal; the seal collapses the
-    // single-key bag to the embedding property ("body"), matching the
-    // seal branch above. This is what singular-function-to-arrow relies
-    // on: its .with() destructures `body` regardless of which branch
-    // matched.
-    expect(bag2!.body).toBe(exprAst);
-    expect(bag2!.node).toBeUndefined();
-  });
-});
-
-describe("match - where + none", () => {
-  // Helper: build a chain with a where entry from patterns that carry .none().
-  function whereChain(...patterns: unknown[]): { method: string; args: unknown[] }[] {
-    return [{ method: "where", args: patterns }];
-  }
-
-  it("rejects when pattern appears in subtree (.none())", () => {
-    const pattern = { name: $ };
-    const chain = whereChain((U as any).ThisExpression().none());
-
-    const ast = {
-      type: "FunctionDeclaration",
-      name: "f",
-      body: {
-        type: "BlockStatement",
-        body: [
-          { type: "ReturnStatement", argument: { type: "ThisExpression" } },
+            args: [
+              {
+                fn: 'uniq',
+              },
+            ],
+          },
         ],
-      },
-    };
-    const bag = match(ast, pattern, chain);
-    expect(bag).toBeNull();
-  });
+      ),
+    ).toBeNull()
+  })
 
-  it("accepts when pattern is absent (.none())", () => {
-    const pattern = { name: $ };
-    const chain = whereChain((U as any).ThisExpression().none());
+  it('works with config slots in arrays', () => {
+    expect(
+      match(
+        {
+          type: 'ArrayExpression',
+          elements: ['hello'],
+        },
+        {
+          elements: [C('val')],
+        },
+        [
+          {
+            method: 'config',
 
-    const ast = {
-      type: "FunctionDeclaration",
-      name: "f",
-      body: {
-        type: "BlockStatement",
-        body: [
-          { type: "ReturnStatement", argument: { type: "Literal", value: 1 } },
+            args: [
+              {
+                val: 'hello',
+              },
+            ],
+          },
         ],
-      },
-    };
-    const bag = match(ast, pattern, chain);
-    expect(bag).not.toBeNull();
-    expect(bag!.name).toBe("f");
-  });
+      ),
+    ).not.toBeNull()
+  })
 
-  it("respects .until() boundary — does not reject when pattern is behind boundary", () => {
-    const pattern = { name: $ };
-    const constraint = (U as any)
-      .ThisExpression()
-      .until((U as any).FunctionExpression())
-      .none();
-    const chain = whereChain(constraint);
+  it('rejects with missing config defaults', () => {
+    const pattern = {
+      name: C('fn'),
+    }
 
-    const ast = {
-      type: "FunctionDeclaration",
-      name: "outer",
-      body: {
-        type: "BlockStatement",
+    const chain: {
+      method: string
+      args: any[]
+    }[] = []
+
+    expect(
+      match(
+        {
+          type: 'Identifier',
+          name: 'foo',
+        },
+        pattern,
+        chain,
+      ),
+    ).toBeNull()
+  })
+})
+
+describe('match - combined seal + bind + or', () => {
+  it(
+    'handles the singular-function-to-arrow pattern (or with seal and bind ' +
+      'branches)',
+    () => {
+      const orPattern = (U as any).or(
+        (U as any)
+          .BlockStatement({
+            body: [
+              (U as any)
+                .ReturnStatement({
+                  argument: $,
+                })
+                .defaultUndefined(),
+            ],
+          })
+          .seal(),
+        (U as any)
+          .BlockStatement({
+            body: [
+              (U as any).ExpressionStatement({
+                expression: $,
+              }),
+            ],
+          })
+          .bind(),
+      )
+
+      const bag1 = match(
+        {
+          type: 'SomeNode',
+
+          body: {
+            type: 'BlockStatement',
+
+            body: [
+              {
+                type: 'ReturnStatement',
+
+                argument: {
+                  type: 'Literal',
+                  value: 42,
+                },
+              },
+            ],
+          },
+        },
+        {
+          body: orPattern,
+        },
+      )
+
+      expect(bag1).not.toBeNull()
+
+      expect(bag1!.body).toEqual({
+        type: 'Literal',
+        value: 42,
+      })
+
+      const exprAst = {
+        type: 'BlockStatement',
+
         body: [
           {
-            type: "ReturnStatement",
-            argument: {
-              type: "FunctionExpression",
+            type: 'ExpressionStatement',
+
+            expression: {
+              type: 'Identifier',
+              name: 'doStuff',
+            },
+          },
+        ],
+      }
+
+      const bag2 = match(
+        {
+          type: 'SomeNode',
+          body: exprAst,
+        },
+        {
+          body: orPattern,
+        },
+      )
+
+      expect(bag2).not.toBeNull()
+      expect(bag2!.body).toBe(exprAst)
+      expect(bag2!.node).toBeUndefined()
+    },
+  )
+})
+
+describe('match - where + none', () => {
+  // Helper: build a chain with a where entry from patterns that carry .none().
+  const whereChain = (
+    ...patterns: unknown[]
+  ): {
+    method: string
+    args: unknown[]
+  }[] => [
+    {
+      method: 'where',
+      args: patterns,
+    },
+  ]
+
+  it('rejects when pattern appears in subtree (.none())', () => {
+    expect(
+      match(
+        {
+          type: 'FunctionDeclaration',
+          name: 'f',
+
+          body: {
+            type: 'BlockStatement',
+
+            body: [
+              {
+                type: 'ReturnStatement',
+
+                argument: {
+                  type: 'ThisExpression',
+                },
+              },
+            ],
+          },
+        },
+        {
+          name: $,
+        },
+        whereChain((U as any).ThisExpression().none()),
+      ),
+    ).toBeNull()
+  })
+
+  it('accepts when pattern is absent (.none())', () => {
+    const bag = match(
+      {
+        type: 'FunctionDeclaration',
+        name: 'f',
+
+        body: {
+          type: 'BlockStatement',
+
+          body: [
+            {
+              type: 'ReturnStatement',
+
+              argument: {
+                type: 'Literal',
+                value: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        name: $,
+      },
+      whereChain((U as any).ThisExpression().none()),
+    )
+
+    expect(bag).not.toBeNull()
+    expect(bag!.name).toBe('f')
+  })
+
+  it(
+    'respects .until() boundary — does not reject when pattern is behind ' +
+      'boundary',
+    () => {
+      const bag = match(
+        {
+          type: 'FunctionDeclaration',
+          name: 'outer',
+
+          body: {
+            type: 'BlockStatement',
+
+            body: [
+              {
+                type: 'ReturnStatement',
+
+                argument: {
+                  type: 'FunctionExpression',
+
+                  body: {
+                    type: 'BlockStatement',
+
+                    body: [
+                      {
+                        type: 'ReturnStatement',
+
+                        argument: {
+                          type: 'ThisExpression',
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+        },
+        {
+          name: $,
+        },
+        whereChain(
+          (U as any)
+            .ThisExpression()
+            .until((U as any).FunctionExpression())
+            .none(),
+        ),
+      )
+
+      expect(bag).not.toBeNull()
+      expect(bag!.name).toBe('outer')
+    },
+  )
+
+  it('rejects when pattern is BEFORE the boundary', () => {
+    expect(
+      match(
+        {
+          type: 'FunctionDeclaration',
+          name: 'f',
+
+          body: {
+            type: 'BlockStatement',
+
+            body: [
+              {
+                type: 'ExpressionStatement',
+
+                expression: {
+                  type: 'ThisExpression',
+                },
+              },
+            ],
+          },
+        },
+        {
+          name: $,
+        },
+        whereChain(
+          (U as any)
+            .ThisExpression()
+            .until((U as any).FunctionExpression())
+            .none(),
+        ),
+      ),
+    ).toBeNull()
+  })
+
+  it('boundary node itself is checked against the pattern before pruning', () => {
+    expect(
+      match(
+        {
+          type: 'FunctionDeclaration',
+          name: 'f',
+
+          body: {
+            type: 'BlockStatement',
+
+            body: [
+              {
+                type: 'ExpressionStatement',
+
+                expression: {
+                  type: 'FunctionExpression',
+
+                  body: {
+                    type: 'BlockStatement',
+                    body: [],
+                  },
+                },
+              },
+            ],
+          },
+        },
+        {
+          name: $,
+        },
+        whereChain(
+          (U as any)
+            .FunctionExpression()
+            .until((U as any).FunctionExpression())
+            .none(),
+        ),
+      ),
+    ).toBeNull()
+  })
+
+  it('handles U.or() boundary with multiple types', () => {
+    expect(
+      match(
+        {
+          type: 'Program',
+          name: 'p',
+
+          body: [
+            {
+              type: 'FunctionDeclaration',
+
               body: {
-                type: "BlockStatement",
+                type: 'BlockStatement',
+
                 body: [
                   {
-                    type: "ReturnStatement",
-                    argument: { type: "ThisExpression" },
+                    type: 'ReturnStatement',
+
+                    argument: {
+                      type: 'ThisExpression',
+                    },
                   },
                 ],
               },
             },
-          },
-        ],
-      },
-    };
-    const bag = match(ast, pattern, chain);
-    expect(bag).not.toBeNull();
-    expect(bag!.name).toBe("outer");
-  });
-
-  it("rejects when pattern is BEFORE the boundary", () => {
-    const pattern = { name: $ };
-    const constraint = (U as any)
-      .ThisExpression()
-      .until((U as any).FunctionExpression())
-      .none();
-    const chain = whereChain(constraint);
-
-    const ast = {
-      type: "FunctionDeclaration",
-      name: "f",
-      body: {
-        type: "BlockStatement",
-        body: [
-          {
-            type: "ExpressionStatement",
-            expression: { type: "ThisExpression" },
-          },
-        ],
-      },
-    };
-    const bag = match(ast, pattern, chain);
-    expect(bag).toBeNull();
-  });
-
-  it("boundary node itself is checked against the pattern before pruning", () => {
-    const pattern = { name: $ };
-    const constraint = (U as any)
-      .FunctionExpression()
-      .until((U as any).FunctionExpression())
-      .none();
-    const chain = whereChain(constraint);
-
-    const ast = {
-      type: "FunctionDeclaration",
-      name: "f",
-      body: {
-        type: "BlockStatement",
-        body: [
-          {
-            type: "ExpressionStatement",
-            expression: {
-              type: "FunctionExpression",
-              body: { type: "BlockStatement", body: [] },
-            },
-          },
-        ],
-      },
-    };
-    const bag = match(ast, pattern, chain);
-    expect(bag).toBeNull();
-  });
-
-  it("handles U.or() boundary with multiple types", () => {
-    const pattern = { name: $ };
-    const constraint = (U as any)
-      .ThisExpression()
-      .until(
-        (U as any).or(
-          (U as any).FunctionDeclaration(),
-          (U as any).FunctionExpression()
-        )
-      )
-      .none();
-    const chain = whereChain(constraint);
-
-    const ast = {
-      type: "Program",
-      name: "p",
-      body: [
+          ],
+        },
         {
-          type: "FunctionDeclaration",
+          name: $,
+        },
+        whereChain(
+          (U as any)
+            .ThisExpression()
+            .until(
+              (U as any).or(
+                (U as any).FunctionDeclaration(),
+                (U as any).FunctionExpression(),
+              ),
+            )
+            .none(),
+        ),
+      ),
+    ).not.toBeNull()
+  })
+
+  it('multiple .where() entries compose (all must pass)', () => {
+    expect(
+      match(
+        {
+          type: 'FunctionDeclaration',
+          name: 'f',
+
           body: {
-            type: "BlockStatement",
+            type: 'BlockStatement',
+
             body: [
               {
-                type: "ReturnStatement",
-                argument: { type: "ThisExpression" },
+                type: 'ReturnStatement',
+
+                argument: {
+                  type: 'Identifier',
+                  name: 'arguments',
+                },
               },
             ],
           },
         },
-      ],
-    };
-    const bag = match(ast, pattern, chain);
-    expect(bag).not.toBeNull();
-  });
-
-  it("multiple .where() entries compose (all must pass)", () => {
-    const pattern = { name: $ };
-    const chain = [
-      { method: "where", args: [(U as any).ThisExpression().none()] },
-      {
-        method: "where",
-        args: [(U as any).Identifier({ name: "arguments" }).none()],
-      },
-    ];
-
-    const ast = {
-      type: "FunctionDeclaration",
-      name: "f",
-      body: {
-        type: "BlockStatement",
-        body: [
-          {
-            type: "ReturnStatement",
-            argument: { type: "Identifier", name: "arguments" },
-          },
-        ],
-      },
-    };
-    const bag = match(ast, pattern, chain);
-    expect(bag).toBeNull();
-  });
-
-  it("structural inner pattern (not just type)", () => {
-    const pattern = { name: $ };
-    const chain = whereChain(
-      (U as any).Identifier({ name: "arguments" }).none()
-    );
-
-    // Has Identifier "x" but not "arguments" → accepted.
-    const ast = {
-      type: "FunctionDeclaration",
-      name: "f",
-      body: {
-        type: "BlockStatement",
-        body: [
-          {
-            type: "ReturnStatement",
-            argument: { type: "Identifier", name: "x" },
-          },
-        ],
-      },
-    };
-    const bag = match(ast, pattern, chain);
-    expect(bag).not.toBeNull();
-  });
-
-  it("checks default parameter values (not just body)", () => {
-    const pattern = { name: $ };
-    const constraint = (U as any)
-      .ThisExpression()
-      .until((U as any).FunctionExpression())
-      .none();
-    const chain = whereChain(constraint);
-
-    // ThisExpression is in a default param value — should be caught.
-    const ast = {
-      type: "FunctionDeclaration",
-      name: "f",
-      params: [
         {
-          type: "AssignmentPattern",
-          left: { type: "Identifier", name: "x" },
-          right: {
-            type: "MemberExpression",
-            object: { type: "ThisExpression" },
-            property: { type: "Identifier", name: "foo" },
+          name: $,
+        },
+        [
+          {
+            method: 'where',
+            args: [(U as any).ThisExpression().none()],
+          },
+          {
+            method: 'where',
+
+            args: [
+              (U as any)
+                .Identifier({
+                  name: 'arguments',
+                })
+                .none(),
+            ],
+          },
+        ],
+      ),
+    ).toBeNull()
+  })
+
+  it('structural inner pattern (not just type)', () => {
+    expect(
+      match(
+        {
+          type: 'FunctionDeclaration',
+          name: 'f',
+
+          body: {
+            type: 'BlockStatement',
+
+            body: [
+              {
+                type: 'ReturnStatement',
+
+                argument: {
+                  type: 'Identifier',
+                  name: 'x',
+                },
+              },
+            ],
           },
         },
-      ],
-      body: {
-        type: "BlockStatement",
-        body: [
-          {
-            type: "ReturnStatement",
-            argument: { type: "Identifier", name: "x" },
+        {
+          name: $,
+        },
+        whereChain(
+          (U as any)
+            .Identifier({
+              name: 'arguments',
+            })
+            .none(),
+        ),
+      ),
+    ).not.toBeNull()
+  })
+
+  it('checks default parameter values (not just body)', () => {
+    expect(
+      match(
+        {
+          type: 'FunctionDeclaration',
+          name: 'f',
+
+          params: [
+            {
+              type: 'AssignmentPattern',
+
+              left: {
+                type: 'Identifier',
+                name: 'x',
+              },
+
+              right: {
+                type: 'MemberExpression',
+
+                object: {
+                  type: 'ThisExpression',
+                },
+
+                property: {
+                  type: 'Identifier',
+                  name: 'foo',
+                },
+              },
+            },
+          ],
+
+          body: {
+            type: 'BlockStatement',
+
+            body: [
+              {
+                type: 'ReturnStatement',
+
+                argument: {
+                  type: 'Identifier',
+                  name: 'x',
+                },
+              },
+            ],
           },
-        ],
+        },
+        {
+          name: $,
+        },
+        whereChain(
+          (U as any)
+            .ThisExpression()
+            .until((U as any).FunctionExpression())
+            .none(),
+        ),
+      ),
+    ).toBeNull()
+  })
+
+  it('handles U.or() in the excluded pattern', () => {
+    const pattern = {
+      name: $,
+    }
+
+    const chain = whereChain(
+      (U as any)
+        .or(
+          (U as any).ThisExpression(),
+          (U as any).Identifier({
+            name: 'arguments',
+          }),
+        )
+        .until((U as any).FunctionExpression())
+        .none(),
+    )
+
+    expect(
+      match(
+        {
+          type: 'FunctionDeclaration',
+          name: 'f',
+
+          body: {
+            type: 'BlockStatement',
+
+            body: [
+              {
+                type: 'ReturnStatement',
+
+                argument: {
+                  type: 'ThisExpression',
+                },
+              },
+            ],
+          },
+        },
+        pattern,
+        chain,
+      ),
+    ).toBeNull()
+
+    expect(
+      match(
+        {
+          type: 'FunctionDeclaration',
+          name: 'f',
+
+          body: {
+            type: 'BlockStatement',
+
+            body: [
+              {
+                type: 'ReturnStatement',
+
+                argument: {
+                  type: 'Identifier',
+                  name: 'arguments',
+                },
+              },
+            ],
+          },
+        },
+        pattern,
+        chain,
+      ),
+    ).toBeNull()
+
+    expect(
+      match(
+        {
+          type: 'FunctionDeclaration',
+          name: 'f',
+
+          body: {
+            type: 'BlockStatement',
+
+            body: [
+              {
+                type: 'ReturnStatement',
+
+                argument: {
+                  type: 'Literal',
+                  value: 1,
+                },
+              },
+            ],
+          },
+        },
+        pattern,
+        chain,
+      ),
+    ).not.toBeNull()
+
+    expect(
+      match(
+        {
+          type: 'FunctionDeclaration',
+          name: 'f',
+
+          body: {
+            type: 'BlockStatement',
+
+            body: [
+              {
+                type: 'ReturnStatement',
+
+                argument: {
+                  type: 'FunctionExpression',
+
+                  body: {
+                    type: 'BlockStatement',
+
+                    body: [
+                      {
+                        type: 'ReturnStatement',
+
+                        argument: {
+                          type: 'ThisExpression',
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+        },
+        pattern,
+        chain,
+      ),
+    ).not.toBeNull()
+  })
+})
+
+describe('match - where + quantifiers (some, atLeast, atMost, exactly)', () => {
+  // AST with 3 ReturnStatements
+  const ast = {
+    type: 'Program',
+    name: 'p',
+    body: [
+      { type: 'ReturnStatement', argument: { type: 'Literal', value: 1 } },
+      { type: 'ReturnStatement', argument: { type: 'Literal', value: 2 } },
+      { type: 'ReturnStatement', argument: { type: 'Literal', value: 3 } },
+      {
+        type: 'ExpressionStatement',
+        expression: { type: 'Literal', value: 4 },
       },
-    };
-    const bag = match(ast, pattern, chain);
-    expect(bag).toBeNull();
-  });
+    ],
+  }
+  const pattern = { name: $ }
 
-  it("handles U.or() in the excluded pattern", () => {
-    const pattern = { name: $ };
-    const constraint = (U as any)
-      .or((U as any).ThisExpression(), (U as any).Identifier({ name: "arguments" }))
-      .until((U as any).FunctionExpression())
-      .none();
-    const chain = whereChain(constraint);
+  it('.some() accepts when at least one match exists', () => {
+    expect(
+      match(ast, pattern, [
+        {
+          method: 'where',
+          args: [(U as any).ReturnStatement().some()],
+        },
+      ]),
+    ).not.toBeNull()
+  })
 
-    // Has ThisExpression → rejected
-    const ast1 = {
-      type: "FunctionDeclaration",
-      name: "f",
-      body: {
-        type: "BlockStatement",
-        body: [
-          { type: "ReturnStatement", argument: { type: "ThisExpression" } },
-        ],
-      },
-    };
-    expect(match(ast1, pattern, chain)).toBeNull();
+  it('.some() rejects when zero matches', () => {
+    expect(
+      match(ast, pattern, [
+        {
+          method: 'where',
+          args: [(U as any).ThisExpression().some()],
+        },
+      ]),
+    ).toBeNull()
+  })
 
-    // Has arguments → rejected
-    const ast2 = {
-      type: "FunctionDeclaration",
-      name: "f",
-      body: {
-        type: "BlockStatement",
-        body: [
-          { type: "ReturnStatement", argument: { type: "Identifier", name: "arguments" } },
-        ],
-      },
-    };
-    expect(match(ast2, pattern, chain)).toBeNull();
+  it('.atLeast(3) accepts with exactly 3', () => {
+    expect(
+      match(ast, pattern, [
+        {
+          method: 'where',
+          args: [(U as any).ReturnStatement().atLeast(3)],
+        },
+      ]),
+    ).not.toBeNull()
+  })
 
-    // Has neither → accepted
-    const ast3 = {
-      type: "FunctionDeclaration",
-      name: "f",
-      body: {
-        type: "BlockStatement",
-        body: [
-          { type: "ReturnStatement", argument: { type: "Literal", value: 1 } },
-        ],
-      },
-    };
-    expect(match(ast3, pattern, chain)).not.toBeNull();
+  it('.atLeast(4) rejects with only 3', () => {
+    expect(
+      match(ast, pattern, [
+        {
+          method: 'where',
+          args: [(U as any).ReturnStatement().atLeast(4)],
+        },
+      ]),
+    ).toBeNull()
+  })
 
-    // Has ThisExpression but behind boundary → accepted
-    const ast4 = {
-      type: "FunctionDeclaration",
-      name: "f",
-      body: {
-        type: "BlockStatement",
-        body: [
-          {
-            type: "ReturnStatement",
-            argument: {
-              type: "FunctionExpression",
+  it('.atMost(3) accepts with exactly 3', () => {
+    expect(
+      match(ast, pattern, [
+        {
+          method: 'where',
+          args: [(U as any).ReturnStatement().atMost(3)],
+        },
+      ]),
+    ).not.toBeNull()
+  })
+
+  it('.atMost(2) rejects with 3', () => {
+    expect(
+      match(ast, pattern, [
+        {
+          method: 'where',
+          args: [(U as any).ReturnStatement().atMost(2)],
+        },
+      ]),
+    ).toBeNull()
+  })
+
+  it('.atMost(0) accepts with zero matches (like .none())', () => {
+    expect(
+      match(ast, pattern, [
+        {
+          method: 'where',
+          args: [(U as any).ThisExpression().atMost(0)],
+        },
+      ]),
+    ).not.toBeNull()
+  })
+
+  it('.exactly(3) accepts with exactly 3', () => {
+    expect(
+      match(ast, pattern, [
+        {
+          method: 'where',
+          args: [(U as any).ReturnStatement().exactly(3)],
+        },
+      ]),
+    ).not.toBeNull()
+  })
+
+  it('.exactly(2) rejects with 3', () => {
+    expect(
+      match(ast, pattern, [
+        {
+          method: 'where',
+          args: [(U as any).ReturnStatement().exactly(2)],
+        },
+      ]),
+    ).toBeNull()
+  })
+
+  it('.exactly(0) accepts with zero matches', () => {
+    expect(
+      match(ast, pattern, [
+        {
+          method: 'where',
+          args: [(U as any).ThisExpression().exactly(0)],
+        },
+      ]),
+    ).not.toBeNull()
+  })
+
+  it('quantifiers respect .until() boundaries', () => {
+    expect(
+      match(
+        {
+          type: 'Program',
+          name: 'p',
+
+          body: [
+            {
+              type: 'ReturnStatement',
+
+              argument: {
+                type: 'Literal',
+                value: 1,
+              },
+            },
+            {
+              type: 'FunctionExpression',
+
               body: {
-                type: "BlockStatement",
+                type: 'BlockStatement',
+
                 body: [
-                  { type: "ReturnStatement", argument: { type: "ThisExpression" } },
+                  {
+                    type: 'ReturnStatement',
+
+                    argument: {
+                      type: 'Literal',
+                      value: 2,
+                    },
+                  },
+                  {
+                    type: 'ReturnStatement',
+
+                    argument: {
+                      type: 'Literal',
+                      value: 3,
+                    },
+                  },
                 ],
               },
             },
-          },
-        ],
-      },
-    };
-    expect(match(ast4, pattern, chain)).not.toBeNull();
-  });
-});
+          ],
+        },
+        pattern,
+        [
+          {
+            method: 'where',
 
-describe("match - where + quantifiers (some, atLeast, atMost, exactly)", () => {
-  // AST with 3 ReturnStatements
-  const ast = {
-    type: "Program",
-    name: "p",
-    body: [
-      { type: "ReturnStatement", argument: { type: "Literal", value: 1 } },
-      { type: "ReturnStatement", argument: { type: "Literal", value: 2 } },
-      { type: "ReturnStatement", argument: { type: "Literal", value: 3 } },
-      { type: "ExpressionStatement", expression: { type: "Literal", value: 4 } },
-    ],
-  };
-  const pattern = { name: $ };
-
-  it(".some() accepts when at least one match exists", () => {
-    const chain = [{ method: "where", args: [(U as any).ReturnStatement().some()] }];
-    expect(match(ast, pattern, chain)).not.toBeNull();
-  });
-
-  it(".some() rejects when zero matches", () => {
-    const chain = [{ method: "where", args: [(U as any).ThisExpression().some()] }];
-    expect(match(ast, pattern, chain)).toBeNull();
-  });
-
-  it(".atLeast(3) accepts with exactly 3", () => {
-    const chain = [{ method: "where", args: [(U as any).ReturnStatement().atLeast(3)] }];
-    expect(match(ast, pattern, chain)).not.toBeNull();
-  });
-
-  it(".atLeast(4) rejects with only 3", () => {
-    const chain = [{ method: "where", args: [(U as any).ReturnStatement().atLeast(4)] }];
-    expect(match(ast, pattern, chain)).toBeNull();
-  });
-
-  it(".atMost(3) accepts with exactly 3", () => {
-    const chain = [{ method: "where", args: [(U as any).ReturnStatement().atMost(3)] }];
-    expect(match(ast, pattern, chain)).not.toBeNull();
-  });
-
-  it(".atMost(2) rejects with 3", () => {
-    const chain = [{ method: "where", args: [(U as any).ReturnStatement().atMost(2)] }];
-    expect(match(ast, pattern, chain)).toBeNull();
-  });
-
-  it(".atMost(0) accepts with zero matches (like .none())", () => {
-    const chain = [{ method: "where", args: [(U as any).ThisExpression().atMost(0)] }];
-    expect(match(ast, pattern, chain)).not.toBeNull();
-  });
-
-  it(".exactly(3) accepts with exactly 3", () => {
-    const chain = [{ method: "where", args: [(U as any).ReturnStatement().exactly(3)] }];
-    expect(match(ast, pattern, chain)).not.toBeNull();
-  });
-
-  it(".exactly(2) rejects with 3", () => {
-    const chain = [{ method: "where", args: [(U as any).ReturnStatement().exactly(2)] }];
-    expect(match(ast, pattern, chain)).toBeNull();
-  });
-
-  it(".exactly(0) accepts with zero matches", () => {
-    const chain = [{ method: "where", args: [(U as any).ThisExpression().exactly(0)] }];
-    expect(match(ast, pattern, chain)).not.toBeNull();
-  });
-
-  it("quantifiers respect .until() boundaries", () => {
-    const nested = {
-      type: "Program",
-      name: "p",
-      body: [
-        { type: "ReturnStatement", argument: { type: "Literal", value: 1 } },
-        {
-          type: "FunctionExpression",
-          body: {
-            type: "BlockStatement",
-            body: [
-              { type: "ReturnStatement", argument: { type: "Literal", value: 2 } },
-              { type: "ReturnStatement", argument: { type: "Literal", value: 3 } },
+            args: [
+              (U as any)
+                .ReturnStatement()
+                .until((U as any).FunctionExpression())
+                .exactly(1),
             ],
           },
-        },
-      ],
-    };
-    // Only 1 ReturnStatement before the FunctionExpression boundary.
-    const chain = [
-      { method: "where", args: [
-        (U as any).ReturnStatement().until((U as any).FunctionExpression()).exactly(1)
-      ] },
-    ];
-    expect(match(nested, pattern, chain)).not.toBeNull();
-  });
+        ],
+      ),
+    ).not.toBeNull()
+  })
 
-  it("accepts a root proxy and checks its tag", () => {
-    const literal = { type: "Literal", value: 1 };
-    const array = { type: "ArrayExpression", elements: [] };
-    expect(match(literal, (U as any).ArrayExpression())).toBeNull();
-    expect(match(array, (U as any).ArrayExpression())).toEqual({});
-    expect(match(array, (U as any).ArrayExpression({ elements: $("els") }))).toEqual({ els: [] });
-  });
+  it('accepts a root proxy and checks its tag', () => {
+    const literal = { type: 'Literal', value: 1 }
+    const array = { type: 'ArrayExpression', elements: [] }
+    expect(match(literal, (U as any).ArrayExpression())).toBeNull()
+    expect(match(array, (U as any).ArrayExpression())).toEqual({})
+    expect(
+      match(array, (U as any).ArrayExpression({ elements: $('els') })),
+    ).toEqual({ els: [] })
+  })
 
   it("applies a root proxy's own .when() guard", () => {
-    const array = { type: "ArrayExpression", elements: [] };
-    expect(match(array, (U as any).ArrayExpression().when(() => false))).toBeNull();
-  });
-});
+    expect(
+      match(
+        {
+          type: 'ArrayExpression',
+          elements: [],
+        },
+        (U as any).ArrayExpression().when(() => false),
+      ),
+    ).toBeNull()
+  })
+})
 
-describe("an object pattern against a null slot", () => {
-  it("does not match, and does not throw", () => {
-    const node = { type: "Literal", value: null, raw: "null" };
-    const pattern = U.Literal({ value: { flags: "g" } as unknown as RegExp });
-    expect(() => match(node, pattern)).not.toThrow();
-    expect(match(node, pattern)).toBeNull();
-  });
-});
+describe('an object pattern against a null slot', () => {
+  it('does not match, and does not throw', () => {
+    const node = { type: 'Literal', value: null, raw: 'null' }
+    const pattern = U.Literal({ value: { flags: 'g' } as unknown as RegExp })
+    expect(() => match(node, pattern)).not.toThrow()
+    expect(match(node, pattern)).toBeNull()
+  })
+})

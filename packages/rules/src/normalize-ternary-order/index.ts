@@ -1,1 +1,3 @@
-export * from "./normalize-ternary-order";
+export * from './normalize-ternary-order'
+
+export * as default from '.'

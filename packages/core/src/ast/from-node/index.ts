@@ -1,2 +1,3 @@
-export * from "./from-node";
+export * from './from-node'
 
+export * as default from '.'

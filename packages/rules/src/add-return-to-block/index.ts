@@ -1,1 +1,3 @@
-export * from "./add-return-to-block";
+export * from './add-return-to-block'
+
+export * as default from '.'

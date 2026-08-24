@@ -1,12 +1,14 @@
-export * from "./prettify";
-export * from "./has-never";
-export * from "./union-to-intersection";
-export * from "./last-of";
-export * from "./union-to-tuple";
-export * from "./keys-to-tuple";
-export * from "./values";
-export * from "./without-internal-ast-fields";
-export * from "./single-key-of";
-export * from "./keys-of-union";
-export * from "./single-value-of";
-export * from "./overwrite";
+export * from './has-never'
+export * from './keys-of-union'
+export * from './keys-to-tuple'
+export * from './last-of'
+export * from './overwrite'
+export * from './prettify'
+export * from './single-key-of'
+export * from './single-value-of'
+export * from './union-to-intersection'
+export * from './union-to-tuple'
+export * from './values'
+export * from './without-internal-ast-fields'
+
+export * as default from '.'

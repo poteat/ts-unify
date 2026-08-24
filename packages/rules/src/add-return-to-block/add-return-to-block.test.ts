@@ -1,11 +1,13 @@
-import type { ExtractCaptures } from "@/pattern";
-import { assertType } from "@/test-utils/assert-type";
-import type { TSESTree } from "@typescript-eslint/types";
-import { addReturnToBlock } from "./add-return-to-block";
+import type { TSESTree } from '@typescript-eslint/types'
 
-describe("addReturnToBlock (type-level)", () => {
-  it("captures the expression from the single expression statement", () => {
-    type Bag = ExtractCaptures<typeof addReturnToBlock>;
-    assertType<Bag, { expression: TSESTree.Expression }>(0);
-  });
-});
+import type { ExtractCaptures } from '@/pattern'
+import AssertType from '@/test-utils/assert-type'
+
+import { addReturnToBlock } from './add-return-to-block'
+
+describe('addReturnToBlock (type-level)', () => {
+  it('captures the expression from the single expression statement', () => {
+    type Bag = ExtractCaptures<typeof addReturnToBlock>
+    AssertType.assertType<Bag, { expression: TSESTree.Expression }>(0)
+  })
+})

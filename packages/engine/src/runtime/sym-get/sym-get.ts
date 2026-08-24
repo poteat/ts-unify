@@ -3,6 +3,4 @@
  * This is the single escape hatch for symbol indexing on unknown.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function symGet(v: unknown, s: symbol): unknown {
-  return (v as any)[s];
-}
+export const symGet = (v: unknown, s: symbol): unknown => (v as any)[s]

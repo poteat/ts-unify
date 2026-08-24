@@ -1,1 +1,3 @@
-export * from "./identifier-name";
+export * from './identifier-name'
+
+export * as default from '.'

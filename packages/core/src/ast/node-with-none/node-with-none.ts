@@ -5,7 +5,7 @@
  * constraint, the match is rejected if any node in the scoped search matches
  * the pattern.
  */
-import type { FluentNode } from "@/ast/fluent-node";
+import type { FluentNode } from '@/ast/fluent-node'
 
 export type NodeWithNone<N> = {
   /**
@@ -15,5 +15,5 @@ export type NodeWithNone<N> = {
    * @returns The pattern with the quantifier attached, suitable for
    * passing to `.where()`.
    */
-  none(): FluentNode<N>;
-};
+  readonly none: () => FluentNode<N>
+}

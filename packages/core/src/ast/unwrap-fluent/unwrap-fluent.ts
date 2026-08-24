@@ -1,4 +1,4 @@
-import type { FLUENT_INNER } from "@/ast/fluent-node";
+import type { FLUENT_INNER } from '@/ast/fluent-node'
 
 /**
  * UnwrapFluent<T>
@@ -9,4 +9,4 @@ import type { FLUENT_INNER } from "@/ast/fluent-node";
  */
 export type UnwrapFluent<T> = T extends { readonly [FLUENT_INNER]: infer N }
   ? N
-  : T;
+  : T

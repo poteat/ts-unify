@@ -1,15 +1,11 @@
-import { U } from "@/ast";
+import Ast from '@/ast'
 
-describe("NodeWithNone (type-level)", () => {
-  it("preserves chainability after .none()", () => {
-    const p = U.ThisExpression().none();
-    void p;
-  });
+describe('NodeWithNone (type-level)', () => {
+  it('preserves chainability after .none()', () => {
+    void Ast.U.ThisExpression().none()
+  })
 
-  it("chains after .until()", () => {
-    const p = U.ThisExpression()
-      .until(U.FunctionDeclaration())
-      .none();
-    void p;
-  });
-});
+  it('chains after .until()', () => {
+    void Ast.U.ThisExpression().until(Ast.U.FunctionDeclaration()).none()
+  })
+})

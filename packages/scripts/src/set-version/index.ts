@@ -1,1 +1,3 @@
-export * from "./set-version";
+export * from './set-version'
+
+export * as default from '.'

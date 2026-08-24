@@ -1,13 +1,13 @@
-import type { Pattern } from "@/pattern";
-import type { BindCaptures } from "@/capture";
-import type { NodeByKind } from "@/ast/node-by-kind";
-import type { NodeKind } from "@/ast/node-kind";
-import type { FluentNode } from "@/ast/fluent-node";
-import type { WithoutInternalAstFields } from "@/type-utils";
+import type { FluentNode } from '@/ast/fluent-node'
+import type { NodeByKind } from '@/ast/node-by-kind'
+import type { NodeKind } from '@/ast/node-kind'
+import type { BindCaptures } from '@/capture'
+import type { Pattern } from '@/pattern'
+import type { WithoutInternalAstFields } from '@/type-utils'
 
 type OmitDistributive<T, K extends keyof any> = T extends any
   ? Omit<T, K>
-  : never;
+  : never
 
 /**
  * Create builders for AST kind `K`.
@@ -22,22 +22,30 @@ type OmitDistributive<T, K extends keyof any> = T extends any
  * - `U.ConditionalExpression({ test, consequent, alternate })` → build node
  * - `U.ReturnStatement({ argument: $("arg") })` → pattern with a capture
  */
-export declare const PATTERN_BUILDER_BRAND: unique symbol;
+export declare const PATTERN_BUILDER_BRAND: unique symbol
 
 export type PatternBuilder<K extends NodeKind> = {
-  /** Build a concrete `K` node (no capture tokens). Returns a fluent node. */
-  <S extends OmitDistributive<WithoutInternalAstFields<NodeByKind[K]>, "type">>(
-    shape: S
-  ): FluentNode<NodeByKind[K]>;
+  /**
+   * Build a concrete `K` node (no capture tokens). Returns a fluent node.
+   */
+  <S extends OmitDistributive<WithoutInternalAstFields<NodeByKind[K]>, 'type'>>(
+    shape: S,
+  ): FluentNode<NodeByKind[K]>
 
-  /** Match a `K` pattern (supports `$`). Returns fluent node. */
-  <P extends Pattern<NodeByKind[K]>>(pattern: P): FluentNode<
-    { readonly type: NodeByKind[K]["type"] } & BindAgainstNodeKind<P, K>
-  >;
+  /**
+   * Match a `K` pattern (supports `$`). Returns fluent node.
+   */
+  <P extends Pattern<NodeByKind[K]>>(
+    pattern: P,
+  ): FluentNode<
+    { readonly type: NodeByKind[K]['type'] } & BindAgainstNodeKind<P, K>
+  >
 
-  /** Match any `K`. Returns `{ type: … }` with fluent helpers. */
-  (): FluentNode<{ readonly type: NodeByKind[K]["type"] }>;
-} & { readonly [PATTERN_BUILDER_BRAND]: true };
+  /**
+   * Match any `K`. Returns `{ type: … }` with fluent helpers.
+   */
+  (): FluentNode<{ readonly type: NodeByKind[K]['type'] }>
+} & { readonly [PATTERN_BUILDER_BRAND]: true }
 
 /**
  * Assuming a pattern `P` conforms to the shape of AST node kind `K`, bind
@@ -47,5 +55,5 @@ export type PatternBuilder<K extends NodeKind> = {
  */
 type BindAgainstNodeKind<P, K extends NodeKind> = BindCaptures<
   P,
-  K extends "Comment" ? NodeByKind[K] : WithoutInternalAstFields<NodeByKind[K]>
->;
+  K extends 'Comment' ? NodeByKind[K] : WithoutInternalAstFields<NodeByKind[K]>
+>

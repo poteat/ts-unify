@@ -1,17 +1,31 @@
-import { stringPredicate, type StringPredicate } from "@/string-predicate/string-predicate";
-import { CONTEXTUAL_KEYWORDS, RESERVED_WORDS, STRICT_MODE_RESERVED_WORDS } from "./reserved-words";
+import StringPredicate from '@/string-predicate/string-predicate'
 
-/** Which keyword sets {@link reserved} consults; see reserved.spec.md. */
+import {
+  CONTEXTUAL_KEYWORDS,
+  RESERVED_WORDS,
+  STRICT_MODE_RESERVED_WORDS,
+} from './reserved-words'
+
+/**
+ * Which keyword sets {@link reserved} consults; see reserved.spec.md.
+ */
 export type ReservedOptions = {
-  /** Count the strict-mode reserved words (`let`, `yield`, `static`...) and `await`. Default `true`. */
-  strict?: boolean;
-  /** Count TypeScript's contextual keywords (`type`, `interface`, `of`...). Default `false`. */
-  typescript?: boolean;
-};
+  /**
+   * Count the strict-mode reserved words (`let`, `yield`, `static`...) and
+   * `await`. Default `true`.
+   */
+  strict?: boolean
 
-const always = new Set(RESERVED_WORDS);
-const strictMode = new Set([...STRICT_MODE_RESERVED_WORDS, "await"]);
-const contextual = new Set(CONTEXTUAL_KEYWORDS);
+  /**
+   * Count TypeScript's contextual keywords (`type`, `interface`, `of`...).
+   * Default `false`.
+   */
+  typescript?: boolean
+}
+
+const always = new Set(RESERVED_WORDS)
+const strictMode = new Set([...STRICT_MODE_RESERVED_WORDS, 'await'])
+const contextual = new Set(CONTEXTUAL_KEYWORDS)
 
 /**
  * A string predicate: the string is a reserved word, so cannot be a binding
@@ -28,11 +42,16 @@ const contextual = new Set(CONTEXTUAL_KEYWORDS);
  * U.string.reserved({ strict: false })("let")        // false
  * U.string.reserved({ typescript: true })("type")    // true
  */
-export function reserved(options: ReservedOptions = {}): StringPredicate {
-  const strict = options.strict !== false;
-  const typescript = options.typescript === true;
-  return stringPredicate(
-    (name) =>
-      always.has(name) || (strict && strictMode.has(name)) || (typescript && contextual.has(name)),
-  );
+export function reserved(
+  options: ReservedOptions = {},
+): StringPredicate.StringPredicate {
+  const strict = options.strict !== false
+  const typescript = options.typescript === true
+
+  return StringPredicate.stringPredicate(
+    name =>
+      always.has(name) ||
+      (strict && strictMode.has(name)) ||
+      (typescript && contextual.has(name)),
+  )
 }

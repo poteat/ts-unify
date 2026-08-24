@@ -1,4 +1,4 @@
-export const CAPTURE_BRAND = Symbol("CAPTURE_BRAND");
+export const CAPTURE_BRAND = Symbol('CAPTURE_BRAND')
 
 /**
  * Sentinel value that marks a position in a pattern for type extraction.
@@ -11,7 +11,7 @@ export const CAPTURE_BRAND = Symbol("CAPTURE_BRAND");
  * writable reach into the AST.
  */
 export type Capture<Name extends string = string, Value = unknown> = {
-  readonly [CAPTURE_BRAND]: true;
-  readonly name: Name;
-  readonly value?: () => Value;
-};
+  readonly [CAPTURE_BRAND]: true
+  readonly name: Name
+  readonly value?: () => Value
+}

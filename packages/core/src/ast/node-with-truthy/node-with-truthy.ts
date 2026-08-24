@@ -1,9 +1,9 @@
-import type { ExtractCaptures } from "@/pattern";
-import type { HasSingleCapture } from "@/ast/capture-cardinality";
-import type { FluentNode } from "@/ast/fluent-node";
-import type { SubstituteSingleCapture } from "@/ast/substitute-single-capture";
-import type { Truthy } from "@/ast/builder-helpers";
-import type { SingleValueOf } from "@/type-utils/single-value-of";
+import type { Truthy } from '@/ast/builder-helpers'
+import type { HasSingleCapture } from '@/ast/capture-cardinality'
+import type { FluentNode } from '@/ast/fluent-node'
+import type { SubstituteSingleCapture } from '@/ast/substitute-single-capture'
+import type { ExtractCaptures } from '@/pattern'
+import type { SingleValueOf } from '@/type-utils/single-value-of'
 
 /**
  * Add a fluent `.truthy()` method to a node value `N`.
@@ -13,9 +13,9 @@ import type { SingleValueOf } from "@/type-utils/single-value-of";
  * (`false | 0 | 0n | "" | null | undefined`).
  */
 export type NodeWithTruthy<Node> = Node & {
-  truthy(
+  readonly truthy: (
     ..._enforce: [HasSingleCapture<Node>] extends [true] ? [] : [never]
-  ): FluentNode<
+  ) => FluentNode<
     SubstituteSingleCapture<Node, Truthy<SingleValueOf<ExtractCaptures<Node>>>>
-  >;
-};
+  >
+}

@@ -1,112 +1,194 @@
-import { match, extractPatterns } from "@ts-unify/engine";
-import { collapseNullGuard } from "@ts-unify/rules";
+import { match, extractPatterns } from '@ts-unify/engine'
+import { collapseNullGuard } from '@ts-unify/rules'
 
-describe("collapseNullGuard matching", () => {
-  const rule = extractPatterns(collapseNullGuard)[0]!;
+describe('collapseNullGuard matching', () => {
+  const rule = extractPatterns(collapseNullGuard)[0]!
 
-  it("extracts as a BlockStatement pattern", () => {
-    expect(rule.tag).toBe("BlockStatement");
-  });
+  it('extracts as a BlockStatement pattern', () => {
+    expect(rule.tag).toBe('BlockStatement')
+  })
 
-  it("matches if (x === null) return def; return x;", () => {
-    const ast = {
-      type: "BlockStatement",
-      body: [
-        // leading statements (spread capture)
-        { type: "ExpressionStatement", expression: { type: "Identifier", name: "setup" } },
-        // nullCheck: if (x === null) return def;
-        {
-          type: "IfStatement",
-          test: {
-            type: "BinaryExpression",
-            operator: "===",
-            left: { type: "Identifier", name: "x" },
-            right: { type: "Literal", value: null },
+  it('matches if (x === null) return def; return x;', () => {
+    const bag = match(
+      {
+        type: 'BlockStatement',
+
+        body: [
+          {
+            type: 'ExpressionStatement',
+
+            expression: {
+              type: 'Identifier',
+              name: 'setup',
+            },
           },
-          consequent: {
-            type: "ReturnStatement",
-            argument: { type: "Identifier", name: "def" },
+          {
+            type: 'IfStatement',
+
+            test: {
+              type: 'BinaryExpression',
+              operator: '===',
+
+              left: {
+                type: 'Identifier',
+                name: 'x',
+              },
+
+              right: {
+                type: 'Literal',
+                value: null,
+              },
+            },
+
+            consequent: {
+              type: 'ReturnStatement',
+
+              argument: {
+                type: 'Identifier',
+                name: 'def',
+              },
+            },
+
+            alternate: null,
           },
-          alternate: null,
-        },
-        // returnOfValue: return x; (or return x as T;)
-        {
-          type: "ReturnStatement",
-          argument: { type: "Identifier", name: "x" },
-        },
-      ],
-    };
+          {
+            type: 'ReturnStatement',
 
-    const bag = match(ast, rule.pattern);
-    expect(bag).not.toBeNull();
-    expect(bag!.value).toEqual({ type: "Identifier", name: "x" });
-    expect(bag!.fallback).toEqual({ type: "Identifier", name: "def" });
-  });
-
-  it("matches with no leading statements", () => {
-    const ast = {
-      type: "BlockStatement",
-      body: [
-        {
-          type: "IfStatement",
-          test: {
-            type: "BinaryExpression",
-            operator: "===",
-            left: { type: "Identifier", name: "val" },
-            right: { type: "Literal", value: null },
+            argument: {
+              type: 'Identifier',
+              name: 'x',
+            },
           },
-          consequent: {
-            type: "ReturnStatement",
-            argument: { type: "Literal", value: 0 },
+        ],
+      },
+      rule.pattern,
+    )
+
+    expect(bag).not.toBeNull()
+
+    expect(bag!.value).toEqual({
+      type: 'Identifier',
+      name: 'x',
+    })
+
+    expect(bag!.fallback).toEqual({
+      type: 'Identifier',
+      name: 'def',
+    })
+  })
+
+  it('matches with no leading statements', () => {
+    const bag = match(
+      {
+        type: 'BlockStatement',
+
+        body: [
+          {
+            type: 'IfStatement',
+
+            test: {
+              type: 'BinaryExpression',
+              operator: '===',
+
+              left: {
+                type: 'Identifier',
+                name: 'val',
+              },
+
+              right: {
+                type: 'Literal',
+                value: null,
+              },
+            },
+
+            consequent: {
+              type: 'ReturnStatement',
+
+              argument: {
+                type: 'Literal',
+                value: 0,
+              },
+            },
+
+            alternate: null,
           },
-          alternate: null,
-        },
-        {
-          type: "ReturnStatement",
-          argument: { type: "Identifier", name: "val" },
-        },
-      ],
-    };
+          {
+            type: 'ReturnStatement',
 
-    const bag = match(ast, rule.pattern);
-    expect(bag).not.toBeNull();
-    expect(bag!.body).toEqual([]);
-  });
-
-  it("rejects when null check has wrong operator", () => {
-    const ast = {
-      type: "BlockStatement",
-      body: [
-        {
-          type: "IfStatement",
-          test: {
-            type: "BinaryExpression",
-            operator: "!==",
-            left: { type: "Identifier", name: "x" },
-            right: { type: "Literal", value: null },
+            argument: {
+              type: 'Identifier',
+              name: 'val',
+            },
           },
-          consequent: {
-            type: "ReturnStatement",
-            argument: { type: "Identifier", name: "def" },
-          },
-          alternate: null,
-        },
+        ],
+      },
+      rule.pattern,
+    )
+
+    expect(bag).not.toBeNull()
+    expect(bag!.body).toEqual([])
+  })
+
+  it('rejects when null check has wrong operator', () => {
+    expect(
+      match(
         {
-          type: "ReturnStatement",
-          argument: { type: "Identifier", name: "x" },
+          type: 'BlockStatement',
+
+          body: [
+            {
+              type: 'IfStatement',
+
+              test: {
+                type: 'BinaryExpression',
+                operator: '!==',
+
+                left: {
+                  type: 'Identifier',
+                  name: 'x',
+                },
+
+                right: {
+                  type: 'Literal',
+                  value: null,
+                },
+              },
+
+              consequent: {
+                type: 'ReturnStatement',
+
+                argument: {
+                  type: 'Identifier',
+                  name: 'def',
+                },
+              },
+
+              alternate: null,
+            },
+            {
+              type: 'ReturnStatement',
+
+              argument: {
+                type: 'Identifier',
+                name: 'x',
+              },
+            },
+          ],
         },
-      ],
-    };
+        rule.pattern,
+      ),
+    ).toBeNull()
+  })
 
-    expect(match(ast, rule.pattern)).toBeNull();
-  });
-
-  it("rejects a BlockStatement whose body is not an array", () => {
-    const ast = {
-      type: "BlockStatement",
-      body: "not-an-array",
-    };
-
-    expect(match(ast, rule.pattern)).toBeNull();
-  });
-});
+  it('rejects a BlockStatement whose body is not an array', () => {
+    expect(
+      match(
+        {
+          type: 'BlockStatement',
+          body: 'not-an-array',
+        },
+        rule.pattern,
+      ),
+    ).toBeNull()
+  })
+})

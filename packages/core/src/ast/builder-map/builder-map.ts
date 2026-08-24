@@ -1,6 +1,6 @@
-import type { NodeKind, PatternBuilder } from "@/ast";
-import type { BuilderUtilities } from "@/ast/builder-utilities";
-import { stringPredicates } from "@/string-predicate/string-predicates";
+import type { NodeKind, PatternBuilder } from '@/ast'
+import type { BuilderUtilities } from '@/ast/builder-utilities'
+import StringPredicates from '@/string-predicate/string-predicates'
 
 /**
  * Map from `NodeKind` to its corresponding `PatternBuilder`.
@@ -8,18 +8,18 @@ import { stringPredicates } from "@/string-predicate/string-predicates";
  * This represents the public surface of the builder registry (e.g., `U`).
  */
 export type BuilderMap = {
-  [K in NodeKind]: PatternBuilder<K>;
-} & BuilderUtilities;
+  [K in NodeKind]: PatternBuilder<K>
+} & BuilderUtilities
 
-export const NODE = Symbol.for("ts-unify.node");
+export const NODE = Symbol.for('ts-unify.node')
 
-export type ChainEntry = { method: string; args: unknown[] };
+export type ChainEntry = { method: string; args: unknown[] }
 
 export type ProxyNode = {
-  tag: string;
-  args: unknown[];
-  chain: ChainEntry[];
-};
+  tag: string
+  args: unknown[]
+  chain: ChainEntry[]
+}
 
 // The proxy is inherently untyped: it intercepts arbitrary property access and
 // function calls to build up a ProxyNode descriptor at runtime.  TypeScript's
@@ -28,29 +28,56 @@ export type ProxyNode = {
 // restores type safety for callers.
 // Utilities that are values rather than pattern descriptors, served from the
 // root as they are.
-const VALUES: Record<string, unknown> = { string: stringPredicates };
-
-function makeProxy(node?: ProxyNode): any {
-  return new Proxy(function () {}, {
-    get(_, prop) {
-      if (prop === NODE) return node;
-      if (typeof prop === "symbol") return undefined;
-      if (!node && prop in VALUES) return VALUES[prop];
-      if (node) {
-        // Fluent method on an existing node — return callable that appends to chain
-        const method = prop as string;
-        return (...args: unknown[]) =>
-          makeProxy({ ...node, chain: [...node.chain, { method, args }] });
-      }
-      // Builder access on root — return callable that creates a node
-      const tag = prop as string;
-      return (...args: unknown[]) => makeProxy({ tag, args, chain: [] });
-    },
-    apply(_, __, args) {
-      return makeProxy({ tag: "", args, chain: [] });
-    },
-  });
+const VALUES: Record<string, unknown> = {
+  string: StringPredicates.stringPredicates,
 }
 
-/** AST pattern builder namespace. */
-export const U = makeProxy() as BuilderMap;
+const makeProxy = (node?: ProxyNode): any =>
+  new Proxy(function () {}, {
+    get(_, prop) {
+      if (prop === NODE) return node
+
+      if (typeof prop === 'symbol') return undefined
+
+      if (!node && prop in VALUES) return VALUES[prop]
+
+      if (node) {
+        const method = prop as string
+
+        return (...args: unknown[]) =>
+          makeProxy({
+            ...node,
+
+            chain: [
+              ...node.chain,
+              {
+                method,
+                args,
+              },
+            ],
+          })
+      }
+
+      const tag = prop as string
+
+      return (...args: unknown[]) =>
+        makeProxy({
+          tag,
+          args,
+          chain: [],
+        })
+    },
+
+    apply(_, __, args) {
+      return makeProxy({
+        tag: '',
+        args,
+        chain: [],
+      })
+    },
+  })
+
+/**
+ * AST pattern builder namespace.
+ */
+export const U = makeProxy() as BuilderMap

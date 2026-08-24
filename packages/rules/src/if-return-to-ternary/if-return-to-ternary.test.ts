@@ -1,18 +1,20 @@
-import type { ExtractCaptures } from "@/pattern";
-import { assertType } from "@/test-utils/assert-type";
-import type { TSESTree } from "@typescript-eslint/types";
-import { ifReturnToTernary } from "./if-return-to-ternary";
+import type { TSESTree } from '@typescript-eslint/types'
 
-describe("ifReturnToTernary (type-level)", () => {
-  it("captures test, consequent, and alternate", () => {
-    type Bag = ExtractCaptures<typeof ifReturnToTernary["from"]>;
-    assertType<
+import type { ExtractCaptures } from '@/pattern'
+import AssertType from '@/test-utils/assert-type'
+
+import { ifReturnToTernary } from './if-return-to-ternary'
+
+describe('ifReturnToTernary (type-level)', () => {
+  it('captures test, consequent, and alternate', () => {
+    type Bag = ExtractCaptures<(typeof ifReturnToTernary)['from']>
+    AssertType.assertType<
       Bag,
       {
-        test: TSESTree.Expression;
-        consequent: TSESTree.Expression;
-        alternate: TSESTree.Expression;
+        test: TSESTree.Expression
+        consequent: TSESTree.Expression
+        alternate: TSESTree.Expression
       }
-    >(0);
-  });
-});
+    >(0)
+  })
+})

@@ -1,2 +1,3 @@
-export * from "./substitute-single-capture";
+export * from './substitute-single-capture'
 
+export * as default from '.'

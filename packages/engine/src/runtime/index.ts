@@ -1,7 +1,9 @@
-export * from "./match";
-export * from "./reify";
-export * from "./extract-patterns";
-export * from "./sym-get";
-export * from "./sub";
-export * from "./apply-rewrites";
-export * from "./comment-nodes";
+export * from './apply-rewrites'
+export * from './comment-nodes'
+export * from './extract-patterns'
+export * from './match'
+export * from './reify'
+export * from './sub'
+export * from './sym-get'
+
+export * as default from '.'

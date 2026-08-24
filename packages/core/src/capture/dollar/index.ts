@@ -1,1 +1,3 @@
-export * from "./dollar";
+export * from './dollar'
+
+export * as default from '.'

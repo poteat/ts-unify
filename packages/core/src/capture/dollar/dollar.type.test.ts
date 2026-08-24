@@ -1,36 +1,35 @@
-import type { $ as DollarFn } from "@/capture";
-import { $ } from "./dollar";
-import type { Capture } from "@/capture/capture-type";
-import type { Spread } from "@/capture";
-import type { DollarObjectSpread } from "@/capture";
-import type { FluentCapture } from "@/capture/fluent-capture";
-import { assertType } from "@/test-utils/assert-type";
+import type { $ as DollarFn, Spread, DollarObjectSpread } from '@/capture'
+import type { Capture } from '@/capture/capture-type'
+import type { FluentCapture } from '@/capture/fluent-capture'
+import AssertType from '@/test-utils/assert-type'
 
-describe("$ type alias", () => {
-  it("exports a function type compatible with typeof $", () => {
-    type FnFromType = DollarFn;
-    type FnFromValue = typeof $;
-    assertType<FnFromType, FnFromValue>(0);
-    assertType<FnFromValue, FnFromType>(0);
-  });
+import { $ } from './dollar'
 
-  it("supports explicit Value generic parameter", () => {
-    const capture = $<"id", number>("id");
-    type C = typeof capture;
-    type Expected = Capture<"id", number> &
-      Iterable<Spread<"id", number>> &
+describe('$ type alias', () => {
+  it('exports a function type compatible with typeof $', () => {
+    type FnFromType = DollarFn
+    type FnFromValue = typeof $
+    AssertType.assertType<FnFromType, FnFromValue>(0)
+    AssertType.assertType<FnFromValue, FnFromType>(0)
+  })
+
+  it('supports explicit Value generic parameter', () => {
+    const capture = $<'id', number>('id')
+    type C = typeof capture
+    type Expected = Capture<'id', number> &
+      Iterable<Spread<'id', number>> &
       DollarObjectSpread &
-      FluentCapture<"id", number>;
-    assertType<C, Expected>(0);
-  });
+      FluentCapture<'id', number>
+    AssertType.assertType<C, Expected>(0)
+  })
 
-  it("defaults Value generic parameter to unknown", () => {
-    const capture = $("name");
-    type C = typeof capture;
-    type Expected = Capture<"name", unknown> &
-      Iterable<Spread<"name", unknown>> &
+  it('defaults Value generic parameter to unknown', () => {
+    const capture = $('name')
+    type C = typeof capture
+    type Expected = Capture<'name', unknown> &
+      Iterable<Spread<'name', unknown>> &
       DollarObjectSpread &
-      FluentCapture<"name", unknown>;
-    assertType<C, Expected>(0);
-  });
-});
+      FluentCapture<'name', unknown>
+    AssertType.assertType<C, Expected>(0)
+  })
+})

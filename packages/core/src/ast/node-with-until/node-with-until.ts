@@ -6,7 +6,7 @@
  * name follows LTL convention: the search continues *until* the boundary
  * is reached.
  */
-import type { FluentNode } from "@/ast/fluent-node";
+import type { FluentNode } from '@/ast/fluent-node'
 
 export type NodeWithUntil<N> = {
   /**
@@ -17,5 +17,5 @@ export type NodeWithUntil<N> = {
    * matching descendants act as scope boundaries.
    * @returns The same node shape, chainable.
    */
-  until(boundary: unknown): FluentNode<N>;
-};
+  readonly until: (boundary: unknown) => FluentNode<N>
+}

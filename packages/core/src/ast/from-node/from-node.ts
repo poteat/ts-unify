@@ -1,13 +1,13 @@
-import type { BindCaptures } from "@/capture";
-import type { NodeByKind } from "@/ast/node-by-kind";
-import type { NodeKind } from "@/ast/node-kind";
-import type { FluentNode } from "@/ast/fluent-node";
-import type { WithoutInternalAstFields } from "@/type-utils";
+import type { FluentNode } from '@/ast/fluent-node'
+import type { NodeByKind } from '@/ast/node-by-kind'
+import type { NodeKind } from '@/ast/node-kind'
+import type { BindCaptures } from '@/capture'
+import type { WithoutInternalAstFields } from '@/type-utils'
 // import { AST_NODE_TYPES } from "@typescript-eslint/types";
 
 type OmitDistributive<T, K extends keyof any> = T extends any
   ? Omit<T, K>
-  : never;
+  : never
 
 /**
  * U.fromNode
@@ -23,35 +23,43 @@ type OmitDistributive<T, K extends keyof any> = T extends any
  */
 // Invert the NodeKind→type mapping to recover the kind from a `type` value
 type KindForType<V> = {
-  [K in NodeKind]: NodeByKind[K]["type"] extends V ? K : never;
-}[NodeKind];
+  [K in NodeKind]: NodeByKind[K]['type'] extends V ? K : never
+}[NodeKind]
 
 export type FromNode = {
-  /** "Any K" form: `{ type }` only. */
-  <V extends NodeByKind[NodeKind]["type"], K extends KindForType<V>>(input: {
-    type: V;
-  }): FluentNode<{ readonly type: NodeByKind[K]["type"] }>;
+  /**
+   * "Any K" form: `{ type }` only.
+   */
+  <V extends NodeByKind[NodeKind]['type'], K extends KindForType<V>>(input: {
+    type: V
+  }): FluentNode<{ readonly type: NodeByKind[K]['type'] }>
 
-  /** Build a concrete node (no capture tokens). Returns a fluent node. */
+  /**
+   * Build a concrete node (no capture tokens). Returns a fluent node.
+   */
   <
-    V extends NodeByKind[NodeKind]["type"],
+    V extends NodeByKind[NodeKind]['type'],
     K extends KindForType<V>,
-    S extends OmitDistributive<WithoutInternalAstFields<NodeByKind[K]>, "type">
+    S extends OmitDistributive<WithoutInternalAstFields<NodeByKind[K]>, 'type'>,
   >(
-    input: { type: V } & S
-  ): FluentNode<NodeByKind[K]>;
+    input: { type: V } & S,
+  ): FluentNode<NodeByKind[K]>
 
-  /** Match a pattern (supports `$`). Returns fluent node. */
-  <P extends { type: NodeByKind[NodeKind]["type"] }>(input: P): FluentNode<
+  /**
+   * Match a pattern (supports `$`). Returns fluent node.
+   */
+  <P extends { type: NodeByKind[NodeKind]['type'] }>(
+    input: P,
+  ): FluentNode<
     // Distribute by the provided discriminant and bind per concrete kind.
-    (P["type"] extends infer V
-      ? V extends NodeByKind[NodeKind]["type"]
+    P['type'] extends infer V
+      ? V extends NodeByKind[NodeKind]['type']
         ? BindCaptures<
             // Specialize this pattern to the branch's discriminant
-            ({ type: V } & (P extends object ? Omit<P, "type"> : P)),
+            { type: V } & (P extends object ? Omit<P, 'type'> : P),
             WithoutInternalAstFields<NodeByKind[KindForType<V>]>
           >
         : never
-      : never)
-  >;
-};
+      : never
+  >
+}

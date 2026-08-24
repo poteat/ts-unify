@@ -1,5 +1,5 @@
-import type { ExtractCaptures } from "@/pattern";
-import type { ConfigSlot } from "@/config/config-type";
+import type { ConfigSlot } from '@/config/config-type'
+import type { ExtractCaptures } from '@/pattern'
 
 /**
  * Import specifier map. Keys follow a convention:
@@ -8,11 +8,11 @@ import type { ConfigSlot } from "@/config/config-type";
  * - `"default as foo"` → `import foo from "..."`
  * - `"* as foo"`       → `import * as foo from "..."`
  */
-type ImportMap = Record<string, string | ConfigSlot>;
+type ImportMap = Record<string, string | ConfigSlot>
 
 type ExtractConfigFromImports<M> = {
-  [K in keyof M as M[K] extends ConfigSlot<infer N, any> ? N : never]: string;
-};
+  [K in keyof M as M[K] extends ConfigSlot<infer N, any> ? N : never]: string
+}
 
 /**
  * Terminal descriptor produced by `.to(...)`.
@@ -20,13 +20,13 @@ type ExtractConfigFromImports<M> = {
  * and an accumulated config shape from all positions.
  */
 export type AstTransform<In, Out, Cfg extends Record<string, unknown> = {}> = {
-  readonly from: In;
-  readonly to: (bag: ExtractCaptures<In>) => Out;
-  readonly importMap?: ImportMap;
-  imports<M extends ImportMap>(
-    map: M
-  ): AstTransform<In, Out, Cfg & ExtractConfigFromImports<M>>;
-  config<D extends Cfg>(defaults: D): AstTransform<In, Out, D>;
-  recommended(): AstTransform<In, Out, Cfg>;
-  message(text: string): AstTransform<In, Out, Cfg>;
-};
+  readonly from: In
+  readonly to: (bag: ExtractCaptures<In>) => Out
+  readonly importMap?: ImportMap
+  readonly imports: <M extends ImportMap>(
+    map: M,
+  ) => AstTransform<In, Out, Cfg & ExtractConfigFromImports<M>>
+  readonly config: <D extends Cfg>(defaults: D) => AstTransform<In, Out, D>
+  readonly recommended: () => AstTransform<In, Out, Cfg>
+  readonly message: (text: string) => AstTransform<In, Out, Cfg>
+}

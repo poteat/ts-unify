@@ -1,1 +1,3 @@
-export * from "./create-rule";
+export * from './create-rule'
+
+export * as default from '.'

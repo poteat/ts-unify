@@ -1,6 +1,8 @@
-import { U, $ } from "@ts-unify/core";
+import { U, $ } from '@ts-unify/core'
 
-const anyExprForm = U.maybeBlock(U.ExpressionStatement({ expression: $ })).seal();
+const anyExprForm = U.maybeBlock(
+  U.ExpressionStatement({ expression: $ }),
+).seal()
 
 /**
  * If both branches are side-effect expressions, convert to a single expression
@@ -33,10 +35,10 @@ export const ifToTernarySideEffect = U.IfStatement({
   consequent: anyExprForm,
   alternate: anyExprForm,
 })
-  .to((bag) =>
+  .to(bag =>
     U.ExpressionStatement({
       expression: U.ConditionalExpression(bag),
     }),
   )
-  .message("Collapse if/else side-effect into ternary expression")
-  .recommended();
+  .message('Collapse if/else side-effect into ternary expression')
+  .recommended()

@@ -1,20 +1,19 @@
-import { U } from "@/ast";
+import Ast from '@/ast'
 
-describe("NodeWithUntil (type-level)", () => {
-  it("preserves chainability after .until()", () => {
+describe('NodeWithUntil (type-level)', () => {
+  it('preserves chainability after .until()', () => {
     // .until() returns FluentNode<N> — further chaining is valid.
-    const p = U.ThisExpression().until(U.FunctionDeclaration());
+    const p = Ast.U.ThisExpression().until(Ast.U.FunctionDeclaration())
     // Can chain .none() after .until()
-    const q = U.ThisExpression().until(U.FunctionDeclaration()).none();
+    const q = Ast.U.ThisExpression().until(Ast.U.FunctionDeclaration()).none()
     // Suppress unused warnings
-    void p;
-    void q;
-  });
+    void p
+    void q
+  })
 
-  it("accepts U.or() as a boundary", () => {
-    const p = U.ThisExpression().until(
-      U.or(U.FunctionDeclaration(), U.FunctionExpression())
-    );
-    void p;
-  });
-});
+  it('accepts U.or() as a boundary', () => {
+    void Ast.U.ThisExpression().until(
+      Ast.U.or(Ast.U.FunctionDeclaration(), Ast.U.FunctionExpression()),
+    )
+  })
+})

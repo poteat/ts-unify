@@ -1,8 +1,8 @@
-import { U, $ } from "@ts-unify/core";
+import { U, $ } from '@ts-unify/core'
 
 const anyReturnForm = U.maybeBlock(U.ReturnStatement({ argument: $ }))
   .defaultUndefined()
-  .seal();
+  .seal()
 
 /**
  * If both branches are return statements, convert to a single return with
@@ -36,6 +36,6 @@ export const ifReturnToTernary = U.IfStatement({
   consequent: anyReturnForm,
   alternate: anyReturnForm,
 })
-  .to((bag) => U.ReturnStatement({ argument: U.ConditionalExpression(bag) }))
-  .message("Collapse if/else return into ternary")
-  .recommended();
+  .to(bag => U.ReturnStatement({ argument: U.ConditionalExpression(bag) }))
+  .message('Collapse if/else return into ternary')
+  .recommended()

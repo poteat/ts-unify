@@ -1,5 +1,9 @@
-/** Brand on a predicate accepted in a pattern's string position. */
-export const STRING_PREDICATE_BRAND: unique symbol = Symbol.for("ts-unify.string-predicate");
+/**
+ * Brand on a predicate accepted in a pattern's string position.
+ */
+export const STRING_PREDICATE_BRAND: unique symbol = Symbol.for(
+  'ts-unify.string-predicate',
+)
 
 /**
  * A string predicate: callable on any value, `false` for a non-string, and
@@ -7,8 +11,8 @@ export const STRING_PREDICATE_BRAND: unique symbol = Symbol.for("ts-unify.string
  * captures nothing. Build one with {@link stringPredicate}.
  */
 export type StringPredicate = ((value: unknown) => boolean) & {
-  readonly [STRING_PREDICATE_BRAND]: true;
-};
+  readonly [STRING_PREDICATE_BRAND]: true
+}
 
 /**
  * Brand a test over strings as a string predicate.
@@ -19,20 +23,23 @@ export type StringPredicate = ((value: unknown) => boolean) & {
  * U.Identifier({ name: long });   // in a slot
  * long(bag.name);                 // on a captured value
  */
-export function stringPredicate(test: (value: string) => boolean): StringPredicate {
-  return Object.assign((value: unknown) => typeof value === "string" && test(value), {
+export const stringPredicate = (
+  test: (value: string) => boolean,
+): StringPredicate =>
+  Object.assign((value: unknown) => typeof value === 'string' && test(value), {
     [STRING_PREDICATE_BRAND]: true as const,
-  });
-}
+  })
 
-/** Whether a pattern value is a string predicate, or a `RegExp` standing for one. */
-export function isStringPredicate(value: unknown): value is StringPredicate | RegExp {
-  return (
-    value instanceof RegExp ||
-    (typeof value === "function" &&
-      (value as Partial<StringPredicate>)[STRING_PREDICATE_BRAND] === true)
-  );
-}
+/**
+ * Whether a pattern value is a string predicate, or a `RegExp` standing for
+ * one.
+ */
+export const isStringPredicate = (
+  value: unknown,
+): value is StringPredicate | RegExp =>
+  value instanceof RegExp ||
+  (typeof value === 'function' &&
+    (value as Partial<StringPredicate>)[STRING_PREDICATE_BRAND] === true)
 
 /**
  * A string predicate from a `RegExp`. A bare `RegExp` in a string position is
@@ -42,17 +49,21 @@ export function isStringPredicate(value: unknown): value is StringPredicate | Re
  * @example
  * U.Comment({ text: U.string.regex(/TODO/) })   // same as { text: /TODO/ }
  */
-export function regex(expression: RegExp): StringPredicate {
-  return stringPredicate((value) => {
-    expression.lastIndex = 0;
-    return expression.test(value);
-  });
-}
+export const regex = (expression: RegExp): StringPredicate =>
+  stringPredicate(value => {
+    expression.lastIndex = 0
 
-/** Apply a string predicate, or the `RegExp` sugar for one, to a matched value. */
-export function testString(predicate: StringPredicate | RegExp, actual: unknown): boolean {
-  return predicate instanceof RegExp ? regex(predicate)(actual) : predicate(actual);
-}
+    return expression.test(value)
+  })
+
+/**
+ * Apply a string predicate, or the `RegExp` sugar for one, to a matched value.
+ */
+export const testString = (
+  predicate: StringPredicate | RegExp,
+  actual: unknown,
+) =>
+  predicate instanceof RegExp ? regex(predicate)(actual) : predicate(actual)
 
 /**
  * Negate a string predicate. Like every predicate, `false` for a non-string.
@@ -60,6 +71,5 @@ export function testString(predicate: StringPredicate | RegExp, actual: unknown)
  * @example
  * U.Identifier({ name: U.string.not(U.string.reserved()) })
  */
-export function not(predicate: StringPredicate | RegExp): StringPredicate {
-  return stringPredicate((value) => !testString(predicate, value));
-}
+export const not = (predicate: StringPredicate | RegExp): StringPredicate =>
+  stringPredicate(value => !testString(predicate, value))

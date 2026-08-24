@@ -1,16 +1,21 @@
-import type { BuilderMap } from "@/ast";
-import { $ } from "@/capture";
-import type { OR_BRAND } from "@/ast/or";
-import { assertType } from "@/test-utils/assert-type";
+import type { BuilderMap } from '@/ast'
+import type { OR_BRAND } from '@/ast/or'
+import Capture from '@/capture'
+import AssertType from '@/test-utils/assert-type'
 
-describe("BuilderUtilities.maybeBlock (type-level)", () => {
-  it("matches both block and non-block forms and preserves captures", () => {
+describe('BuilderUtilities.maybeBlock (type-level)', () => {
+  it('matches both block and non-block forms and preserves captures', () => {
     function check(u: BuilderMap) {
-      const ret = u.ReturnStatement({ argument: $("value") });
-      const mb = u.maybeBlock(ret);
-      type Brand = (typeof mb)[typeof OR_BRAND];
-      assertType<Brand, true>(0);
+      const mb = u.maybeBlock(
+        u.ReturnStatement({
+          argument: Capture.$('value'),
+        }),
+      )
+
+      type Brand = (typeof mb)[typeof OR_BRAND]
+      AssertType.assertType<Brand, true>(0)
     }
-    void check;
-  });
-});
+
+    void check
+  })
+})
