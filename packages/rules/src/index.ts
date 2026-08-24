@@ -13,4 +13,5 @@ export * from "./normalize-ternary-order";
 export * from "./object-assign-to-spread";
 export * from "./singular-function-to-arrow";
 export * from "./spread-new-set-to-uniq";
+export * from "./ternary-to-boolean-op";
 export * from "./typeof-undefined-to-nullish-check";

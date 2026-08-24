@@ -217,8 +217,9 @@ const substituted = <T>(tree: T, target: Node, replacement: Node): T => {
  * ```
  */
 export const inlineSingleUseConst = U.BlockStatement({ body: $("body") })
-  .when(({ body }) => inlinableConst(body) !== null)
-  .to(({ body }) => {
+  .when((bag) => inlinableConst((bag as { body?: unknown }).body) !== null)
+  .to((bag) => {
+    const body = (bag as { body?: unknown }).body;
     const it = inlinableConst(body);
     const list = body as unknown[];
     if (it === null) return { type: "BlockStatement", body: list };
