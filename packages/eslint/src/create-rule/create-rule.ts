@@ -5,7 +5,7 @@ import { extractRuleMeta } from "@ts-unify/runner";
 import type { TSESTree } from "@typescript-eslint/types";
 import type { RuleModule } from "../rule-module";
 import type { TransformLike } from "../transform-like";
-import { print } from "recast";
+import { printNode } from "../print-node";
 
 /**
  * Resolve config slot values in an imports map against config defaults.
@@ -73,6 +73,9 @@ function patternContainsInnerTo(
   return entries.some((e) => walk(e.pattern));
 }
 
+/** Message of a rule with neither `.message()` nor `opts.message`. */
+const DEFAULT_MESSAGE = "Matches a ts-unify pattern";
+
 /** Compile an AstTransform into an ESLint rule module. */
 export function createRule(
   transform: TransformLike,
@@ -80,7 +83,7 @@ export function createRule(
 ): RuleModule {
   const meta = extractRuleMeta("", transform);
   const entries = meta.patterns;
-  const message = opts.message ?? meta.message;
+  const message = opts.message ?? (meta.message || DEFAULT_MESSAGE);
   const factory = opts.fix === false ? null : meta.factory;
   const withEntries = meta.withs;
 
@@ -103,10 +106,24 @@ export function createRule(
       const visitors: Record<string, (node: TSESTree.Node) => void> = {};
       const sourceCode = context.sourceCode ?? context.getSourceCode?.();
 
+      // Entries sharing a tag (two same-typed branches of a root `U.or`)
+      // share one visitor; like `U.or`, the first entry to match wins.
+      const byTag = new Map<string, { pattern: Record<string, unknown>; chain: ChainEntry[] }[]>();
       for (const { tag, pattern, chain } of entries) {
+        const list = byTag.get(tag) ?? [];
+        list.push({ pattern, chain });
+        byTag.set(tag, list);
+      }
+
+      for (const [tag, candidates] of byTag) {
         visitors[tag] = (node: TSESTree.Node) => {
-          const result = matchWithSites(node, pattern, chain);
-          if (!result) return;
+          let first: ReturnType<typeof matchWithSites> = null;
+          for (const { pattern, chain } of candidates) {
+            first = matchWithSites(node, pattern, chain);
+            if (first) break;
+          }
+          if (!first) return;
+          const result = first;
           const bag = result.bag;
           const data: Record<string, string> = {};
           for (const [k, v] of Object.entries(bag)) {
@@ -145,7 +162,7 @@ export function createRule(
                     // canFix gated this branch on sites.length > 0, so
                     // applyRewrites returns non-null.
                     const rewritten = applyRewrites(node, sites, result.capturePaths, sourceCode);
-                    const text = print(rewritten as Parameters<typeof print>[0]).code;
+                    const text = printNode(rewritten);
 
                     // If imports are specified, prepend missing ones to the file
                     if (importMap) {

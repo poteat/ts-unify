@@ -191,4 +191,35 @@ describe("createRule", () => {
     const fix = fixes[0];
     expect(Array.isArray(fix)).toBe(false);
   });
+
+  it("reports both branches of a root or that share a node type", () => {
+    const rule = createRule(
+      (U as any).or(
+        (U as any).VariableDeclaration({ kind: "let" }),
+        (U as any).VariableDeclaration({ kind: "var" }),
+      ),
+    );
+    const reported: any[] = [];
+    const visitors = rule.create({ report: (d: any) => reported.push(d) } as any);
+    expect(Object.keys(visitors)).toEqual(["VariableDeclaration"]);
+    for (const kind of ["let", "var", "const"]) {
+      visitors.VariableDeclaration({ type: "VariableDeclaration", kind, declarations: [] } as any);
+    }
+    expect(reported.map((d) => d.node.kind)).toEqual(["let", "var"]);
+  });
+
+  it("honours a .when() on a root or after the branch matched", () => {
+    const rule = createRule(
+      (U as any)
+        .or((U as any).Identifier({ name: $("n") }), (U as any).Literal({ value: $("n") }))
+        .when(({ n }: { n: unknown }) => n !== "skip"),
+    );
+    const reported: any[] = [];
+    const visitors = rule.create({ report: (d: any) => reported.push(d) } as any);
+    visitors.Identifier({ type: "Identifier", name: "skip" } as any);
+    visitors.Identifier({ type: "Identifier", name: "keep" } as any);
+    visitors.Literal({ type: "Literal", value: "skip" } as any);
+    visitors.Literal({ type: "Literal", value: 1 } as any);
+    expect(reported.map((d) => d.data.n)).toEqual(["keep", "1"]);
+  });
 });

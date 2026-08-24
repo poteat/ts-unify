@@ -10,9 +10,14 @@ between ts-unify's pattern language and the ESLint rule API.
 
 - Extracts entry patterns from the transform's proxy trace via
   `extractPatterns`.
-- Registers one ESLint visitor per extracted `{ tag, pattern }` entry.
-- Each visitor calls `match(node, pattern)` at runtime and, on success, calls
-  `context.report` with the captured data.
+- Registers one ESLint visitor per distinct tag among the extracted
+  `{ tag, pattern, chain }` entries. Entries sharing a tag (two same-typed
+  branches of a root `U.or`) are tried in order and the first match wins,
+  as `U.or` does for nested patterns; one report per node at most.
+- Each visitor calls `matchWithSites(node, pattern, chain)` at runtime and,
+  on success, calls `context.report` with the captured data. A `.when()`,
+  `.where()` or `.config()` on a root `U.or` reaches each branch's chain via
+  `extractPatterns`, so a root guard runs after whichever branch matched.
 - When `opts.fix` is `true` and the transform carries a `.to(factory)` chain
   entry, the rule additionally supplies a `fix` function that reifies the
   factory output and replaces the matched node's text.
@@ -38,8 +43,9 @@ A `RuleModule` with:
 
 - Captures are stringified for the `data` bag passed to `context.report`.
   `Identifier` nodes use their `.name`; everything else uses `String(v)`.
-- Fix generation uses `reify(output, sourceCode)` followed by `recast.print` to
-  produce the replacement text.
+- Fix generation uses `applyRewrites` followed by `printNode` to produce the
+  replacement text; `printNode` maps typescript-estree v8 field names to the
+  ones recast's TypeScript printer reads.
 
 ## Examples
 
