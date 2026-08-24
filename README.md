@@ -58,3 +58,19 @@ export const typeofUndefinedToNullishCheck = U.BinaryExpression({
   }),
 );
 ```
+
+Comments are matchable too. `U.Comment` sees each comment as a node with its
+`kind` (`line`, `block`, `jsdoc`), its `text`, the JSDoc `summary`, `body` and
+`tags`, and the declaration it is `attachedTo`. A string position also takes
+a `RegExp`.
+
+```ts
+// A JSDoc block that documents nothing
+export const detachedJsdoc = U.Comment({ kind: "jsdoc", attachedTo: null });
+
+// A JSDoc summary of three or more lines
+export const longSummary = U.Comment({ kind: "jsdoc", summary: [$, $, $, ...$] });
+
+// Non-ASCII in a comment
+export const asciiComments = U.Comment({ text: /[^\x00-\x7f]/ });
+```

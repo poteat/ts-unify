@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add `U.Comment` — match comments as nodes: `kind`, `text`, JSDoc `summary`/`body`/`tags`, `attachedTo`, `header`; `U.Program({ comments })` sees the same views
+- Accept a `RegExp` in string positions; it tests the string and captures nothing
 - Add `.where()`, `.none()`, `.until()` — declarative subtree constraints
 - Fix zero-arg `.bind()` to re-key to parent field (was hardcoded to `"node"`)
 - Fix zero-arg `.to()` to return the single capture value (was treated as no-op)
