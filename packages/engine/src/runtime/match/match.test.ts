@@ -1,5 +1,6 @@
 import { $, C, U } from '@ts-unify/core/internal'
 
+import TestUtils from '../../test-utils'
 import CommentNodes from '../comment-nodes'
 import Fixtures from './fixtures'
 import { match } from './match'
@@ -102,7 +103,7 @@ describe('match', () => {
     it('matches when frozen at module scope', () => {
       const NAMED = Object.freeze(U.Identifier({ name: $('n') }))
 
-      expect(match(Fixtures.identifier('foo'), NAMED)).toEqual({ n: 'foo' })
+      expect(match(TestUtils.identifier('foo'), NAMED)).toEqual({ n: 'foo' })
       expect(match({ type: 'Literal', value: 1 }, NAMED)).toBeNull()
     })
 
@@ -111,8 +112,8 @@ describe('match', () => {
         (it: { n: string }) => it.n.length < 4,
       )
 
-      expect(match(Fixtures.identifier('foo'), SHORT)).toEqual({ n: 'foo' })
-      expect(match(Fixtures.identifier('quux'), SHORT)).toBeNull()
+      expect(match(TestUtils.identifier('foo'), SHORT)).toEqual({ n: 'foo' })
+      expect(match(TestUtils.identifier('quux'), SHORT)).toBeNull()
     })
 
     it('matches when embedded in a larger one', () => {
@@ -122,7 +123,7 @@ describe('match', () => {
 
       expect(
         match(
-          { type: 'ReturnStatement', argument: Fixtures.identifier('x') },
+          { type: 'ReturnStatement', argument: TestUtils.identifier('x') },
           RET,
         ),
       ).toEqual({ n: 'x' })
@@ -132,14 +133,14 @@ describe('match', () => {
   describe('a string predicate', () => {
     it('tests a string position against a RegExp', () => {
       expect(
-        match(Fixtures.identifier('fooBar'), U.Identifier({ name: /^foo/ })),
+        match(TestUtils.identifier('fooBar'), U.Identifier({ name: /^foo/ })),
       ).toEqual({})
       expect(
-        match(Fixtures.identifier('bar'), U.Identifier({ name: /^foo/ })),
+        match(TestUtils.identifier('bar'), U.Identifier({ name: /^foo/ })),
       ).toBeNull()
       expect(
         match(
-          Fixtures.identifier('bar'),
+          TestUtils.identifier('bar'),
           U.Identifier({ name: U.string.regex(/^b/) }),
         ),
       ).toEqual({})
@@ -160,21 +161,21 @@ describe('match', () => {
     it('matches a reserved word with U.string.reserved, no near miss', () => {
       const p = U.Identifier({ name: U.string.reserved() })
 
-      expect(match(Fixtures.identifier('class'), p)).toEqual({})
-      expect(match(Fixtures.identifier('let'), p)).toEqual({})
-      expect(match(Fixtures.identifier('klass'), p)).toBeNull()
+      expect(match(TestUtils.identifier('class'), p)).toEqual({})
+      expect(match(TestUtils.identifier('let'), p)).toEqual({})
+      expect(match(TestUtils.identifier('klass'), p)).toBeNull()
     })
 
     it('reads the strict and typescript options of U.string.reserved', () => {
       expect(
         match(
-          Fixtures.identifier('let'),
+          TestUtils.identifier('let'),
           U.Identifier({ name: U.string.reserved({ isStrict: false }) }),
         ),
       ).toBeNull()
       expect(
         match(
-          Fixtures.identifier('type'),
+          TestUtils.identifier('type'),
           U.Identifier({ name: U.string.reserved({ isTypeScript: true }) }),
         ),
       ).toEqual({})
@@ -197,8 +198,8 @@ describe('match', () => {
           needless,
         ),
       ).toBeNull()
-      expect(match(Fixtures.identifier('klass'), bindable)).toEqual({})
-      expect(match(Fixtures.identifier('class'), bindable)).toBeNull()
+      expect(match(TestUtils.identifier('klass'), bindable)).toEqual({})
+      expect(match(TestUtils.identifier('class'), bindable)).toBeNull()
     })
 
     it('works in sequence positions and beside captures', () => {
@@ -206,7 +207,7 @@ describe('match', () => {
         match(
           {
             type: 'CallExpression',
-            callee: Fixtures.identifier('log'),
+            callee: TestUtils.identifier('log'),
             arguments: [{ type: 'Literal', value: 'hello' }],
           },
           U.CallExpression({
@@ -227,14 +228,14 @@ describe('match', () => {
       )
       const p = U.Property({ key, value: U.Identifier({ name: 'v' }) })
 
-      expect(match(Fixtures.property(Fixtures.identifier('name')), p)).toEqual({
-        key: 'name',
-      })
+      expect(match(Fixtures.property(TestUtils.identifier('name')), p)).toEqual(
+        { key: 'name' },
+      )
       expect(
         match(Fixtures.property({ type: 'Literal', value: 'name' }), p),
       ).toEqual({ key: 'name' })
       expect(
-        match(Fixtures.property(Fixtures.identifier('class')), p),
+        match(Fixtures.property(TestUtils.identifier('class')), p),
       ).toBeNull()
       expect(
         match(Fixtures.property({ type: 'Literal', value: 'data-id' }), p),
@@ -247,8 +248,8 @@ describe('match', () => {
     it('resets a global RegExp between tests', () => {
       const p = U.Identifier({ name: /a/g })
 
-      expect(match(Fixtures.identifier('a'), p)).toEqual({})
-      expect(match(Fixtures.identifier('a'), p)).toEqual({})
+      expect(match(TestUtils.identifier('a'), p)).toEqual({})
+      expect(match(TestUtils.identifier('a'), p)).toEqual({})
     })
   })
 
@@ -456,7 +457,7 @@ describe('match', () => {
     it('matches a value against the config default', () => {
       expect(
         match(
-          { type: 'CallExpression', callee: Fixtures.identifier('uniq') },
+          { type: 'CallExpression', callee: TestUtils.identifier('uniq') },
           { callee: { type: 'Identifier', name: C('fn') } },
           [{ method: 'config', args: [{ fn: 'uniq' }] }],
         ),
@@ -466,7 +467,7 @@ describe('match', () => {
     it('rejects a value other than the config default', () => {
       expect(
         match(
-          { type: 'CallExpression', callee: Fixtures.identifier('map') },
+          { type: 'CallExpression', callee: TestUtils.identifier('map') },
           { callee: { type: 'Identifier', name: C('fn') } },
           [{ method: 'config', args: [{ fn: 'uniq' }] }],
         ),

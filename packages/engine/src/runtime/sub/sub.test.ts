@@ -1,15 +1,16 @@
+import TestUtils from '../../test-utils'
 import Fixtures from './fixtures'
 import { sub } from './sub'
 
 describe('sub', () => {
   it('replaces a structurally equal node and leaves the others', () => {
-    const tree = Fixtures.call(Fixtures.ident('handler'), [
-      Fixtures.ident('err'),
+    const tree = Fixtures.call(TestUtils.identifier('handler'), [
+      TestUtils.identifier('err'),
     ])
-    const target = Fixtures.ident('handler')
+    const target = TestUtils.identifier('handler')
     const replacement = Fixtures.member(
-      Fixtures.ident('config'),
-      Fixtures.ident('onError'),
+      TestUtils.identifier('config'),
+      TestUtils.identifier('onError'),
     )
 
     const result = sub(tree, target, replacement) as Record<string, unknown>
@@ -120,7 +121,7 @@ describe('sub', () => {
   })
 
   it('does not mutate the original tree', () => {
-    const tree = Fixtures.returnOf(Fixtures.ident('x'))
+    const tree = Fixtures.returnOf(TestUtils.identifier('x'))
     const original = JSON.stringify(tree)
     sub(tree, { type: 'Identifier', name: 'x' }, { type: 'Literal', value: 1 })
     expect(JSON.stringify(tree)).toBe(original)

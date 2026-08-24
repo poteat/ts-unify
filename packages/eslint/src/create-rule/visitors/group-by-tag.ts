@@ -1,4 +1,4 @@
-import type { Candidate } from './candidate'
+import type { PatternEntry } from '@ts-unify/engine'
 
 /**
  * Entries by tag, in first-seen order.
@@ -9,9 +9,9 @@ import type { Candidate } from './candidate'
  * @param entries the rule's entry patterns
  */
 export function groupByTag(
-  entries: readonly Candidate[],
-): ReadonlyMap<string, readonly Candidate[]> {
-  const byTag = new Map<string, readonly Candidate[]>()
+  entries: readonly PatternEntry[],
+): ReadonlyMap<string, readonly PatternEntry[]> {
+  const byTag = new Map<string, readonly PatternEntry[]>()
 
   for (const entry of entries) {
     byTag.set(entry.tag, [...(byTag.get(entry.tag) ?? []), entry])

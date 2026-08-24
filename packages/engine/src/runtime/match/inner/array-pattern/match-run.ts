@@ -1,6 +1,7 @@
-import type { Bag } from '../bag'
-import Context from '../context'
-import { matchValueInner } from './match-value-inner'
+import type { Bag } from '../../bag'
+import Context from '../../context'
+import { absorb } from '../absorb'
+import { matchValueInner } from '../match-value-inner'
 
 /**
  * Matches a run of pattern elements against the array elements from an
@@ -21,13 +22,14 @@ export function matchRun(
 
   for (const [i, element] of run.elements.entries()) {
     const index = run.start + i
-    const elemBag = matchValueInner(
-      actual[index],
-      element,
-      Context.childCursor(at, index),
+
+    if (
+      !absorb(
+        bag,
+        matchValueInner(actual[index], element, Context.childCursor(at, index)),
+      )
     )
-    if (!elemBag) return null
-    Object.assign(bag, elemBag)
+      return null
   }
 
   return bag

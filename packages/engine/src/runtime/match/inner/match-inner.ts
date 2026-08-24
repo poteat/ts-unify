@@ -8,7 +8,8 @@ import {
 import type { Bag } from '../bag'
 import Context from '../context'
 import Pattern from '../pattern'
-import { matchArrayInner } from './match-array-inner'
+import { absorb } from './absorb'
+import ArrayPattern from './array-pattern'
 import { matchProxyNode } from './match-proxy-node'
 
 /**
@@ -64,24 +65,19 @@ export function matchInner(
     }
 
     if (Pattern.isProxyNode(expected)) {
-      const proxyBag = matchProxyNode(actual, expected, childAt)
-      if (!proxyBag) return null
-      Object.assign(bag, proxyBag)
+      if (!absorb(bag, matchProxyNode(actual, expected, childAt))) return null
       continue
     }
 
     if (typeof expected === 'object' && expected && !Array.isArray(expected)) {
-      const innerBag = matchInner(actual, expected, childAt)
-      if (!innerBag) return null
-      Object.assign(bag, innerBag)
+      if (!absorb(bag, matchInner(actual, expected, childAt))) return null
       continue
     }
 
     if (Array.isArray(expected)) {
       if (!Array.isArray(actual)) return null
-      const arrayBag = matchArrayInner(actual, expected, childAt)
-      if (!arrayBag) return null
-      Object.assign(bag, arrayBag)
+      if (!absorb(bag, ArrayPattern.matchArrayInner(actual, expected, childAt)))
+        return null
       continue
     }
 

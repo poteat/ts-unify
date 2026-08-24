@@ -1,5 +1,6 @@
 import SymGet from '../sym-get'
 import type { PatternEntry } from './pattern-entry'
+import { patternOf } from './pattern-of'
 import { ROOT_INHERITED } from './root-inherited'
 
 /**
@@ -29,7 +30,7 @@ export function extractPatterns(rule: unknown): PatternEntry[] {
         ? [
             {
               tag: inner.tag,
-              pattern: (inner.args[0] ?? {}) as Record<string, unknown>,
+              pattern: patternOf(inner),
               chain: [...inner.chain, ...rootGuards],
             },
           ]
@@ -38,7 +39,7 @@ export function extractPatterns(rule: unknown): PatternEntry[] {
   }
 
   if (proxyNode.tag === 'fromNode') {
-    const pattern = (proxyNode.args[0] ?? {}) as Record<string, unknown>
+    const pattern = patternOf(proxyNode)
     const typeField = pattern.type
     const typeNode = SymGet.proxyNodeOf(typeField)
 
@@ -64,7 +65,7 @@ export function extractPatterns(rule: unknown): PatternEntry[] {
   return [
     {
       tag: proxyNode.tag,
-      pattern: (proxyNode.args[0] ?? {}) as Record<string, unknown>,
+      pattern: patternOf(proxyNode),
       chain: proxyNode.chain,
     },
   ]

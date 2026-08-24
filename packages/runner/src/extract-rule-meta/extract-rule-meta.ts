@@ -1,6 +1,5 @@
-import { NODE } from '@ts-unify/core/internal'
-import type { ProxyNode, ChainEntry } from '@ts-unify/core/internal'
-import { extractPatterns, symGet } from '@ts-unify/engine'
+import type { ChainEntry } from '@ts-unify/core/internal'
+import { extractPatterns, proxyNodeOf } from '@ts-unify/engine'
 
 import type { Factory } from './factory'
 import { kebabCase } from './kebab-case'
@@ -21,7 +20,7 @@ export function extractRuleMeta(
 ): RuleMeta {
   const kebab = kebabCase(exportName)
   const patterns = extractPatterns(transform)
-  const node = symGet(transform, NODE) as ProxyNode | undefined
+  const node = proxyNodeOf(transform)
 
   const msgEntry = node?.chain.find((c: ChainEntry) => c.method === 'message')
   const message = (msgEntry?.args[0] as string | undefined) ?? kebab

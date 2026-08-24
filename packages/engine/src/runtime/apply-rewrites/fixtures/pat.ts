@@ -1,6 +1,8 @@
 import { NODE } from '@ts-unify/core/internal'
 import type { ChainEntry, ProxyNode } from '@ts-unify/core/internal'
 
+import ExtractPatterns from '../../extract-patterns'
+
 /**
  * The pattern shape and chain of a built proxy, in the order
  * `matchWithSites` takes them after the node.
@@ -12,5 +14,5 @@ export function pat(
 ): readonly [Record<string, unknown>, ChainEntry[]] {
   const node = (proxy as Record<symbol, unknown>)[NODE] as ProxyNode
 
-  return [(node.args[0] ?? {}) as Record<string, unknown>, node.chain]
+  return [ExtractPatterns.patternOf(node), node.chain]
 }

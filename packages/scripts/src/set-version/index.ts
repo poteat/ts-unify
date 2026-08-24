@@ -1,3 +1,4 @@
+export * from './manifest'
 export * from './package-dirs'
 export * from './packages-dir'
 export * from './root'

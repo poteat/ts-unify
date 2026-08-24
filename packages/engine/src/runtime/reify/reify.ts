@@ -25,5 +25,5 @@ export function reify(value: unknown): unknown {
     return result
   }
 
-  return Array.isArray(value) ? value.map((v: unknown) => reify(v)) : value
+  return Array.isArray(value) ? value.map(reify) : value
 }

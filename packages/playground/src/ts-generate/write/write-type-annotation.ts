@@ -1,7 +1,7 @@
 import type { State } from 'astring'
 
-import type { GeneratorNode } from './generator-node'
-import type { GeneratorTable } from './generator-table'
+import type { GeneratorNode } from '../generator-node'
+import type { GeneratorTable } from '../generator-table'
 
 /**
  * Write a node's type annotation after it, when it carries one.

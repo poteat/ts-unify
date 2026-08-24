@@ -1,6 +1,6 @@
-import * as fs from 'fs'
 import * as path from 'path'
 
+import Manifest from './manifest'
 import { packageDirs } from './package-dirs'
 import { ROOT } from './root'
 import { setPackageVersion } from './set-package-version'
@@ -22,8 +22,9 @@ export function setWorkspaceVersion(version: string) {
   }
 
   const rootFile = path.join(ROOT, 'package.json')
-  const rootJson = JSON.parse(fs.readFileSync(rootFile, 'utf-8'))
-  rootJson.version = version
-  fs.writeFileSync(rootFile, JSON.stringify(rootJson, null, 2) + '\n')
+  Manifest.writeManifest(rootFile, {
+    ...Manifest.readManifest(rootFile),
+    version,
+  })
   console.log(`root → ${version}`)
 }

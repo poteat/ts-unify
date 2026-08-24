@@ -1,6 +1,4 @@
-import { NODE } from '@ts-unify/core/internal'
-import type { ProxyNode } from '@ts-unify/core/internal'
-import { symGet } from '@ts-unify/engine'
+import { proxyNodeOf } from '@ts-unify/engine'
 
 import type { TransformLike } from '../transform-like'
 
@@ -10,7 +8,7 @@ import type { TransformLike } from '../transform-like'
  * @param transform a fluent pattern
  */
 export function isRecommended(transform: TransformLike) {
-  const node = symGet(transform, NODE) as ProxyNode | undefined
+  const node = proxyNodeOf(transform)
 
   return node?.chain.some(c => c.method === 'recommended') ?? false
 }

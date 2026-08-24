@@ -1,3 +1,4 @@
+import Sub from '../sub'
 import { METADATA_KEYS } from './metadata-keys'
 
 /**
@@ -8,7 +9,7 @@ import { METADATA_KEYS } from './metadata-keys'
  */
 export function cloneNode(node: unknown): unknown {
   if (Array.isArray(node)) return node.map(cloneNode)
-  if (node == null || typeof node !== 'object') return node
+  if (Sub.isLeaf(node)) return node
   const copy: Record<string, unknown> = {}
 
   for (const key of Object.keys(node as Record<string, unknown>)) {

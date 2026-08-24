@@ -1,7 +1,7 @@
 import type { State } from 'astring'
 
-import type { GeneratorNode } from './generator-node'
-import type { GeneratorTable } from './generator-table'
+import type { GeneratorNode } from '../generator-node'
+import type { GeneratorTable } from '../generator-table'
 
 /**
  * What {@link writeSeparated} writes: a list of nodes and the text between

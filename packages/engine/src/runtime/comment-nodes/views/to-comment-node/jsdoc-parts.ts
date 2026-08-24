@@ -1,5 +1,6 @@
 import type { JsdocTag } from '@ts-unify/core/internal'
 
+import { isParagraphLine } from './is-paragraph-line'
 import { isTagLine } from './is-tag-line'
 
 /**
@@ -18,8 +19,7 @@ export function jsdocParts(lines: readonly string[]): {
   let i = 0
   const summary: string[] = []
 
-  while (i < lines.length && lines[i] !== '' && !isTagLine(lines[i]))
-    summary.push(lines[i++])
+  while (isParagraphLine(lines, i)) summary.push(lines[i++])
 
   const body: string[] = []
 
@@ -40,8 +40,7 @@ export function jsdocParts(lines: readonly string[]): {
     const name = space === -1 ? line : line.slice(0, space)
     const text = [space === -1 ? '' : line.slice(space + 1).trimStart()]
 
-    while (i < lines.length && lines[i] !== '' && !isTagLine(lines[i]))
-      text.push(lines[i++].trimStart())
+    while (isParagraphLine(lines, i)) text.push(lines[i++].trimStart())
 
     tags.push({ name, text: text.join('\n') })
   }

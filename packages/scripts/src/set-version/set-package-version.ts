@@ -1,5 +1,4 @@
-import * as fs from 'fs'
-
+import Manifest from './manifest'
 import { SCOPE } from './scope'
 
 /**
@@ -10,7 +9,7 @@ import { SCOPE } from './scope'
  * @param version the version to write
  */
 export function setPackageVersion(file: string, version: string) {
-  const json = JSON.parse(fs.readFileSync(file, 'utf-8'))
+  const json = Manifest.readManifest(file)
   json.version = version
 
   for (const depType of [
@@ -18,7 +17,7 @@ export function setPackageVersion(file: string, version: string) {
     'devDependencies',
     'peerDependencies',
   ] as const) {
-    const deps = json[depType] as Record<string, string> | undefined
+    const deps = json[depType]
     if (!deps) continue
 
     for (const dep of Object.keys(deps)) {
@@ -28,6 +27,6 @@ export function setPackageVersion(file: string, version: string) {
     }
   }
 
-  fs.writeFileSync(file, JSON.stringify(json, null, 2) + '\n')
+  Manifest.writeManifest(file, json)
   console.log(`${json.name} → ${version}`)
 }

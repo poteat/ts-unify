@@ -1,6 +1,7 @@
 export * from './attached-declaration'
 export * from './comment-setting'
 export * from './first-at-or-after'
+export * from './is-paragraph-line'
 export * from './is-tag-line'
 export * from './jsdoc-lines'
 export * from './jsdoc-parts'

@@ -1,7 +1,5 @@
-import { NODE } from '@ts-unify/core/internal'
-import type { ProxyNode } from '@ts-unify/core/internal'
-import { matchWithSites, applyRewrites, symGet } from '@ts-unify/engine'
-import { extractRuleMeta } from '@ts-unify/runner'
+import { matchWithSites, applyRewrites, proxyNodeOf } from '@ts-unify/engine'
+import { extractRuleMeta, rootSites } from '@ts-unify/runner'
 import type { TSESTree } from '@typescript-eslint/types'
 
 import KeepsComments from '../keeps-comments'
@@ -32,7 +30,7 @@ export function createRule(
   const canFix = opts.canFix !== false
   const factory = canFix ? meta.factory : null
   const withEntries = meta.withs
-  const proxyNode = symGet(transform, NODE) as ProxyNode | undefined
+  const proxyNode = proxyNodeOf(transform)
   const isFixable = factory !== null || patternContainsInnerTo(entries)
   const importMap = proxyNode ? Imports.resolveImports(proxyNode.chain) : null
 
@@ -69,15 +67,7 @@ export function createRule(
                 : String(v)
           }
 
-          const sites = canFix ? [...result.sites] : []
-
-          if (factory && !sites.some(s => s.path.length === 0)) {
-            sites.push({
-              path: [],
-              factory,
-              scopeBag: bag,
-            })
-          }
+          const sites = canFix ? rootSites(result, factory) : []
 
           context.report({
             ...(tag === 'Comment'

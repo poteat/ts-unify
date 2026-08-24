@@ -1,15 +1,14 @@
 import { NODE } from '@ts-unify/core/internal'
 import type { ProxyNode } from '@ts-unify/core/internal'
 import { symGet } from '@ts-unify/engine'
-
-import type { Candidate } from './visitors'
+import type { PatternEntry } from '@ts-unify/engine'
 
 /**
  * Whether any pattern entry contains a proxy with `.to()` anywhere.
  *
  * @param entries the rule's entry patterns
  */
-export function patternContainsInnerTo(entries: readonly Candidate[]) {
+export function patternContainsInnerTo(entries: readonly PatternEntry[]) {
   function walk(v: unknown): boolean {
     if (v == null) return false
 

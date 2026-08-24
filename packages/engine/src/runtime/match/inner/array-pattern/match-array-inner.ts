@@ -1,7 +1,9 @@
-import type { Bag } from '../bag'
-import Context from '../context'
-import Pattern from '../pattern'
-import Seqs from '../seqs'
+import type { Bag } from '../../bag'
+import Context from '../../context'
+import Pattern from '../../pattern'
+import Seqs from '../../seqs'
+import { absorb } from '../absorb'
+import { matchEnds } from './match-ends'
 import { matchRun } from './match-run'
 
 /**
@@ -42,21 +44,11 @@ export function matchArrayInner(
     const si = spreadIndices[0]
     const before = expanded.slice(0, si)
     const after = expanded.slice(si + 1)
-    if (actual.length < before.length + after.length) return null
-    const bag = matchRun(actual, { elements: before, start: 0 }, at)
-    if (!bag) return null
-    const afterStart = actual.length - after.length
-    const afterBag = matchRun(
-      actual,
-      { elements: after, start: afterStart },
-      at,
-    )
-    if (!afterBag) return null
-    Object.assign(bag, afterBag)
+    const bag = matchEnds(actual, { before, after }, at)
     const name = (expanded[si] as { name: string }).name || at.key
 
-    if (name) {
-      bag[name] = actual.slice(before.length, afterStart)
+    if (bag && name) {
+      bag[name] = actual.slice(before.length, actual.length - after.length)
       at.ctx.capturePaths[name] = at.path
     }
 
@@ -73,17 +65,13 @@ export function matchArrayInner(
       return null
     }
 
-    const bag = matchRun(actual, { elements: before, start: 0 }, at)
+    const bag = matchEnds(actual, { before, after }, at)
     if (!bag) return null
     const mEnd = actual.length - after.length
-    const afterBag = matchRun(actual, { elements: after, start: mEnd }, at)
-    if (!afterBag) return null
-    Object.assign(bag, afterBag)
 
     for (let pos = before.length; pos + middle.length <= mEnd; pos++) {
-      const middleBag = matchRun(actual, { elements: middle, start: pos }, at)
-      if (!middleBag) continue
-      Object.assign(bag, middleBag)
+      if (!absorb(bag, matchRun(actual, { elements: middle, start: pos }, at)))
+        continue
       const s1 = expanded[si1] as { name: string }
       const s2 = expanded[si2] as { name: string }
       const n1 = s1.name || at.key

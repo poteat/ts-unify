@@ -1,4 +1,5 @@
 import { deepEqual } from './deep-equal'
+import { isLeaf } from './is-leaf'
 import { POSITION_KEYS } from './position-keys'
 
 /**
@@ -11,7 +12,7 @@ import { POSITION_KEYS } from './position-keys'
  */
 export function sub<T>(tree: T, target: unknown, replacement: unknown): T {
   if (deepEqual(tree, target)) return replacement as T
-  if (tree == null || typeof tree !== 'object') return tree
+  if (isLeaf(tree)) return tree
 
   if (Array.isArray(tree)) {
     return tree.map(v => sub(v, target, replacement)) as T

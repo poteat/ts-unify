@@ -15,8 +15,8 @@ export function countChildren(
   constraint: Constraint,
   limit?: number,
 ): number {
-  const nodeRec = node as Record<string, unknown> | null | undefined
-  if (!nodeRec || typeof nodeRec !== 'object') return 0
+  if (!node || typeof node !== 'object') return 0
+  const nodeRec = node as Record<string, unknown>
   let count = 0
 
   for (const key of Object.keys(nodeRec)) {

@@ -1,9 +1,10 @@
+import { kebabCase } from '@ts-unify/runner'
+
 import CreateRule from '../create-rule'
 import type { RuleModule } from '../rule-module'
 import type { TransformLike } from '../transform-like'
 import { isRecommended } from './is-recommended'
 import { pluginConfigs } from './plugin-configs'
-import { toKebab } from './to-kebab'
 
 /**
  * Create an ESLint plugin from a map of rule names to AstTransform values.
@@ -24,7 +25,7 @@ export function createPlugin(
   const recommendedRules: Record<string, string> = {}
 
   for (const [name, transform] of Object.entries(rules)) {
-    const kebab = toKebab(name)
+    const kebab = kebabCase(name)
     ruleModules[kebab] = CreateRule.createRule(transform)
 
     if (isRecommended(transform)) {

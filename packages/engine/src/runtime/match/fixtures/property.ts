@@ -1,4 +1,4 @@
-import { identifier } from './identifier'
+import TestUtils from '../../../test-utils'
 
 /**
  * An ESTree `Property` node whose value is the identifier `v`.
@@ -8,5 +8,5 @@ import { identifier } from './identifier'
 export const property = (key: unknown) => ({
   type: 'Property',
   key,
-  value: identifier('v'),
+  value: TestUtils.identifier('v'),
 })
