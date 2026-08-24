@@ -1,53 +1,13 @@
-const SKIP_KEYS = new Set(['parent', 'loc', 'range'])
-
-function deepEqual(a: unknown, b: unknown): boolean {
-  if (a === b) return true
-
-  if (a == null || b == null) return false
-
-  if (typeof a !== typeof b) return false
-
-  if (typeof a !== 'object') return false
-
-  if (Array.isArray(a) !== Array.isArray(b)) return false
-
-  if (Array.isArray(a) && Array.isArray(b)) {
-    return (
-      a.length === b.length &&
-      a.every((v, i) => deepEqual(v, (b as unknown[])[i]))
-    )
-  }
-
-  const aRec = a as Record<string, unknown>
-  const bRec = b as Record<string, unknown>
-  const aKeys = Object.keys(aRec).filter(k => !SKIP_KEYS.has(k))
-
-  return (
-    aKeys.length === Object.keys(bRec).filter(k => !SKIP_KEYS.has(k)).length &&
-    aKeys.every(k => deepEqual(aRec[k], bRec[k]))
-  )
-}
+import { deepEqual } from './deep-equal'
+import { POSITION_KEYS } from './position-keys'
 
 /**
- * Check whether `target` appears anywhere in `tree` (structural equality,
- * ignoring parent/loc/range).
- */
-export function contains(tree: unknown, target: unknown): boolean {
-  if (deepEqual(tree, target)) return true
-  if (tree == null || typeof tree !== 'object') return false
-  if (Array.isArray(tree)) return tree.some(v => contains(v, target))
-
-  for (const [k, v] of Object.entries(tree as Record<string, unknown>)) {
-    if (SKIP_KEYS.has(k)) continue
-    if (contains(v, target)) return true
-  }
-
-  return false
-}
-
-/**
- * Structural substitution on an AST tree. Every node structurally equal
- * to `target` is replaced with `replacement`. Returns a new tree.
+ * Structural substitution on an AST tree: a new tree in which every node
+ * structurally equal to the target is the replacement.
+ *
+ * @param tree the tree substituted in, left as it was
+ * @param target the node replaced wherever it appears
+ * @param replacement what stands in its place
  */
 export function sub<T>(tree: T, target: unknown, replacement: unknown): T {
   if (deepEqual(tree, target)) return replacement as T
@@ -61,7 +21,7 @@ export function sub<T>(tree: T, target: unknown, replacement: unknown): T {
   const result: Record<string, unknown> = {}
 
   for (const [k, v] of Object.entries(rec)) {
-    if (SKIP_KEYS.has(k)) {
+    if (POSITION_KEYS.has(k)) {
       result[k] = v
       continue
     }

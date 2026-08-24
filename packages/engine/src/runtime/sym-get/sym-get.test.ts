@@ -1,6 +1,6 @@
 import { symGet } from './sym-get'
 
-describe('symGet', () => {
+describe('sym-get', () => {
   it('retrieves a symbol-keyed property', () => {
     const sym = Symbol('test')
 

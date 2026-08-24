@@ -1,15 +1,16 @@
-import { NODE } from '@ts-unify/core/internal'
-import type { ProxyNode } from '@ts-unify/core/internal'
-
 import SymGet from '../sym-get'
 
 /**
- * Convert a proxy tree (or real AST node) into a plain ESTree object
- * suitable for recast's `print()`.
+ * Converts a proxy tree (or a real AST node) into a plain ESTree object,
+ * the form recast's `print()` takes.
+ *
+ * @param value a proxy, a node, an array of either, or a primitive
+ * @param sourceCode a source handle, reserved and not yet read
  */
 export function reify(value: unknown, sourceCode?: unknown): unknown {
-  if (typeof value === 'function' && SymGet.symGet(value, NODE)) {
-    const node = SymGet.symGet(value, NODE) as ProxyNode
+  const node = SymGet.proxyNodeOf(value)
+
+  if (node) {
     const args = node.args[0] ?? ({} as Record<string, unknown>)
 
     const result: Record<string, unknown> = {

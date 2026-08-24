@@ -1,24 +1,11 @@
-import { NODE } from '@ts-unify/core/internal'
-import type { ProxyNode } from '@ts-unify/core/internal'
-
+import TestUtils from '../../test-utils'
 import { reify } from './reify'
-
-/**
- * Helper: create a minimal proxy-shaped function carrying a NODE descriptor.
- */
-function makeProxy(node: ProxyNode): unknown {
-  function fn() {}
-
-  ;(fn as any)[NODE] = node
-
-  return fn
-}
 
 describe('reify', () => {
   it('converts a proxy node to a plain ESTree object', () => {
     expect(
       reify(
-        makeProxy({
+        TestUtils.makeProxy({
           tag: 'Identifier',
 
           args: [
@@ -39,12 +26,12 @@ describe('reify', () => {
   it('recursively reifies nested proxy nodes', () => {
     expect(
       reify(
-        makeProxy({
+        TestUtils.makeProxy({
           tag: 'ReturnStatement',
 
           args: [
             {
-              argument: makeProxy({
+              argument: TestUtils.makeProxy({
                 tag: 'Identifier',
 
                 args: [
@@ -74,7 +61,7 @@ describe('reify', () => {
   it('reifies arrays of proxy nodes', () => {
     expect(
       reify([
-        makeProxy({
+        TestUtils.makeProxy({
           tag: 'Literal',
 
           args: [
@@ -106,7 +93,7 @@ describe('reify', () => {
 
   it('ignores type field from args (uses tag instead)', () => {
     const result = reify(
-      makeProxy({
+      TestUtils.makeProxy({
         tag: 'Identifier',
 
         args: [
@@ -127,7 +114,7 @@ describe('reify', () => {
   it('handles a proxy with no args', () => {
     expect(
       reify(
-        makeProxy({
+        TestUtils.makeProxy({
           tag: 'EmptyStatement',
           args: [],
           chain: [],

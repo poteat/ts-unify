@@ -1,65 +1,55 @@
-import { NODE } from '@ts-unify/core/internal'
-import type { ProxyNode, ChainEntry } from '@ts-unify/core/internal'
-
 import SymGet from '../sym-get'
+import type { PatternEntry } from './pattern-entry'
+import { ROOT_INHERITED } from './root-inherited'
 
 /**
- * Chain methods on a root `U.or` that every branch inherits.
+ * Every entry pattern of a rule's proxy trace: the branches of a root
+ * `U.or(...)`, the types of a `U.fromNode(...)`, or the one node.
+ *
+ * Two branches of a root `U.or` with the same tag yield two entries;
+ * consumers merge them per tag. A rule that is no proxy yields none.
+ *
+ * @param rule the rule's pattern proxy
  */
-const ROOT_INHERITED = new Set(['when', 'where', 'config'])
-
-/**
- * Extract all entry patterns from a rule's proxy trace.
- * Handles top-level `U.or(...)` and `U.fromNode(...)` as well as plain
- * single-node patterns. Two branches of a root `U.or` with the same tag
- * yield two entries; consumers merge them per tag.
- */
-export function extractPatterns(rule: unknown): {
-  tag: string
-  pattern: Record<string, unknown>
-  chain: ChainEntry[]
-}[] {
-  const proxyNode = SymGet.symGet(rule, NODE) as ProxyNode | undefined
+export function extractPatterns(rule: unknown): PatternEntry[] {
+  const proxyNode = SymGet.proxyNodeOf(rule)
   if (!proxyNode?.tag) return []
 
   if (proxyNode.tag === 'or') {
-    // Root guards and config apply to whichever branch matched, so each
-    // branch chain is extended with them, after the branch's own entries.
+    /**
+     * The guards and config on the root, which apply to whichever branch
+     * matched; each branch chain is extended with them after its own.
+     */
     const rootGuards = proxyNode.chain.filter(c => ROOT_INHERITED.has(c.method))
 
     return proxyNode.args.flatMap((arg: unknown) => {
-      if (typeof arg === 'function' && SymGet.symGet(arg, NODE)) {
-        const inner = SymGet.symGet(arg, NODE) as ProxyNode
+      const inner = SymGet.proxyNodeOf(arg)
 
-        return [
-          {
-            tag: inner.tag,
-            pattern: (inner.args[0] ?? {}) as Record<string, unknown>,
-            chain: [...inner.chain, ...rootGuards],
-          },
-        ]
-      }
-
-      return []
+      return inner
+        ? [
+            {
+              tag: inner.tag,
+              pattern: (inner.args[0] ?? {}) as Record<string, unknown>,
+              chain: [...inner.chain, ...rootGuards],
+            },
+          ]
+        : []
     })
   }
 
   if (proxyNode.tag === 'fromNode') {
     const pattern = (proxyNode.args[0] ?? {}) as Record<string, unknown>
     const typeField = pattern.type
+    const typeNode = SymGet.proxyNodeOf(typeField)
 
-    if (typeof typeField === 'function' && SymGet.symGet(typeField, NODE)) {
-      const typeNode = SymGet.symGet(typeField, NODE) as ProxyNode
+    if (typeNode?.tag === 'or') {
+      const { type: _type, ...rest } = pattern
 
-      if (typeNode.tag === 'or') {
-        const { type: _type, ...rest } = pattern
-
-        return typeNode.args.map((t: unknown) => ({
-          tag: t as string,
-          pattern: rest,
-          chain: proxyNode.chain,
-        }))
-      }
+      return typeNode.args.map((t: unknown) => ({
+        tag: t as string,
+        pattern: rest,
+        chain: proxyNode.chain,
+      }))
     }
 
     if (typeof typeField === 'string') {
@@ -79,17 +69,3 @@ export function extractPatterns(rule: unknown): {
     },
   ]
 }
-
-/**
- * Extract the first entry pattern from a rule's proxy trace.
- */
-const extractPattern = (
-  rule: unknown,
-): {
-  tag: string
-  pattern: Record<string, unknown>
-} | null => extractPatterns(rule)[0] ?? null
-
-// Re-export extractPattern for internal use by sibling modules (not part of
-// the public API surface).
-export { extractPattern as _extractPattern }

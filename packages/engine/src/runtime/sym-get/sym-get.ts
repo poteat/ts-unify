@@ -1,6 +1,9 @@
 /**
- * Access a symbol-keyed property on an unknown value.
- * This is the single escape hatch for symbol indexing on unknown.
+ * Reads a symbol-keyed property off a value of unknown type: the one
+ * place symbol indexing on `unknown` is spelled.
+ *
+ * @param v the value that may carry the property
+ * @param s the symbol that keys it
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const symGet = (v: unknown, s: symbol): unknown => (v as any)[s]
+export const symGet = (v: unknown, s: symbol): unknown =>
+  (v as Record<symbol, unknown>)[s]

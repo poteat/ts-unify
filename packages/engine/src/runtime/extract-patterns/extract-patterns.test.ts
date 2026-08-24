@@ -1,27 +1,10 @@
 import { U } from '@ts-unify/core'
-import { NODE } from '@ts-unify/core/internal'
-import type { ProxyNode } from '@ts-unify/core/internal'
 
+import TestUtils from '../../test-utils'
 import { extractPatterns } from './extract-patterns'
+import Fixtures from './fixtures'
 
-/**
- * Helper: create a minimal proxy-shaped function carrying a NODE descriptor.
- */
-function makeProxy(node: ProxyNode): unknown {
-  function fn() {}
-
-  ;(fn as any)[NODE] = node
-
-  return fn
-}
-
-function fn() {}
-
-const guard = () => true
-
-const branchGuard = () => true
-
-describe('extractPatterns', () => {
+describe('extract-patterns', () => {
   it('returns an empty array for non-proxy values', () => {
     expect(extractPatterns(42)).toEqual([])
     expect(extractPatterns({})).toEqual([])
@@ -29,7 +12,7 @@ describe('extractPatterns', () => {
 
   it('extracts a single-node pattern', () => {
     const result = extractPatterns(
-      makeProxy({
+      TestUtils.makeProxy({
         tag: 'Identifier',
 
         args: [
@@ -52,11 +35,11 @@ describe('extractPatterns', () => {
 
   it('extracts patterns from an or() disjunction', () => {
     const result = extractPatterns(
-      makeProxy({
+      TestUtils.makeProxy({
         tag: 'or',
 
         args: [
-          makeProxy({
+          TestUtils.makeProxy({
             tag: 'ReturnStatement',
 
             args: [
@@ -67,7 +50,7 @@ describe('extractPatterns', () => {
 
             chain: [],
           }),
-          makeProxy({
+          TestUtils.makeProxy({
             tag: 'ThrowStatement',
 
             args: [
@@ -91,7 +74,7 @@ describe('extractPatterns', () => {
 
   it('extracts patterns from fromNode with string type', () => {
     const result = extractPatterns(
-      makeProxy({
+      TestUtils.makeProxy({
         tag: 'fromNode',
 
         args: [
@@ -116,8 +99,9 @@ describe('extractPatterns', () => {
   })
 
   it('returns empty array when tag is missing', () => {
-    ;(fn as any)[NODE] = { tag: '', args: [], chain: [] }
-    expect(extractPatterns(fn)).toEqual([])
+    expect(
+      extractPatterns(TestUtils.makeProxy({ tag: '', args: [], chain: [] })),
+    ).toEqual([])
   })
 
   it('preserves chain entries', () => {
@@ -130,7 +114,7 @@ describe('extractPatterns', () => {
 
     expect(
       extractPatterns(
-        makeProxy({
+        TestUtils.makeProxy({
           tag: 'Identifier',
 
           args: [
@@ -147,11 +131,11 @@ describe('extractPatterns', () => {
 
   it('keeps one entry per branch when branches share a tag', () => {
     const result = extractPatterns(
-      (U as any).or(
-        (U as any).VariableDeclaration({
+      U.or(
+        U.VariableDeclaration({
           kind: 'let',
         }),
-        (U as any).VariableDeclaration({
+        U.VariableDeclaration({
           kind: 'var',
         }),
       ),
@@ -164,21 +148,16 @@ describe('extractPatterns', () => {
     expect(result.map(e => e.pattern.kind)).toEqual(['let', 'var'])
   })
 
-  it(
-    "appends a root or's .when(), .where() and .config() to each branch " +
-      'chain',
-    () => {
-      const result = extractPatterns(
-        (U as any)
-          .or((U as any).Identifier().when(branchGuard), (U as any).Literal())
-          .when(guard)
-          .message('m'),
-      )
+  it("appends a root or's guards and config to each branch chain", () => {
+    const result = extractPatterns(
+      U.or(U.Identifier().when(Fixtures.GUARDS.branch), U.Literal())
+        .when(Fixtures.GUARDS.root)
+        .message('m'),
+    )
 
-      expect(result[0].chain.map(c => c.method)).toEqual(['when', 'when'])
-      expect(result[0].chain[0].args[0]).toBe(branchGuard)
-      expect(result[0].chain[1].args[0]).toBe(guard)
-      expect(result[1].chain.map(c => c.method)).toEqual(['when'])
-    },
-  )
+    expect(result[0].chain.map(c => c.method)).toEqual(['when', 'when'])
+    expect(result[0].chain[0].args[0]).toBe(Fixtures.GUARDS.branch)
+    expect(result[0].chain[1].args[0]).toBe(Fixtures.GUARDS.root)
+    expect(result[1].chain.map(c => c.method)).toEqual(['when'])
+  })
 })
