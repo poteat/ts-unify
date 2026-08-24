@@ -149,6 +149,10 @@ function matchInner(
     return bag;
   }
 
+  // An object pattern against a slot holding null or a primitive (a Literal's
+  // `value: null`, an absent child): nothing to read keys off, no match.
+  if (node === null || typeof node !== "object") return null;
+
   const bag: Record<string, unknown> = {};
   const nodeRec = node as Record<string, unknown>;
   const patternRec = pattern as Record<string | symbol, unknown>;

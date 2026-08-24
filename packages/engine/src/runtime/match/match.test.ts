@@ -804,3 +804,12 @@ describe("match - where + quantifiers (some, atLeast, atMost, exactly)", () => {
     expect(match(array, (U as any).ArrayExpression().when(() => false))).toBeNull();
   });
 });
+
+describe("an object pattern against a null slot", () => {
+  it("does not match, and does not throw", () => {
+    const node = { type: "Literal", value: null, raw: "null" };
+    const pattern = U.Literal({ value: { flags: "g" } as unknown as RegExp });
+    expect(() => match(node, pattern)).not.toThrow();
+    expect(match(node, pattern)).toBeNull();
+  });
+});
