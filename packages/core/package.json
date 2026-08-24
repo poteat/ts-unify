@@ -15,7 +15,7 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts src/internal.ts --format esm && tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "build": "tsup src/index.ts src/internal.ts --format esm && tsc -p tsconfig.build.json --emitDeclarationOnly && node scripts/rewrite-alias-imports.mjs dist",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "jest",
     "test:coverage": "jest --coverage"
