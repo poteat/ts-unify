@@ -29,14 +29,35 @@ success, or `null` on mismatch.
 - Duplicate named captures are validated via structural `deepEqual`; if the same
   name binds to structurally different values, the match fails.
 
+## Plans
+
+A pattern is read once into a plan, and the plan is what a match runs:
+`planOf(value)` tells a capture, a config slot, a string predicate, a proxy,
+a fields record or a literal apart by their brands, `proxyPlanOf(proxy)`
+reads a proxy's tag, arguments and chain through its `NODE` symbol, and
+`chainPlanOf(chain)` reads the `.when()` guards, `.bind()`, `.seal()`,
+`.to()`, `.config()` and `.where()` entries into one record. Plans are kept
+in `WeakMap`s by the pattern object, the proxy and the chain, so a rule
+compiled once and matched against every node of a file reads its brands,
+its proxies and its chains once, not per node. A `RegExp` in a string
+position becomes one predicate at planning, with the same reset of
+`lastIndex` per test.
+
+An array is an array pattern under a property of a fields record
+(`fieldPlanOf`) and a fields record with index keys anywhere else
+(`planOf`), as the matchers read it either way.
+
 ## Helpers (private)
 
-- `matchInner` -- recursive object-key matching.
-- `matchValueInner` -- single-value matching (captures, proxy nodes, literals).
-- `matchArrayInner` -- array matching with 0, 1, or 2 spread elements.
-- `matchOrInner` -- left-to-right disjunction over branches.
-- `matchMaybeBlockInner` -- unwraps single-statement `BlockStatement` or matches
-  directly.
+- `matchFields` -- object-key matching over a fields plan; `matchInner` is
+  the same over a record.
+- `matchPlan` -- single-value matching over a plan (captures, proxy nodes,
+  literals); `matchValueInner` the same over a pattern value.
+- `matchArrayPlan` -- array matching with 0, 1, or 2 spread elements over an
+  array plan; `matchArrayInner` the same over an array pattern.
+- `matchOrPlans` -- left-to-right disjunction over branches.
+- `matchMaybeBlockPlan` -- unwraps single-statement `BlockStatement` or
+  matches directly.
 - `applyChainModifiers` -- post-processes a nested sub-pattern's bag based on
   chain entries `seal` and `bind`. See "Seal and bind" below.
 - `deepEqual` -- structural equality ignoring `parent`, `loc`, `range` keys.
@@ -110,13 +131,16 @@ Implements CTL formula `A[!P U B]` (for `.none()`) per `node-with-where.spec.md`
 
 ### Helpers
 
-- `applyWhere(chain, actual)` -- entry point; iterates where entries.
-- `readQuantifier(chain)` -- extracts the quantifier kind and test predicate.
-- `subtreeCount(root, pattern, boundary, limit?)` -- counts matches in root's
+- `applyConstraints(constraints, actual)` -- entry point over a chain plan's
+  constraints; `applyWhere(chain, actual)` the same over a chain.
+- `readQuantifier(chain)` -- extracts the quantifier kind and test predicate
+  into the plan.
+- `countChildrenOf(node, plan, limit, at)` -- counts matches in the node's
   children. Accepts an optional `limit` for early exit (used by `.none()`).
-- `countDescendant(node, pattern, boundary, limit?)` -- checks one node +
-  recurses, returning the match count.
-- `isBoundaryNode(node, boundary)` -- type-checks against boundary pattern.
+- `countDescendantOf(node, plan, limit, at)` -- checks one node + recurses,
+  returning the match count; one context serves the whole count.
+- A boundary is the set of node types its `.until()` proxy names, read into
+  the plan; `isBoundaryNode(node, boundary)` reads it from the proxy.
 
 ## Examples
 

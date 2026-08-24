@@ -46,7 +46,11 @@ Sites are collected during match. Each match function knows its own path prefix
 
 After a successful match:
 
-1. Clone the matched node (drop `parent`, `loc`, `range`, `tokens`, etc.).
+1. Clone the matched node (drop `parent`, `loc`, `range`, `tokens`, etc.),
+   the positions of the inner sites left undefined for step 3c to fill
+   (`cloneOutside` over the `siteTreeOf` the sites). With a site at the root
+   the clone is never read, so none is made: the inner sites then only rebind
+   the captures (step 3d).
 2. Sort sites by path depth descending. For ties, order is irrelevant (sibling
    sites are spatially disjoint by construction).
 3. For each site, in order: a. Run `factory(scopeBag)` to get a result. b. Reify

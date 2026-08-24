@@ -1,6 +1,6 @@
 import type { ChainEntry } from '@ts-unify/core/internal'
 
-import Chain from '../chain'
+import Chain from '../../../chain'
 import type { Quantifier } from './quantifier'
 
 /**

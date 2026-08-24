@@ -1,11 +1,10 @@
 import type { ChainEntry } from '@ts-unify/core/internal'
 
-import Chain from './chain'
 import Context from './context'
 import Inner from './inner'
 import type { MatchResult } from './match-result'
 import Node from './node'
-import Pattern from './pattern'
+import Plan from './plan'
 import Where from './where'
 
 /**
@@ -25,23 +24,33 @@ export function matchWithSites(
   pattern: unknown,
   chain: ChainEntry[] = [],
 ): MatchResult | null {
-  const ctx = Context.createMatchContext(
-    chain,
+  const plan = Plan.chainPlanOf(chain)
+  const ctx = Context.matchContextOf(
+    plan,
     Node.nodeType(node) === 'Program' ? node : undefined,
   )
   const at: Context.Cursor = { ctx, path: [] }
-  const bag = Pattern.isProxyNode(pattern)
-    ? Inner.matchProxyNode(node, pattern, at)
-    : Inner.matchInner(node, pattern, at)
+  const root = Plan.rootPlanOf(pattern)
+  const bag =
+    root.kind === 'proxy'
+      ? Inner.matchProxyPlan(node, root, at)
+      : root.kind === 'dollar'
+        ? Context.captureRest(node, at, Context.NO_KEYS)
+        : Inner.matchFields(node, root, at)
   if (!bag) return null
   if (!Context.bindingsAgree(ctx.namedBindings)) return null
-  if (!Chain.applyWhenGuards(chain, bag)) return null
-  if (!Where.applyWhere(chain, node)) return null
+
+  for (const guard of plan.whens) {
+    if (!guard(bag)) return null
+  }
+
+  if (!Where.applyConstraints(plan.constraints, node)) return null
 
   for (const site of ctx.sites) site.scopeBag = bag
 
-  const factory = Chain.toFactory(chain)
-  if (factory) ctx.recordSite({ path: [], factory, scopeBag: bag })
+  if (plan.factory) {
+    ctx.recordSite({ path: [], factory: plan.factory, scopeBag: bag })
+  }
 
   return { bag, sites: ctx.sites, capturePaths: ctx.capturePaths }
 }

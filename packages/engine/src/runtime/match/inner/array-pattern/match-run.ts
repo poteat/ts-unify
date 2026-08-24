@@ -1,7 +1,7 @@
 import type { Bag } from '../../bag'
-import Context from '../../context'
-import { absorb } from '../absorb'
-import { matchValueInner } from '../match-value-inner'
+import type { Cursor } from '../../context'
+import Plan from '../../plan'
+import { matchRunPlans } from './match-run-plans'
 
 /**
  * Matches a run of pattern elements against the array elements from an
@@ -13,24 +13,13 @@ import { matchValueInner } from '../match-value-inner'
  * @param run the pattern elements and the array index the first aligns to
  * @param at where the array sits in the match
  */
-export function matchRun(
+export const matchRun = (
   actual: unknown[],
   run: { elements: unknown[]; start: number },
-  at: Context.Cursor,
-): Bag | null {
-  const bag: Bag = {}
-
-  for (const [i, element] of run.elements.entries()) {
-    const index = run.start + i
-
-    if (
-      !absorb(
-        bag,
-        matchValueInner(actual[index], element, Context.childCursor(at, index)),
-      )
-    )
-      return null
-  }
-
-  return bag
-}
+  at: Cursor,
+): Bag | null =>
+  matchRunPlans(
+    actual,
+    { elements: run.elements.map(Plan.planOf), start: run.start },
+    at,
+  )

@@ -1,0 +1,21 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "declaration": false,
+    "types": ["node", "jest"],
+    "paths": {
+      "@ts-unify/core/internal": ["../../core/src/internal.ts"],
+      "@ts-unify/core": ["../../core/src/index.ts"],
+      "@ts-unify/engine": ["../src/index.ts"],
+      "@ts-unify/runner": ["../../runner/src/index.ts"],
+      "@ts-unify/eslint/internal": ["../../eslint/src/internal.ts"],
+      "@ts-unify/eslint": ["../../eslint/src/index.ts"],
+      "@ts-unify/rules": ["../../rules/src/index.ts"],
+      "@/*": ["../../core/src/*"],
+      "@": ["../../core/src/index.ts"]
+    }
+  },
+  "include": ["./**/*"],
+  "exclude": ["node_modules", "dist"]
+}

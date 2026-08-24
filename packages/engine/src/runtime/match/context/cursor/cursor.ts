@@ -1,5 +1,5 @@
-import type { Path } from '../path'
-import type { MatchContext } from './match-context'
+import type { Path } from '../../path'
+import type { MatchContext } from '../match-context'
 
 /**
  * Where in the node a pattern value is being tried: the match it belongs

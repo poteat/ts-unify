@@ -5,5 +5,6 @@ export * from './match-maybe-block-inner'
 export * from './match-or-inner'
 export * from './match-proxy-node'
 export * from './match-value-inner'
+export * from './planned'
 
 export * as default from '.'

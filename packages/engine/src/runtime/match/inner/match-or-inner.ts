@@ -1,6 +1,7 @@
 import type { Bag } from '../bag'
 import type { Cursor } from '../context'
-import { matchValueInner } from './match-value-inner'
+import Plan from '../plan'
+import Planned from './planned'
 
 /**
  * Matches a value against the alternatives of a `U.or(...)`, in order,
@@ -10,15 +11,8 @@ import { matchValueInner } from './match-value-inner'
  * @param args the alternatives
  * @param at where the value sits in the match
  */
-export function matchOrInner(
+export const matchOrInner = (
   actual: unknown,
   args: unknown[],
   at: Cursor,
-): Bag | null {
-  for (const arg of args) {
-    const result = matchValueInner(actual, arg, at)
-    if (result) return result
-  }
-
-  return null
-}
+): Bag | null => Planned.matchOrPlans(actual, args.map(Plan.planOf), at)
