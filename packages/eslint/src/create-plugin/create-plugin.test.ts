@@ -2,11 +2,10 @@ import { U, $ } from '@ts-unify/core'
 
 import { createPlugin } from './create-plugin'
 
-// Cast through `any` -- see note in create-rule.test.ts.
-const idPattern = U.Identifier({ name: $('n') }) as any
-const ifPattern = U.IfStatement({ test: $('cond') }) as any
+describe('create-plugin', () => {
+  const idPattern = U.Identifier({ name: $('n') })
+  const ifPattern = U.IfStatement({ test: $('cond') })
 
-describe('createPlugin', () => {
   it('returns an object with a rules property', () => {
     const plugin = createPlugin({})
     expect(plugin).toHaveProperty('rules')

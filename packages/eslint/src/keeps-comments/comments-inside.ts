@@ -1,8 +1,9 @@
 import type { TSESTree } from '@typescript-eslint/types'
 
 /**
- * The comments inside a node, read from ESLint's `SourceCode`; none when
- * the surface handed in does not carry `getCommentsInside`.
+ * What ESLint's `SourceCode` lists within a node's range; none when the
+ * surface handed in does not carry `getCommentsInside`.
+ *
  * @param sourceCode the rule context's source
  * @param node the node
  */

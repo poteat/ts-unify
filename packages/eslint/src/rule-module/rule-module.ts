@@ -1,56 +1,5 @@
-import type { TSESTree } from '@typescript-eslint/types'
-
-/**
- * The source ESLint hands a rule. A text `SourceCode` carries `text`; the
- * legacy surface carries `getText()`. `sourceText` reads either.
- */
-type SourceCodeLike =
-  | { text: string }
-  | { readonly getText: (node?: TSESTree.Node) => string }
-
-/**
- * A report site: the matched node, or the location of a comment match.
- */
-type ReportSite = { node: TSESTree.Node } | { loc: TSESTree.SourceLocation }
-
-type RuleContext = {
-  sourceCode?: SourceCodeLike | object
-  readonly getSourceCode?: () => SourceCodeLike
-  readonly report: (
-    descriptor: ReportSite & {
-      messageId: string
-      data?: Record<string, string>
-      fix?: (fixer: RuleFixer) => RuleFix | RuleFix[] | null
-    },
-  ) => void
-}
-
-type RuleFixer = {
-  readonly replaceText: (node: TSESTree.Node, text: string) => RuleFix
-  readonly insertTextBeforeRange: (
-    range: [number, number],
-    text: string,
-  ) => RuleFix
-}
-
-type RuleFix = { range: [number, number]; text: string }
-
-/**
- * The full text behind a context's `sourceCode`, or "" when it carries none.
- */
-export function sourceText(sourceCode: unknown) {
-  if (typeof sourceCode !== 'object' || !sourceCode) return ''
-  if ('text' in sourceCode && typeof sourceCode.text === 'string')
-    return sourceCode.text
-
-  if ('getText' in sourceCode && typeof sourceCode.getText === 'function') {
-    const text: unknown = sourceCode.getText()
-
-    return typeof text === 'string' ? text : ''
-  }
-
-  return ''
-}
+import type { RuleContext } from './context'
+import type { Visitors } from './visitors'
 
 /**
  * ESLint rule module produced by createRule.
@@ -61,7 +10,11 @@ export type RuleModule = {
     fixable?: 'code'
     messages: Record<string, string>
   }
-  create: (
-    context: RuleContext,
-  ) => Record<string, (node: TSESTree.Node) => void>
+
+  /**
+   * Builds the rule's visitors for one file, given its context.
+   *
+   * @param context the file's ESLint rule context
+   */
+  create: (context: RuleContext) => Visitors
 }

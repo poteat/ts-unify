@@ -4,11 +4,11 @@ import { printNode } from './print-node'
 
 const first = (src: string) => parse(src, { range: true, loc: true }).body[0]
 
-const src =
-  'interface I {\n  (a: number): void;\n  new (b: string): I;\n  m<T>(c: ' +
-  'T): T;\n}'
+describe('print-node', () => {
+  const signatures =
+    'interface I {\n  (a: number): void;\n  new (b: string): I;\n  m<T>(c: ' +
+    'T): T;\n}'
 
-describe('printNode', () => {
   it('keeps type arguments on a type reference', () => {
     expect(printNode(first('type T = ReturnType<typeof f>;'))).toBe(
       'type T = ReturnType<typeof f>;',
@@ -22,8 +22,8 @@ describe('printNode', () => {
   })
 
   it('prints call, construct and method signatures', () => {
-    expect(printNode(first(src)).replace(/\s+/g, ' ')).toBe(
-      src.replace(/\s+/g, ' '),
+    expect(printNode(first(signatures)).replace(/\s+/g, ' ')).toBe(
+      signatures.replace(/\s+/g, ' '),
     )
   })
 
@@ -32,9 +32,9 @@ describe('printNode', () => {
   })
 
   it('does not mutate the input node', () => {
-    const node = first('type T = ReturnType<typeof f>;') as any
+    const node = first('type T = ReturnType<typeof f>;')
     printNode(node)
-    expect(node.typeAnnotation.typeParameters).toBeUndefined()
-    expect(node.typeAnnotation.typeArguments).toBeDefined()
+    expect(node).not.toHaveProperty('typeAnnotation.typeParameters')
+    expect(node).toHaveProperty('typeAnnotation.typeArguments')
   })
 })

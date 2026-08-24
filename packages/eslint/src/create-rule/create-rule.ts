@@ -1,167 +1,47 @@
-import { NODE, CONFIG_BRAND } from '@ts-unify/core/internal'
-import type { ProxyNode, ChainEntry } from '@ts-unify/core/internal'
-import {
-  matchWithSites,
-  applyRewrites,
-  symGet,
-  commentNodes,
-} from '@ts-unify/engine'
+import { NODE } from '@ts-unify/core/internal'
+import type { ProxyNode } from '@ts-unify/core/internal'
+import { matchWithSites, applyRewrites, symGet } from '@ts-unify/engine'
 import { extractRuleMeta } from '@ts-unify/runner'
 import type { TSESTree } from '@typescript-eslint/types'
 
 import KeepsComments from '../keeps-comments'
 import PrintNode from '../print-node'
-import SrcRuleModule from '../rule-module'
-import type { RuleModule } from '../rule-module'
+import RuleModule from '../rule-module'
 import type { TransformLike } from '../transform-like'
+import { DEFAULT_MESSAGE } from './default-message'
+import Imports from './imports'
+import { patternContainsInnerTo } from './pattern-contains-inner-to'
+import { ruleMeta } from './rule-meta'
+import type { RuleOptions } from './rule-options'
+import Visitors from './visitors'
 
 /**
- * Resolve config slot values in an imports map against config defaults.
- * Returns a map of `{ specifier: modulePath }`.
- */
-function resolveImports(chain: ChainEntry[]): Record<string, string> | null {
-  const importsEntry = chain.find(c => c.method === 'imports')
-  if (!importsEntry) return null
-
-  const configEntry = chain.find(c => c.method === 'config')
-  const configDefaults: Record<string, unknown> =
-    (configEntry?.args[0] as Record<string, unknown>) ?? {}
-
-  const raw = importsEntry.args[0] as Record<string, unknown>
-  const resolved: Record<string, string> = {}
-
-  for (const [specifier, value] of Object.entries(raw)) {
-    if (typeof value === 'string') {
-      resolved[specifier] = value
-    } else if (
-      value &&
-      typeof value === 'object' &&
-      symGet(value, CONFIG_BRAND) === true
-    ) {
-      const defaultVal =
-        configDefaults[
-          (
-            value as {
-              name: string
-            }
-          ).name
-        ]
-
-      if (typeof defaultVal === 'string') {
-        resolved[specifier] = defaultVal
-      }
-    }
-  }
-
-  return Object.keys(resolved).length > 0 ? resolved : null
-}
-
-/**
- * Build an import statement string from a resolved imports map.
- * Produces `import { specifier1, specifier2 } from "module";\n` for each
- * unique module path.
- */
-function buildImportStatements(imports: Record<string, string>) {
-  // Group specifiers by module path
-  const byModule: Record<string, string[]> = {}
-
-  for (const [specifier, modulePath] of Object.entries(imports)) {
-    if (!byModule[modulePath]) byModule[modulePath] = []
-    byModule[modulePath].push(specifier)
-  }
-
-  const stmts: string[] = []
-
-  for (const [modulePath, specifiers] of Object.entries(byModule)) {
-    stmts.push(`import { ${specifiers.join(', ')} } from "${modulePath}";\n`)
-  }
-
-  return stmts.join('')
-}
-
-/**
- * Check if any pattern entry contains a proxy with `.to()` anywhere.
- */
-function patternContainsInnerTo(
-  entries: {
-    tag: string
-    pattern: Record<string, unknown>
-    chain: ChainEntry[]
-  }[],
-) {
-  function walk(v: unknown): boolean {
-    if (v == null) return false
-
-    if (typeof v === 'function' && symGet(v, NODE)) {
-      const pn = symGet(v, NODE) as ProxyNode
-
-      return pn.chain.some((c: ChainEntry) => c.method === 'to')
-        ? true
-        : pn.args.some(walk)
-    }
-
-    return (
-      typeof v === 'object' &&
-      (Array.isArray(v)
-        ? v.some(walk)
-        : Object.values(v as Record<string, unknown>).some(walk))
-    )
-  }
-
-  return entries.some(e => walk(e.pattern))
-}
-
-/**
- * Message of a rule with neither `.message()` nor `opts.message`.
- */
-const DEFAULT_MESSAGE = 'Matches a ts-unify pattern'
-
-/**
- * Compile an AstTransform into an ESLint rule module.
+ * Compile an AstTransform into an ESLint rule module. The rule is fixable
+ * when the chain has a top-level `.to()` or a sub-pattern carries one.
+ *
+ * @param transform the pattern, with or without `.to()`
+ * @param opts the parts of `RuleOptions` the caller sets
  */
 export function createRule(
   transform: TransformLike,
-  opts: { message?: string; fix?: boolean } = {},
-): RuleModule {
+  opts: Partial<RuleOptions> = {},
+): RuleModule.RuleModule {
   const meta = extractRuleMeta('', transform)
   const entries = meta.patterns
   const message = opts.message ?? (meta.message || DEFAULT_MESSAGE)
   const factory = opts.fix === false ? null : meta.factory
   const withEntries = meta.withs
-
   const proxyNode = symGet(transform, NODE) as ProxyNode | undefined
-
-  // The rule is fixable if the proxy chain has a top-level `.to()`
-  // (factory != null) or any sub-pattern carries a `.to()` site.
-  const hasInnerRewrites = patternContainsInnerTo(entries)
-
-  // Pre-resolve imports from the top-level chain
-  const importMap = proxyNode?.chain ? resolveImports(proxyNode.chain) : null
+  const isFixable = factory !== null || patternContainsInnerTo(entries)
+  const importMap = proxyNode ? Imports.resolveImports(proxyNode.chain) : null
 
   return {
-    meta: {
-      type: 'suggestion',
-      ...(factory || hasInnerRewrites ? { fixable: 'code' as const } : {}),
-      messages: { match: message },
-    },
+    meta: ruleMeta(message, isFixable),
     create(context) {
-      const visitors: Record<string, (node: TSESTree.Node) => void> = {}
       const sourceCode = context.sourceCode ?? context.getSourceCode?.()
+      let visitors: ReadonlyMap<string, RuleModule.Visitor> = new Map()
 
-      // Entries sharing a tag (two same-typed branches of a root `U.or`)
-      // share one visitor; like `U.or`, the first entry to match wins.
-      const byTag = new Map<
-        string,
-        { pattern: Record<string, unknown>; chain: ChainEntry[] }[]
-      >()
-
-      for (const { tag, pattern, chain } of entries) {
-        const list = byTag.get(tag) ?? []
-        list.push({ pattern, chain })
-        byTag.set(tag, list)
-      }
-
-      for (const [tag, candidates] of byTag) {
+      for (const [tag, candidates] of Visitors.groupByTag(entries)) {
         function visit(node: TSESTree.Node) {
           let first: ReturnType<typeof matchWithSites> = null
 
@@ -244,26 +124,23 @@ export function createRule(
                     }
 
                     if (importMap) {
-                      const fullSource = SrcRuleModule.sourceText(sourceCode)
+                      const fullSource = RuleModule.sourceText(sourceCode)
                       const missingImports: Record<string, string> = {}
 
                       for (const [specifier, modulePath] of Object.entries(
                         importMap,
                       )) {
                         if (
-                          !new RegExp(
-                            `import\\s+\\{[^}]*\\b${specifier}\\b[^}]*\\}\\s+from\\s+["']${modulePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["']`,
-                          ).test(fullSource)
-                        ) {
+                          !Imports.hasImport(fullSource, specifier, modulePath)
+                        )
                           missingImports[specifier] = modulePath
-                        }
                       }
 
                       if (Object.keys(missingImports).length > 0) {
                         return [
                           fixer.insertTextBeforeRange(
                             [0, 0],
-                            buildImportStatements(missingImports),
+                            Imports.buildImportStatements(missingImports),
                           ),
                           fixer.replaceText(node, text),
                         ]
@@ -276,27 +153,11 @@ export function createRule(
               : {}),
           })
         }
-        // Comments are not visited by ESLint; run them from the Program.
-        if (tag === 'Comment') {
-          const prev = visitors.Program
-          visitors.Program = (program: TSESTree.Node) => {
-            prev?.(program)
 
-            for (const c of commentNodes(program))
-              visit(c as unknown as TSESTree.Node)
-          }
-        } else if (tag === 'Program' && visitors.Program) {
-          const prev = visitors.Program
-          visitors.Program = (program: TSESTree.Node) => {
-            visit(program)
-            prev(program)
-          }
-        } else {
-          visitors[tag] = visit
-        }
+        visitors = Visitors.withVisitor(visitors, tag, visit)
       }
 
-      return visitors
+      return Object.fromEntries(visitors)
     },
   }
 }

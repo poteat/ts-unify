@@ -1,24 +1,16 @@
-import { NODE } from '@ts-unify/core/internal'
-import type { ProxyNode, ChainEntry } from '@ts-unify/core/internal'
-import { symGet } from '@ts-unify/engine'
-
 import CreateRule from '../create-rule'
 import type { RuleModule } from '../rule-module'
 import type { TransformLike } from '../transform-like'
-
-const toKebab = (name: string) =>
-  name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()
-
-function isRecommended(transform: TransformLike) {
-  const node = symGet(transform, NODE) as ProxyNode | undefined
-
-  return (
-    node?.chain?.some((c: ChainEntry) => c.method === 'recommended') ?? false
-  )
-}
+import { isRecommended } from './is-recommended'
+import { pluginConfigs } from './plugin-configs'
+import { toKebab } from './to-kebab'
 
 /**
  * Create an ESLint plugin from a map of rule names to AstTransform values.
+ *
+ * @param rules each rule's transform by its export name
+ * @param opts `prefix`, the plugin name a recommended rule is qualified
+ *   with (`ts-unify` when absent)
  */
 export function createPlugin(
   rules: Record<string, TransformLike>,
@@ -40,8 +32,5 @@ export function createPlugin(
     }
   }
 
-  return {
-    rules: ruleModules,
-    configs: { recommended: { rules: recommendedRules } },
-  }
+  return { rules: ruleModules, configs: pluginConfigs(recommendedRules) }
 }
