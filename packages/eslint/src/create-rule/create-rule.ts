@@ -6,6 +6,7 @@ import type { TSESTree } from "@typescript-eslint/types";
 import type { RuleModule } from "../rule-module";
 import { sourceText } from "../rule-module";
 import type { TransformLike } from "../transform-like";
+import { commentsInside, keepsComments } from "../keeps-comments";
 import { printNode } from "../print-node";
 
 /**
@@ -165,6 +166,10 @@ export function createRule(
                     // applyRewrites returns non-null.
                     const rewritten = applyRewrites(node, sites, result.capturePaths, sourceCode);
                     const text = printNode(rewritten);
+
+                    if (!keepsComments(commentsInside(sourceCode, node), text)) {
+                      return null;
+                    }
 
                     // If imports are specified, prepend missing ones to the file
                     if (importMap) {

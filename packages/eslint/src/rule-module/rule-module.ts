@@ -16,7 +16,7 @@ type RuleContext = {
     descriptor: ReportSite & {
       messageId: string;
       data?: Record<string, string>;
-      fix?: (fixer: RuleFixer) => RuleFix | RuleFix[];
+      fix?: (fixer: RuleFixer) => RuleFix | RuleFix[] | null;
     },
   ): void;
 };
