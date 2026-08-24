@@ -31,18 +31,28 @@ fetch(base + "/api");
 
 ## Captures
 
-- `before` — statements preceding the const declaration.
-- `id` — the declared identifier.
-- `init` — the initializer expression.
-- `stmt` — the single statement that uses the binding.
-- `after` — statements following the usage.
+- `body` — the block's statements. The rule finds the first
+  single-declarator `const` whose one read is in the very next statement
+  and rewrites the block with the declaration gone and that read replaced
+  by the initializer.
 
 ## Notes
 
-- The rewrite uses `sub(stmt, id, init)` to substitute every occurrence
-  of the identifier in the usage statement with the initializer.
-- Safe because: the binding is `const` (no reassignment), the usage is
-  the immediately following statement (no intervening code), and the
-  substitution is purely structural.
-- Does not verify that `id` actually appears in `stmt`. If it doesn't,
-  the const is dead code and removing it is still correct.
+- Every single-declarator `const` of the block is examined, first to
+  last; the report lands on the block.
+- A read is counted by its role, not its name: a non-computed property
+  key or member name, a binding (declarator, parameter, pattern element,
+  catch parameter), a label, an import or export specifier and a type
+  position are not reads.
+- The const is left alone when: a same-named binding is made anywhere
+  after it (a parameter `x => x + 1`); a type position names it
+  (`typeof x`); it has more than one read, or its one read is not in the
+  next statement; the read sits inside a nested function or a loop's
+  test, update or body (the initializer would run later, again, or
+  never); the read is a shorthand property; the declarator is annotated
+  (`const x: Narrow = v` checks `v`); or the initializer has effects (a
+  call, `new`, `await`, `yield`, an assignment, an update, a tagged
+  template) and the read comes after another effect in the statement or
+  sits under a branch (`&&`/`||`/`??` right side, a conditional, an
+  `if` body, an optional chain, a `switch` case, a `try`).
+- Only the one read node is replaced; the rest of the statement is kept.
