@@ -1,13 +1,12 @@
 /**
- * Converts a union type to an intersection type.
- * Uses distributive conditional types and contravariance.
+ * A union type turned into an intersection, through a distributive
+ * conditional type and the contravariance of a parameter position.
  *
  * @example
- * type Result = UnionToIntersection<{ a: 1 } | { b: 2 }>;
- * //   ^? { a: 1 } & { b: 2 }
+ * type R = UnionToIntersection<{ a: 1 } | { b: 2 }> // { a: 1 } & { b: 2 }
  */
 export type UnionToIntersection<U> = (
-  U extends any ? (k: U) => void : never
+  U extends unknown ? (k: U) => void : never
 ) extends (k: infer I) => void
   ? I
   : never

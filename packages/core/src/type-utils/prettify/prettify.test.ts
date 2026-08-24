@@ -2,7 +2,7 @@ import AssertType from '@/test-utils/assert-type'
 
 import type { Prettify } from './prettify'
 
-describe('Prettify', () => {
+describe('prettify', () => {
   it('should flatten intersection types', () => {
     type Intersected = { a: 1 } & { b: 2 }
     type Result = Prettify<Intersected>

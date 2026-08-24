@@ -3,7 +3,7 @@ import type { TSESTree } from '@typescript-eslint/types'
 import AssertType from '@/test-utils/assert-type'
 import type { WithoutInternalAstFields } from '@/type-utils'
 
-describe('WithoutInternalAstFields', () => {
+describe('without-internal-ast-fields', () => {
   it('removes bookkeeping fields from a single node shape', () => {
     type Input = TSESTree.ReturnStatement
     type Result = WithoutInternalAstFields<Input>

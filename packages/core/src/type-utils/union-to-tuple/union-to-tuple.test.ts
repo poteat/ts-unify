@@ -2,7 +2,7 @@ import AssertType from '@/test-utils/assert-type'
 
 import type { UnionToTuple } from './union-to-tuple'
 
-describe('UnionToTuple', () => {
+describe('union-to-tuple', () => {
   it('should convert union to tuple', () => {
     type Union = 'a' | 'b' | 'c'
     type Result = UnionToTuple<Union>

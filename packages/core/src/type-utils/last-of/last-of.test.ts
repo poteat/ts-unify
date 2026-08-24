@@ -2,7 +2,7 @@ import AssertType from '@/test-utils/assert-type'
 
 import type { LastOf } from './last-of'
 
-describe('LastOf', () => {
+describe('last-of', () => {
   it('should extract a union member', () => {
     type Union = 1 | 2 | 3
     type Result = LastOf<Union>

@@ -1,14 +1,12 @@
 import type { UnionToIntersection } from '@/type-utils/union-to-intersection'
 
 /**
- * SingleKeyOf<T>
+ * The only key of an object type `T` when it has exactly one key, and
+ * `never` otherwise.
  *
- * Yields the only key of an object type `T` when it has exactly one key;
- * otherwise yields `never`. Decided without walking the keys: a union of
- * two or more keys is not equal to its own intersection.
- *
- * Commonly used to enable single-capture ergonomics where special handling is
- * desired only for exactly-one-entry capture bags.
+ * Decided without walking the keys: a union of two or more keys is not
+ * equal to its own intersection. The single-capture overloads read it to
+ * give a bag with exactly one entry its own handling.
  */
 export type SingleKeyOf<T> = [keyof T] extends [never]
   ? never

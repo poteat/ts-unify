@@ -1,12 +1,7 @@
 /**
- * KeysOfUnion<T>
+ * The union of property keys across every member of a union type `T`; used
+ * to check name collisions across a union of shapes.
  *
- * Produces the union of property keys across a union type `T`.
- *
- * Useful for checking name collisions across unions of shapes.
- *
- * @example
- * type U = { a: 1 } | { b: 2 };
- * type K = KeysOfUnion<U>; // "a" | "b"
+ * @example type K = KeysOfUnion<{ a: 1 } | { b: 2 }> // "a" | "b"
  */
-export type KeysOfUnion<T> = T extends any ? keyof T : never
+export type KeysOfUnion<T> = T extends unknown ? keyof T : never

@@ -2,30 +2,25 @@ import { assertType } from './assert-type'
 
 const input = 0
 
-describe('assertType', () => {
+describe('assert-type', () => {
   test('exact type matches compile', () => {
-    // Primitives
     assertType<string, string>(0)
     assertType<number, number>(0)
     assertType<boolean, boolean>(0)
 
-    // Literals
     assertType<'hello', 'hello'>(0)
     assertType<42, 42>(0)
     assertType<true, true>(0)
 
-    // Objects
     assertType<{ a: string }, { a: string }>(0)
     assertType<{ a: { b: number } }, { a: { b: number } }>(0)
 
-    // Arrays and tuples
     assertType<string[], string[]>(0)
     assertType<[string, number], [string, number]>(0)
 
-    // Functions
     assertType<(a: string) => void, (a: string) => void>(0)
 
-    // Special types
+    // eslint-disable-next-line atp/no-any
     assertType<any, any>(0)
     assertType<unknown, unknown>(0)
     assertType<never, never>(0)
@@ -37,31 +32,24 @@ describe('assertType', () => {
   })
 
   test('type mismatches cause compile errors', () => {
-    // Different primitives
     // @ts-expect-error - string is not number
     assertType<string, number>(0)
 
-    // Literal vs base type
     // @ts-expect-error - literal "hello" is not string
     assertType<'hello', string>(0)
 
-    // Different object shapes
     // @ts-expect-error - objects have different properties
     assertType<{ a: string }, { a: string; b: number }>(0)
 
-    // Union vs single type
     // @ts-expect-error - union is not single type
     assertType<string | number, string>(0)
 
-    // Subtype relationships
     // @ts-expect-error - 42 is subtype of number, not equal
     assertType<42, number>(0)
 
-    // Optional vs required
     // @ts-expect-error - optional is not the same as required
     assertType<{ a?: string }, { a: string }>(0)
 
-    // Readonly modifier
     // @ts-expect-error - readonly is not the same as mutable
     assertType<{ readonly a: string }, { a: string }>(0)
 
@@ -79,7 +67,6 @@ describe('assertType', () => {
     assertType<Container<string>, Container<string>>(0)
     assertType<Container<number>, Container<number>>(0)
 
-    // Generic with multiple parameters
     type Pair<A, B> = [A, B]
     assertType<Pair<string, number>, Pair<string, number>>(0)
 

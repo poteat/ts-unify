@@ -2,7 +2,7 @@ import AssertType from '@/test-utils/assert-type'
 
 import type { KeysToTuple } from './keys-to-tuple'
 
-describe('KeysToTuple', () => {
+describe('keys-to-tuple', () => {
   it('should convert object keys to tuple', () => {
     type Obj = { a: 1; b: 2; c: 3 }
     type Result = KeysToTuple<Obj>
@@ -28,8 +28,8 @@ describe('KeysToTuple', () => {
   })
 
   it('should handle single key', () => {
-    type Single = { only: true }
+    type Single = { isOnly: true }
     type Result = KeysToTuple<Single>
-    AssertType.assertType<Result, ['only']>(0)
+    AssertType.assertType<Result, ['isOnly']>(0)
   })
 })

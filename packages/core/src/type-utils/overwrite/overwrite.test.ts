@@ -1,8 +1,15 @@
 import type { Overwrite } from '@/type-utils/overwrite'
-// Extends-based checks to avoid overly strict exact-equality pitfalls
+
+/**
+ * Asserts at compile time that `T` is assignable to `U`.
+ *
+ * The tests call it in both directions: the intersection `Overwrite`
+ * produces is assignable each way to the flat shape, while an
+ * exact-equality check on the two fails.
+ */
 const assertExtends = <T extends U, U>(_v?: T) => 0 as const
 
-describe('Overwrite type util', () => {
+describe('overwrite', () => {
   it('overwrites colliding keys', () => {
     type A = { a: number }
     type B = { a: string }

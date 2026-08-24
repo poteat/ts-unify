@@ -2,7 +2,7 @@ import AssertType from '@/test-utils/assert-type'
 
 import type { HasNever } from './has-never'
 
-describe('HasNever', () => {
+describe('has-never', () => {
   it('should return true for never', () => {
     type Result = HasNever<never>
     AssertType.assertType<Result, true>(0)

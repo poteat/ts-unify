@@ -1,7 +1,7 @@
 import AssertType from '@/test-utils/assert-type'
 import type { KeysOfUnion } from '@/type-utils'
 
-describe('KeysOfUnion - type-level', () => {
+describe('keys-of-union', () => {
   it('unions keys across variants', () => {
     type U = { a: 1 } | { b: 2 } | { c: 3 }
     type K = KeysOfUnion<U>
@@ -19,7 +19,7 @@ describe('KeysOfUnion - type-level', () => {
   it('reduces to keyof for non-unions', () => {
     type T = { x: number; y: string }
     type K = KeysOfUnion<T>
-    type Expected = keyof T // "x" | "y"
+    type Expected = keyof T
     AssertType.assertType<K, Expected>(0)
   })
 })

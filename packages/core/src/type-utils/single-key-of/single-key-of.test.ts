@@ -2,7 +2,7 @@ import AssertType from '@/test-utils/assert-type'
 
 import type { SingleKeyOf } from './single-key-of'
 
-describe('SingleKeyOf', () => {
+describe('single-key-of', () => {
   it('yields the only key for single-key objects', () => {
     type K = SingleKeyOf<{ a: 1 }>
     AssertType.assertType<K, 'a'>(0)

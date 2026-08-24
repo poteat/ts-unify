@@ -1,14 +1,12 @@
 import type { LastOf } from '@/type-utils/last-of'
 
 /**
- * Converts a union type to a tuple type.
- * Uses tail-call optimization pattern for recursion.
+ * A union type turned into a tuple, built by tail recursion on the last
+ * member; the order may vary.
  *
- * @example
- * type Result = UnionToTuple<1 | 2 | 3>;
- * //   ^? [1, 2, 3] (order may vary)
+ * @example type Result = UnionToTuple<1 | 2 | 3> // [1, 2, 3]
  */
-export type UnionToTuple<T, Acc extends readonly any[] = []> = 0 extends 1
+export type UnionToTuple<T, Acc extends readonly unknown[] = []> = 0 extends 1
   ? never
   : [T] extends [never]
     ? Acc

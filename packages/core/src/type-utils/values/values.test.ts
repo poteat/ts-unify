@@ -2,9 +2,9 @@ import AssertType from '@/test-utils/assert-type'
 
 import type { Values } from './values'
 
-describe('Values type utility', () => {
+describe('values', () => {
   it('should extract values from basic objects', () => {
-    type TestObj = { a: string; b: number; c: boolean }
+    type TestObj = { a: string; b: number; isOn: boolean }
     type Result = Values<TestObj>
     AssertType.assertType<Result, string | number | boolean>(0)
   })
@@ -30,12 +30,12 @@ describe('Values type utility', () => {
   it('should extract nested object types', () => {
     type Nested = {
       user: { name: string; age: number }
-      settings: { theme: string; darkMode: boolean }
+      settings: { theme: string; isDark: boolean }
     }
     type Result = Values<Nested>
     AssertType.assertType<
       Result,
-      { name: string; age: number } | { theme: string; darkMode: boolean }
+      { name: string; age: number } | { theme: string; isDark: boolean }
     >(0)
   })
 
@@ -48,7 +48,7 @@ describe('Values type utility', () => {
   it('should handle index signatures with specific properties', () => {
     type IndexWithSpecific = {
       [key: string]: string | number | boolean
-      specific: boolean
+      isSpecific: boolean
     }
     type Result = Values<IndexWithSpecific>
     AssertType.assertType<Result, string | number | boolean>(0)
@@ -84,29 +84,19 @@ describe('Values type utility', () => {
     >(0)
   })
 
-  it('should extract all properties from arrays (not just elements)', () => {
-    // Note: Arrays have many properties beyond just indexed elements
-    // Values<T[]> includes array methods, length, etc.
-    type StringArray = string[]
-    type Result = Values<StringArray>
-
-    // Result includes string (elements) but also array properties
-    // Verify strings are assignable to Result
-    void ((): Result => 'test')
-
-    // For practical element extraction, users should use T[number]
+  it('should include the element type among the properties of an array', () => {
+    type Result = Values<string[]>
+    type HasElement = string extends Result ? true : false
+    AssertType.assertType<HasElement, true>(0)
   })
 
-  it('should extract all properties from tuples', () => {
-    // Tuples also have array properties
-    type Tuple = [string, number, boolean]
-    type Result = Values<Tuple>
-
-    // Verify tuple elements are assignable to Result
-    void ((): Result => 'test')
-    void ((): Result => 42)
-    void ((): Result => true)
-
-    // But Result also includes array properties like length, methods, etc.
+  it('should include each element type among the properties of a tuple', () => {
+    type Result = Values<[string, number, boolean]>
+    type HasString = string extends Result ? true : false
+    type HasNumber = number extends Result ? true : false
+    type HasBoolean = boolean extends Result ? true : false
+    AssertType.assertType<HasString, true>(0)
+    AssertType.assertType<HasNumber, true>(0)
+    AssertType.assertType<HasBoolean, true>(0)
   })
 })

@@ -1,20 +1,18 @@
 import Equal from '@/test-utils/equal'
 
 /**
- * Type-safe expectation helper that enforces exact type equality at compile
- * time while performing runtime value assertions.
+ * A runtime equality check whose expected value must have exactly the type
+ * of the checked value, so a mismatch fails to compile.
  *
- * @example
- * expectType("hello").toBe("hello"); // ✓ Passes
- * expectType(42).toBe(43); // ✗ Runtime error
- * expectType("hello").toBe(42); // ✗ Compile error
- *
- * @param value - The value to check
- * @returns Object with toBe method for type-safe equality checking
+ * @example expectType('hello').toBe('hello')
+ * @example expectType('hello').toBe(42) // compile error
+ * @param value the value to check
+ * @returns an object whose `toBe` asserts equality and returns its argument
  */
 export const expectType = <const T>(value: T) => ({
   toBe: <U>(expected: Equal.Equal<T, U> extends true ? U : never) => {
     expect(value).toBe(expected)
+
     return expected
   },
 })

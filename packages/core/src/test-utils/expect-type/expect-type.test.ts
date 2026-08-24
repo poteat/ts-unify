@@ -1,25 +1,18 @@
 import { expectType } from './expect-type'
+import Fixtures from './fixtures'
 
-const obj = { mode: 'production' } as const
-
-const value: string | number = 'hello'
-
-describe('expectType', () => {
+describe('expect-type', () => {
   test('exact type matches pass', () => {
-    // Primitives
     expectType('hello').toBe('hello')
-    expectType(42).toBe(42)
+    expectType(Fixtures.someNumber).toBe(Fixtures.someNumber)
     expectType(true).toBe(true)
 
-    // Objects (reference equality with toBe)
     const obj = { a: 'test' }
     expectType(obj).toBe(obj)
 
-    // Arrays
     const arr = ['a', 'b', 'c']
     expectType(arr).toBe(arr)
 
-    // Special values
     expectType(null).toBe(null)
     expectType(undefined).toBe(undefined)
   })
@@ -31,13 +24,12 @@ describe('expectType', () => {
 
   test('works with const assertions', () => {
     expectType('hello' as const).toBe('hello')
-    expectType(42 as const).toBe(42)
-    expectType(obj.mode).toBe('production')
+    expectType(2 as const).toBe(2)
+    expectType(Fixtures.settings.mode).toBe('production')
   })
 
   test('works with union types', () => {
-    // Type is string | number, so it must match exactly
-    expectType(value).toBe(value)
+    expectType(Fixtures.unionValue).toBe(Fixtures.unionValue)
   })
 
   test('works with generic functions', () => {
@@ -48,15 +40,12 @@ describe('expectType', () => {
     }
 
     expectType(identity('test')).toBe('test')
-    expectType(identity(42)).toBe(42)
+    expectType(identity(Fixtures.someNumber)).toBe(Fixtures.someNumber)
   })
 
-  test('works with type narrowing', () => {
-    const value: string | number = 'hello'
-
-    if (typeof value === 'string') {
-      // Type is narrowed to string
-      expectType(value).toBe(value) // Both are string type
+  test('narrows the union value to string under a typeof guard', () => {
+    if (typeof Fixtures.unionValue === 'string') {
+      expectType(Fixtures.unionValue).toBe(Fixtures.unionValue)
     }
   })
 

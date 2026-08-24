@@ -2,7 +2,7 @@ import AssertType from '@/test-utils/assert-type'
 
 import type { UnionToIntersection } from './union-to-intersection'
 
-describe('UnionToIntersection', () => {
+describe('union-to-intersection', () => {
   it('should convert union to intersection', () => {
     type Union = { a: 1 } | { b: 2 }
     type Result = UnionToIntersection<Union>
