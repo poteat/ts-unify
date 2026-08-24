@@ -8,6 +8,10 @@ describe("ExtractCaptures type tests", () => {
     type TestBasic = ExtractCaptures<{ value: Capture<"v"> }>;
     assertType<TestBasic, { v: unknown }>(0);
 
+    // A RegExp in a string position contributes no capture
+    type TestRegExp = ExtractCaptures<{ value: Capture<"v">; name: RegExp }>;
+    assertType<TestRegExp, { v: unknown }>(0);
+
     // Test 2: Multiple different captures (implicit values => unknown)
     type TestMultiple = ExtractCaptures<{
       name: Capture<"n">;

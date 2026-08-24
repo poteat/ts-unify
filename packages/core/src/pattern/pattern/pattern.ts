@@ -30,13 +30,17 @@ type ParentShape =
   | TSESTree.Program;
 type WithParent = { parent?: Pattern<ParentShape> };
 
+// A string position also accepts a RegExp, tested against the string.
+type StringPattern<T> = T extends string ? Capturable<T> | RegExp : Capturable<T>;
+
 /**
  * Deeply capturable pattern for a shape `T`.
  *
  * At any position you may either:
  * - Provide a nested pattern of the original value type, or
  * - Provide a capture token (implicit `$` or explicit `Capture`), or
- * - In sequence positions (arrays/tuples), provide a spread capture `Spread`.
+ * - In sequence positions (arrays/tuples), provide a spread capture `Spread`, or
+ * - In string positions, provide a `RegExp`.
  *
  * This type defines what inputs are accepted; consumers interpret semantics
  * such as naming, anchoring, and unification.
@@ -51,4 +55,4 @@ export type Pattern<T> = T extends readonly any[]
       | (PatternChildren<T> & DollarObjectSpread & WithParent)
       | DollarObjectSpread
       | WithParent
-  : Capturable<T>;
+  : StringPattern<T>;

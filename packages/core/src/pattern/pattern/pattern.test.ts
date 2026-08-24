@@ -34,6 +34,15 @@ describe("Pattern type", () => {
     expect(Array.isArray(p)).toBe(true);
   });
 
+  it("accepts a RegExp in a string position only", () => {
+    type Shape = { x: number; y: { z: string } };
+    const p: Pattern<Shape> = { y: { z: /^a/ } };
+    // @ts-expect-error a number position takes no RegExp
+    const bad: Pattern<Shape> = { x: /1/ };
+    expect(typeof p).toBe("object");
+    expect(typeof bad).toBe("object");
+  });
+
   it("accepts explicit captures", () => {
     type Shape = { x: number; y: string; tup: [number, string] };
     const p: Pattern<Shape> = {

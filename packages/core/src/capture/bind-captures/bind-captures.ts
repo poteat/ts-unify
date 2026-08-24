@@ -94,7 +94,10 @@ type BindValue<P, S, Key extends string> =
   // Short-circuit: don't recurse into concrete AST nodes
   P extends TSESTree.Node
     ? P
-    : // Placeholder becomes named capture using key context
+    : // A RegExp tests a string position and binds nothing
+      P extends RegExp
+      ? P
+      : // Placeholder becomes named capture using key context
       P extends $
       ? Key extends ""
         ? S extends readonly any[]

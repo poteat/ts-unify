@@ -16,6 +16,14 @@ describe("BindCaptures - type-level", () => {
     assertType<Result, Expected>(0);
   });
 
+  it("leaves a RegExp in a string position as is, with no capture", () => {
+    type Shape = { id: number; name: string };
+    type Pattern = { id: $; name: RegExp };
+    type Result = BindCaptures<Pattern, Shape>;
+    type Expected = { id: Capture<"id", number>; name: RegExp };
+    assertType<Result, Expected>(0);
+  });
+
   it("preserves explicit capture and upgrades unknown to shape type", () => {
     type Shape = { value: number; text: string };
     type Pattern1 = {

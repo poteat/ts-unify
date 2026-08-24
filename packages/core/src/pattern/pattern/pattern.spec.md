@@ -15,6 +15,8 @@ not interpret names, unify duplicates, or perform any runtime work.
 ## Allowed Positions
 
 - Primitives: either the original value type `T`, or a capture token.
+- Strings: also a `RegExp`; consumers test it against the string. It
+  contributes no capture.
 - Objects: either a capture token for the whole subtree, or an object with any
   subset of properties from `T`, where each present property is
   `Pattern<T[K]>`. Omitted keys are treated as "don’t care".
@@ -120,6 +122,8 @@ Object patterns may include a special `parent` property to constrain the parent
 node without introducing additional captures.
 
 - `{ parent: P }` restricts matches to nodes whose parent satisfies pattern `P`.
+- `P` ranges over the node kinds that can be parents: every kind but
+  `Comment`, with `Program` in its upstream shape (raw comments).
 - The `parent` property is enforcement-only: captures inside `P` are ignored by
   `ExtractCaptures`, and `BindCaptures` does not add a `parent` field to the
   bound shape.

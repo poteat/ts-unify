@@ -22,6 +22,8 @@ type ReKeyIfSingle<Bag, K extends string> = [SingleKeyOf<Bag>] extends [never]
 
 type ExtractFromPropertyValue<T, Key extends string> = T extends TSESTree.Node
   ? {}
+  : T extends RegExp
+  ? {}
   : T extends ConfigSlot
   ? {}
   : T extends Capture
