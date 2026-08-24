@@ -790,4 +790,17 @@ describe("match - where + quantifiers (some, atLeast, atMost, exactly)", () => {
     ];
     expect(match(nested, pattern, chain)).not.toBeNull();
   });
+
+  it("accepts a root proxy and checks its tag", () => {
+    const literal = { type: "Literal", value: 1 };
+    const array = { type: "ArrayExpression", elements: [] };
+    expect(match(literal, (U as any).ArrayExpression())).toBeNull();
+    expect(match(array, (U as any).ArrayExpression())).toEqual({});
+    expect(match(array, (U as any).ArrayExpression({ elements: $("els") }))).toEqual({ els: [] });
+  });
+
+  it("applies a root proxy's own .when() guard", () => {
+    const array = { type: "ArrayExpression", elements: [] };
+    expect(match(array, (U as any).ArrayExpression().when(() => false))).toBeNull();
+  });
 });

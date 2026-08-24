@@ -49,7 +49,8 @@ type Ctx = {
 
 /**
  * Match an AST node against a pattern object, extracting captures.
- * Returns the capture bag on match, or null on mismatch.
+ * Returns the capture bag on match, or null on mismatch. The pattern may
+ * be a fields record or a root proxy such as `U.Identifier({ name: $ })`.
  *
  * For inner-`.to()` rewrite sites, use {@link matchWithSites} instead.
  */
@@ -75,7 +76,11 @@ export function matchWithSites(
   const configDefaults = chain ? extractConfigDefaults(chain) : {};
   const namedBindings: NamedBinding[] = [];
   const ctx: Ctx = { sites: [], capturePaths: {} };
-  const bag = matchInner(node, pattern, namedBindings, configDefaults, ctx, []);
+  // A root proxy (`U.X(...)`) carries its tag and chain itself: match it as
+  // a nested proxy would be, so the tag is checked and its guards apply.
+  const bag = isProxyNode(pattern)
+    ? matchProxyNode(node, pattern, namedBindings, configDefaults, undefined, ctx, [])
+    : matchInner(node, pattern, namedBindings, configDefaults, ctx, []);
   if (!bag) return null;
 
   // Validate duplicate named captures have equal values

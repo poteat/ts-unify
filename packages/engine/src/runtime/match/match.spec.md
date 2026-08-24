@@ -17,7 +17,10 @@ success, or `null` on mismatch.
 ## Design
 
 - **Inputs**: `node` (any AST-like object) and `pattern` (a plain object
-  possibly containing capture sentinels, proxy nodes, arrays, and literals).
+  possibly containing capture sentinels, proxy nodes, arrays, and literals,
+  or a root proxy such as `U.Identifier({ name: $ })`). A root proxy is
+  matched as a nested one would be: its tag is checked against `node.type`
+  and its own chain (`.when()`, `.seal()`, `.bind()`, `.to()`) applies.
 - **Output**: `Record<string, any> | null` -- the capture bag or `null`.
 - Duplicate named captures are validated via structural `deepEqual`; if the same
   name binds to structurally different values, the match fails.
