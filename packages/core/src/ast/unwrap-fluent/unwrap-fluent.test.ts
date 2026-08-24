@@ -2,7 +2,7 @@ import type { FluentNode } from '@/ast/fluent-node'
 import type { UnwrapFluent } from '@/ast/unwrap-fluent'
 import AssertType from '@/test-utils/assert-type'
 
-describe('UnwrapFluent (type-level)', () => {
+describe('unwrap-fluent', () => {
   it('unwraps FluentNode<N> to N', () => {
     type N = { type: 'X' }
     type F = FluentNode<N>

@@ -1,6 +1,6 @@
 import Ast from '@/ast'
 
-describe('NodeWithSome (type-level)', () => {
+describe('node-with-some', () => {
   it('preserves chainability after .some()', () => {
     void Ast.U.ThisExpression().some()
   })

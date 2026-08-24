@@ -3,13 +3,12 @@ import Capture from '@/capture'
 import type { ExtractCaptures } from '@/pattern'
 import AssertType from '@/test-utils/assert-type'
 
-describe('NodeWithWhere (type-level)', () => {
+describe('node-with-where', () => {
   it('preserves the capture bag through .where()', () => {
     const pattern = Ast.U.FunctionDeclaration({
       id: Capture.$('id'),
       body: Capture.$('body'),
     }).where(Ast.U.ThisExpression().none())
-    // The capture bag should still have id and body after .where().
     type Bag = ExtractCaptures<typeof pattern>
     AssertType.assertType<keyof Bag, 'id' | 'body'>(0)
   })

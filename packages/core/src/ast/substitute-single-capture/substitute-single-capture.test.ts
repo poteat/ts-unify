@@ -4,7 +4,7 @@ import type { SubstituteSingleCapture } from '@/ast/substitute-single-capture'
 import type { Capture } from '@/capture'
 import AssertType from '@/test-utils/assert-type'
 
-describe('SubstituteSingleCapture (type-level)', () => {
+describe('substitute-single-capture', () => {
   it('substitutes the single capture with normalized expression type', () => {
     type N = {
       type: 'ReturnStatement'

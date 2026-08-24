@@ -1,6 +1,6 @@
 import Ast from '@/ast'
 
-describe('NodeWithNone (type-level)', () => {
+describe('node-with-none', () => {
   it('preserves chainability after .none()', () => {
     void Ast.U.ThisExpression().none()
   })

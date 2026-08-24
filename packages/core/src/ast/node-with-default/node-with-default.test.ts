@@ -4,7 +4,7 @@ import type { NodeWithDefault } from '@/ast/node-with-default'
 import type { Capture } from '@/capture'
 import AssertType from '@/test-utils/assert-type'
 
-describe('NodeWithDefault (type-level)', () => {
+describe('node-with-default', () => {
   it('provides default for single capture and applies to node shape', () => {
     type N = {
       type: 'ReturnStatement'
@@ -12,11 +12,8 @@ describe('NodeWithDefault (type-level)', () => {
     }
     type NM = NodeWithDefault<N>
 
-    function check(n: NM) {
-      const withDefault = n.default({
-        type: 'Identifier',
-        name: 'undefined',
-      } as TSESTree.Identifier)
+    function check(n: NM, fallback: TSESTree.Identifier) {
+      const withDefault = n.default(fallback)
 
       type NodePart = Omit<typeof withDefault, 'default'>
       type ArgValue =
@@ -27,7 +24,7 @@ describe('NodeWithDefault (type-level)', () => {
     void check
   })
 
-  it('is unavailable when multiple captures are present (param is never)', () => {
+  it('takes never when there are multiple captures', () => {
     type N = {
       type: 'X'
       aField: Capture<'a', TSESTree.Expression | undefined>
@@ -35,8 +32,7 @@ describe('NodeWithDefault (type-level)', () => {
     }
     type NM = NodeWithDefault<N>
 
-    // The parameter type of `.default` should be never via overload
-    type DefaultParam = NM['default'] extends (arg: infer A) => any
+    type DefaultParam = NM['default'] extends (arg: infer A) => unknown
       ? A
       : unknown
     AssertType.assertType<DefaultParam, never>(0)

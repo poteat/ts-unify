@@ -1,11 +1,11 @@
 import type { Sealed } from '@/ast/sealed'
 import type { Capture } from '@/capture/capture-type'
-import type { Spread } from '@/capture/spread/spread'
+import type { Spread } from '@/capture/spread'
 import AssertType from '@/test-utils/assert-type'
 
 import type { SubstituteCaptures } from './substitute-captures'
 
-describe('SubstituteCaptures (type-level)', () => {
+describe('substitute-captures', () => {
   it('refines an explicit capture with a bag value', () => {
     type Node = { type: 'ReturnStatement'; argument: Capture<'arg', unknown> }
     type Bag = { arg: string }
@@ -30,12 +30,11 @@ describe('SubstituteCaptures (type-level)', () => {
 
   it('preserves Sealed wrapper while transforming inner', () => {
     type Node = Sealed<{ argument: Capture<'arg', unknown> }>
-    type Bag = { arg: boolean }
+    type Bag = { arg: number }
     type Result = SubstituteCaptures<Node, Bag>
-    AssertType.assertType<
-      Result,
-      Sealed<{ argument: Capture<'arg', boolean> }>
-    >(0)
+    AssertType.assertType<Result, Sealed<{ argument: Capture<'arg', number> }>>(
+      0,
+    )
   })
 
   it('recurses through nested objects', () => {

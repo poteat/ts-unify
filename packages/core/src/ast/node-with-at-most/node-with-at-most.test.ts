@@ -1,6 +1,6 @@
 import Ast from '@/ast'
 
-describe('NodeWithAtMost (type-level)', () => {
+describe('node-with-at-most', () => {
   it('preserves chainability after .atMost()', () => {
     void Ast.U.ThisExpression().atMost(2)
   })

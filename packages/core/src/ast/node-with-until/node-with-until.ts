@@ -1,21 +1,17 @@
-/**
- * NodeWithUntil<N>
- *
- * Adds a fluent `.until(boundary)` method that attaches a boundary pattern
- * controlling how far `.excludes()` walks when searching the subtree. The
- * name follows LTL convention: the search continues *until* the boundary
- * is reached.
- */
 import type { FluentNode } from '@/ast/fluent-node'
 
+/**
+ * Adds a fluent `.until(boundary)` that bounds how far `.excludes()`
+ * walks the subtree: the search continues until it reaches the boundary.
+ */
 export type NodeWithUntil<N> = {
   /**
-   * Attach a walk boundary. When this node is passed to `.excludes()`, the
-   * subtree search stops recursion at descendants matching `boundary`.
+   * Attaches a walk boundary. When this node is passed to `.excludes()`,
+   * the subtree search stops recursion at descendants matching it.
    *
-   * @param boundary A pattern (builder-produced node or `U.or(...)`) whose
-   * matching descendants act as scope boundaries.
-   * @returns The same node shape, chainable.
+   * @param boundary a pattern (a built node or `U.or(...)`) whose matches
+   * end the search
+   * @returns the same node shape, chainable
    */
   readonly until: (boundary: unknown) => FluentNode<N>
 }

@@ -1,9 +1,10 @@
+import type { SEALED_BRAND } from './sealed-brand'
+
 /**
- * Sealed<N>
+ * A node shape branded by `.seal()`.
  *
- * Type-level brand applied by `.seal()`. When a sealed subtree is used as the
- * value of an object property in a larger pattern, capture extraction may
- * re-key a single inner capture to the embedding property name.
+ * Used as the value of an object property in a larger pattern, its one
+ * inner capture is re-keyed to the property's name during capture
+ * extraction.
  */
-export declare const SEALED_BRAND: unique symbol
 export type Sealed<N> = N & { readonly [SEALED_BRAND]: true }

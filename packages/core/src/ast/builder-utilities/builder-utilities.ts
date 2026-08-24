@@ -6,11 +6,8 @@ import type { OrCombinator } from '@/ast/or'
 import type { StringPredicates } from '@/string-predicate/string-predicates'
 
 /**
- * BuilderUtilities
- *
- * Typed helper utilities exposed alongside builders on the `U` namespace.
- * These are not tied to a specific AST kind and are convenient when composing
- * fluent helpers.
+ * The helpers on the `U` namespace that belong to no AST kind: guards,
+ * combinators and the string predicates, for composing patterns.
  */
 export type BuilderUtilities = {
   truthy: TruthyGuard
@@ -20,8 +17,8 @@ export type BuilderUtilities = {
   seq: SeqCombinator
 
   /**
-   * String predicates for string positions and captured values; see
-   * string-predicate.spec.md.
+   * Predicates for the string positions of a pattern, each callable on a
+   * captured value too; see string-predicate.spec.md.
    */
-  string: StringPredicates
+  readonly string: StringPredicates
 }

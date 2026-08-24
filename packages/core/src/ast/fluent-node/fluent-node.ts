@@ -14,13 +14,11 @@ import type { NodeWithWhen } from '@/ast/node-with-when'
 import type { NodeWithWhere } from '@/ast/node-with-where'
 import type { NodeWithWith } from '@/ast/node-with-with'
 
-export declare const FLUENT_INNER: unique symbol
+import type { FLUENT_INNER } from './fluent-inner'
 
 /**
- * A node shape `N` augmented with fluent pattern helpers:
- * `.when()`, `.with()`, `.bind()`, `.seal()`, `.to()`,
- * `.where()`, `.until()`, `.none()`, `.some()`,
- * `.atLeast()`, `.atMost()`, `.exactly()`, etc.
+ * A node shape `N` with the fluent helpers on it: `.when()`, `.with()`,
+ * `.bind()`, `.seal()`, `.to()`, `.where()`, the quantifiers, and more.
  */
 export type FluentNode<N> = { readonly [FLUENT_INNER]: N } & NodeWithWhen<N> &
   NodeWithDefault<N> &
@@ -38,10 +36,13 @@ export type FluentNode<N> = { readonly [FLUENT_INNER]: N } & NodeWithWhen<N> &
   NodeWithAtMost<N> &
   NodeWithExactly<N> & {
     /**
-     * Rule metadata — available on FluentNode for rules with seq rewrites (no
-     * top-level .to()).
+     * Sets the text a report carries, for a rule whose rewrites sit on
+     * seq elements and that has no top-level `.to()`.
      */
     readonly message: (text: string) => FluentNode<N>
 
+    /**
+     * Marks the rule as recommended.
+     */
     readonly recommended: () => FluentNode<N>
   }

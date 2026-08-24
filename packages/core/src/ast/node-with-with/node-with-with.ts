@@ -1,23 +1,29 @@
 import type { FluentNode } from '@/ast/fluent-node'
 import type { NormalizeBag } from '@/ast/normalize-bag'
+import type { OverwriteBag } from '@/ast/overwrite-bag'
 import type { SubstituteCaptures } from '@/ast/substitute-captures'
 import type { ExtractCaptures } from '@/pattern'
 import type { Overwrite } from '@/type-utils'
 
 /**
- * Add a fluent `.with` that merges a new bag into the existing capture bag:
- * - Overwrites colliding keys with the new bag's entry type
- * - Adds new keys (carried via brand so downstream `.to` sees them)
+ * Adds a fluent `.with` that merges a new bag into the capture bag: a
+ * colliding key takes the new entry's type, a new key is added.
+ *
+ * The added keys ride on the `__with` brand, so a downstream `.to` sees
+ * them.
  */
 export type NodeWithWith<Node> = Node & {
-  with<NewBag>(fn: (bag: ExtractCaptures<Node>) => NewBag): FluentNode<
-    SubstituteCaptures<
-      Omit<Node, '__with'>,
-      Overwrite<ExtractCaptures<Node>, NormalizeBag<NewBag>>
-    > & {
+  /**
+   * Merges the bag the callback returns into the capture bag.
+   * @param fn computes the new entries from the captures of a match
+   */
+  with<NewBag>(
+    fn: (bag: ExtractCaptures<Node>) => NewBag,
+  ): FluentNode<
+    SubstituteCaptures<Omit<Node, '__with'>, OverwriteBag<Node, NewBag>> & {
       readonly __with: Node extends { readonly __with: infer WB }
         ? Overwrite<WB, NormalizeBag<NewBag>>
-        : Overwrite<ExtractCaptures<Node>, NormalizeBag<NewBag>>
+        : OverwriteBag<Node, NewBag>
     }
   >
 }

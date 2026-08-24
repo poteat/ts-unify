@@ -1,53 +1,28 @@
 import type { HasSingleCapture } from '@/ast/capture-cardinality'
 import type { FluentNode } from '@/ast/fluent-node'
+import type { NarrowSingleCapture } from '@/ast/narrow-single-capture'
 import type { SubstituteCaptures } from '@/ast/substitute-captures'
-import type { SubstituteSingleCapture } from '@/ast/substitute-single-capture'
 import type { ExtractCaptures } from '@/pattern'
 import type { SingleValueOf } from '@/type-utils/single-value-of'
 
 /**
- * Add a fluent `.when` method to a node value `N`.
- * The capture bag is derived from the node shape as `ExtractCaptures<N>`.
- *
- * Overloads:
- * - Single-capture sugar — if the bag has exactly one key, accept
- *   `(value) => value is Narrow` to refine that capture and return a narrowed
- *   node.
- * - Single-capture predicate — `(value) => boolean` returns the same node type
- *   (no narrowing).
- * - Bag guard — `(bag): bag is Narrow` refines the node by structurally
- *   updating capture/spread occurrences.
- * - Bag predicate — `(bag) => boolean` returns the same node type.
- *
- * The bag forms are open to a single-capture node too, with an annotated
- * parameter: the match passes the bag at runtime whatever the capture count.
+ * Adds a fluent `.when` that keeps a match only while a guard or predicate
+ * holds, over the one capture's value or over the whole bag.
  */
 export type NodeWithWhen<Node> = Node & {
   /**
-   * Single-capture type guard overload. When the node has exactly one capture,
-   * accepts a value-guard that narrows that capture's value type and
-   * structurally updates the embedded capture tokens in the node.
-   *
-   * @typeParam VNarrow The narrowed value type for the single capture.
-   * @param guard Predicate that refines the single capture's value. A false
-   * result excludes the node from matching.
-   * @returns A node with the capture and its occurrences narrowed.
+   * Keeps the match when the guard holds over the one capture's value,
+   * and narrows that capture, in the bag and in the node shape.
    */
   when<VNarrow extends SingleValueOf<ExtractCaptures<Node>>>(
     guard: [HasSingleCapture<Node>] extends [true]
       ? (value: SingleValueOf<ExtractCaptures<Node>>) => value is VNarrow
       : never,
-  ): [HasSingleCapture<Node>] extends [true]
-    ? FluentNode<SubstituteSingleCapture<Node, VNarrow>>
-    : never
+  ): NarrowSingleCapture<Node, VNarrow>
 
   /**
-   * Single-capture boolean predicate overload. When the node has exactly one
-   * capture, accepts a value predicate without changing types.
-   *
-   * @param predicate Predicate over the single capture's value. A false result
-   * excludes the node from matching.
-   * @returns The same node type (no narrowing).
+   * Keeps the match when the predicate holds over the one capture's
+   * value; nothing narrows.
    */
   when(
     predicate: [HasSingleCapture<Node>] extends [true]
@@ -56,25 +31,16 @@ export type NodeWithWhen<Node> = Node & {
   ): [HasSingleCapture<Node>] extends [true] ? FluentNode<Node> : never
 
   /**
-   * Bag type guard overload. Accepts a guard over the capture bag derived from
-   * the node, and refines all matching capture/spread occurrences in the node.
-   *
-   * @typeParam Narrow The refined capture bag type.
-   * @param guard Predicate that refines the capture bag. A false result
-   * excludes the node from matching.
-   * @returns A node with all occurrences narrowed per the refined bag.
+   * Keeps the match when the guard holds over the bag, and narrows every
+   * capture the guard refines.
    */
   when<Narrow extends ExtractCaptures<Node>>(
     guard: (bag: ExtractCaptures<Node>) => bag is Narrow,
   ): FluentNode<SubstituteCaptures<Node, Narrow>>
 
   /**
-   * Bag boolean predicate overload. Accepts a predicate over the capture bag
-   * without changing types.
-   *
-   * @param predicate Predicate over the capture bag. A false result excludes
-   * the node from matching.
-   * @returns The same node type (no narrowing).
+   * Keeps the match when the predicate holds over the bag; nothing
+   * narrows.
    */
   when(predicate: (bag: ExtractCaptures<Node>) => boolean): FluentNode<Node>
 }

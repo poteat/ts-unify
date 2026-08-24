@@ -4,12 +4,11 @@ import type { BuilderMap, NodeByKind } from '@/ast'
 import type { UnwrapFluent } from '@/ast/unwrap-fluent'
 import AssertType from '@/test-utils/assert-type'
 
-describe('U.fromNode typing (type-level)', () => {
-  it('type-only input returns discriminant only', () => {
+describe('from-node', () => {
+  it('type-only input returns the discriminant only', () => {
     function check(U: BuilderMap) {
       const n = U.fromNode({ type: AST_NODE_TYPES.ReturnStatement })
       type Inner = UnwrapFluent<typeof n>
-      // Expect `{ readonly type: 'ReturnStatement' }`
       AssertType.assertType<
         Inner,
         { readonly type: NodeByKind['ReturnStatement']['type'] }

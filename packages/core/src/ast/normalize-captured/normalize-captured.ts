@@ -1,19 +1,12 @@
-import type { TSESTree } from '@typescript-eslint/types'
-
 import type { UnwrapFluent } from '@/ast/unwrap-fluent'
 
-/**
- * Normalize a captured value or template value for substitution.
- */
-export type NormalizeCaptured<V> = _CollapseCategories<
-  _Rehydrate<UnwrapFluent<V>>
->
+import type { CollapseCategories } from './collapse-categories'
+import type { Rehydrate } from './rehydrate'
 
-type _Rehydrate<T> = T extends { type: infer Tag }
-  ? Extract<TSESTree.Node, { type: Tag }>
-  : T
-type _CollapseCategories<T> = [T] extends [TSESTree.Expression]
-  ? TSESTree.Expression
-  : [T] extends [TSESTree.Statement]
-    ? TSESTree.Statement
-    : T
+/**
+ * Normalizes a captured value or template value for substitution: the
+ * fluent wrapper off, the tag rehydrated, the node widened to its category.
+ */
+export type NormalizeCaptured<V> = CollapseCategories<
+  Rehydrate<UnwrapFluent<V>>
+>

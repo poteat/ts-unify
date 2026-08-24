@@ -2,20 +2,15 @@ import type { TSESTree } from '@typescript-eslint/types'
 
 import type { CommentNode } from '@/ast/comment-node'
 
-type UpstreamByKind = {
-  [K in keyof typeof TSESTree.AST_NODE_TYPES]: Extract<
-    TSESTree.Node,
-    { type: (typeof TSESTree.AST_NODE_TYPES)[K] }
-  >
-}
+import type { UpstreamByKind } from './upstream-by-kind'
 
 /**
- * Map node kind → concrete `TSESTree.Node` interface for that kind, plus
- * `Comment` → `CommentNode`. `Program.comments` holds `CommentNode`s, the
- * view a match presents for the parser's raw comments.
+ * Each node kind mapped to its concrete `TSESTree.Node` interface, plus
+ * `Comment` to `CommentNode`.
  *
- * - Uses the `type` discriminant to extract the specific interface.
- * - Keeps a precise association without copying upstream node definitions.
+ * `Program.comments` holds `CommentNode`s, the view a match presents for
+ * the parser's raw comments. The `type` discriminant picks each interface
+ * out of `TSESTree.Node`, so no upstream definition is copied.
  */
 export type NodeByKind = Omit<UpstreamByKind, 'Program'> & {
   Program: Omit<TSESTree.Program, 'comments'> & { comments?: CommentNode[] }

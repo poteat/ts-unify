@@ -1,11 +1,8 @@
 import type { FLUENT_INNER } from '@/ast/fluent-node'
 
 /**
- * UnwrapFluent<T>
- *
- * If `T` is a `FluentNode<N>`, yields `N`; otherwise yields `T` unchanged.
- * Uses the symbol brand so inference doesn't traverse the full FluentNode
- * intersection.
+ * The plain shape `N` of a `FluentNode<N>`; any other type unchanged.
+ * Reads the brand, so inference skips the fluent intersection.
  */
 export type UnwrapFluent<T> = T extends { readonly [FLUENT_INNER]: infer N }
   ? N

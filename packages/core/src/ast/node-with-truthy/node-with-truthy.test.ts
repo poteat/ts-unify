@@ -1,8 +1,10 @@
+import type { NodeByKind } from '@/ast/node-by-kind'
 import type { NodeWithTruthy } from '@/ast/node-with-truthy'
 import type { Capture } from '@/capture'
 import AssertType from '@/test-utils/assert-type'
+import type { KeysOfUnion } from '@/type-utils'
 
-describe('NodeWithTruthy (type-level)', () => {
+describe('node-with-truthy', () => {
   it('narrows the single capture to Truthy<...>', () => {
     type Node = {
       type: 'ReturnStatement'
@@ -45,5 +47,12 @@ describe('NodeWithTruthy (type-level)', () => {
     }
 
     void check
+  })
+
+  it("collides with no AST node data field named 'truthy'", () => {
+    type U = NodeByKind[keyof NodeByKind]
+    type AllKeys = KeysOfUnion<U>
+    type HasTruthy = 'truthy' extends AllKeys ? true : false
+    AssertType.assertType<HasTruthy, false>(0)
   })
 })

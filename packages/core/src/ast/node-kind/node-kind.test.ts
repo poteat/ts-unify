@@ -6,18 +6,16 @@ import type { NodeKind } from './node-kind'
 
 const _x: keyof typeof TSESTree.AST_NODE_TYPES = 'IfStatement'
 
-describe('NodeKind', () => {
-  it('matches keys of AST_NODE_TYPES', () => {
+describe('node-kind', () => {
+  it('has the members of AST_NODE_TYPES, spot-checked', () => {
     type K = NodeKind
-    // Spot-check a few members
     AssertType.assertType<Extract<K, 'IfStatement'>, 'IfStatement'>(0)
     AssertType.assertType<Extract<K, 'Identifier'>, 'Identifier'>(0)
     AssertType.assertType<Extract<K, 'Literal'>, 'Literal'>(0)
     AssertType.assertType<Extract<K, 'Comment'>, 'Comment'>(0)
   })
 
-  it('is keyed to TSESTree.AST_NODE_TYPES', () => {
-    // Ensures we reference the upstream enum, not a copied list
+  it('is keyed to the upstream enum TSESTree.AST_NODE_TYPES', () => {
     void _x
   })
 })

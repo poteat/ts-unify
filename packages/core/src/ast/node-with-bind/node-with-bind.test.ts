@@ -6,7 +6,7 @@ import type { Capture } from '@/capture'
 import type { ExtractCaptures } from '@/pattern'
 import AssertType from '@/test-utils/assert-type'
 
-describe('NodeWithBind (type-level)', () => {
+describe('node-with-bind', () => {
   it('bind(name) clears existing capture bag entries', () => {
     type Node = {
       type: 'BlockStatement'

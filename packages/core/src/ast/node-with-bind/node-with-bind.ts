@@ -1,17 +1,20 @@
 import type { FluentNode } from '@/ast/fluent-node'
-import type { NormalizeCaptured } from '@/ast/normalize-captured'
 import type { Sealed } from '@/ast/sealed'
-import type { SubstituteCaptures } from '@/ast/substitute-captures'
+
+import type { BindExclusive } from './bind-exclusive'
 
 /**
- * Add a fluent `.bind` which captures an entire subtree under a particular
- * name. Regardless of overload, the existing capture bag is cleared and
- * replaced with a single whole-tree capture.
+ * Adds a fluent `.bind` that captures the whole subtree under one name.
+ * Either form clears the existing capture bag first.
  */
 export type NodeWithBind<Node> = Node & {
   /**
-   * Capture the whole subtree under the provided `name`. Clears any existing
-   * capture entries contributed by the node while keeping the node unsealed.
+   * Captures the whole subtree under the given name, dropping the
+   * captures the node contributed.
+   *
+   * Called with no name, it binds as `node` and seals.
+   *
+   * @param name the bag key the subtree lands under
    */
   bind<const S extends string>(name: S): FluentNode<BindExclusive<Node, S>>
 
@@ -20,15 +23,4 @@ export type NodeWithBind<Node> = Node & {
    * name, seal the subtree, and clear the capture bag.
    */
   bind(): FluentNode<Sealed<BindExclusive<Node, 'node'>>>
-}
-
-type BindBagEntries<Node, Name extends string> = {
-  [K in Name]: NormalizeCaptured<Node>
-}
-
-type BindExclusive<Node, Name extends string> = SubstituteCaptures<
-  Omit<Node, '__with' | '__only'>,
-  BindBagEntries<Node, Name>
-> & {
-  readonly __only: BindBagEntries<Node, Name>
 }

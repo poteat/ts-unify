@@ -1,6 +1,6 @@
 import Ast from '@/ast'
 
-describe('NodeWithExactly (type-level)', () => {
+describe('node-with-exactly', () => {
   it('preserves chainability after .exactly()', () => {
     void Ast.U.ThisExpression().exactly(1)
   })

@@ -1,12 +1,9 @@
 import Ast from '@/ast'
 
-describe('NodeWithUntil (type-level)', () => {
-  it('preserves chainability after .until()', () => {
-    // .until() returns FluentNode<N> — further chaining is valid.
+describe('node-with-until', () => {
+  it('returns a FluentNode that chains .none() after .until()', () => {
     const p = Ast.U.ThisExpression().until(Ast.U.FunctionDeclaration())
-    // Can chain .none() after .until()
     const q = Ast.U.ThisExpression().until(Ast.U.FunctionDeclaration()).none()
-    // Suppress unused warnings
     void p
     void q
   })

@@ -4,8 +4,8 @@ import type { NodeWithDefaultUndefined } from '@/ast/node-with-default-undefined
 import type { Capture } from '@/capture'
 import AssertType from '@/test-utils/assert-type'
 
-describe('NodeWithDefaultUndefined (type-level)', () => {
-  it('provides undefined default for single capture and applies to node shape', () => {
+describe('node-with-default-undefined', () => {
+  it('defaults a single capture to undefined in the node shape', () => {
     type N = {
       type: 'ReturnStatement'
       argument: Capture<'arg', TSESTree.Expression | undefined>
@@ -23,7 +23,7 @@ describe('NodeWithDefaultUndefined (type-level)', () => {
     void check
   })
 
-  it('is unavailable when multiple captures are present (returns never)', () => {
+  it('returns never when there are multiple captures', () => {
     type N = {
       type: 'X'
       aField: Capture<'a', TSESTree.Expression | undefined>

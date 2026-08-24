@@ -6,7 +6,7 @@ import AssertType from '@/test-utils/assert-type'
 
 import type { NodeByKind } from './node-by-kind'
 
-describe('NodeByKind', () => {
+describe('node-by-kind', () => {
   it('indexes concrete node interfaces by kind', () => {
     type IfNode = NodeByKind['IfStatement']
     type IdNode = NodeByKind['Identifier']

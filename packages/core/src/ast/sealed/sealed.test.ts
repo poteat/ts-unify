@@ -3,19 +3,17 @@ import AssertType from '@/test-utils/assert-type'
 
 import type { Sealed } from './sealed'
 
-describe('Sealed brand (type-level)', () => {
-  it('preserves original fields while adding a brand', () => {
+describe('sealed', () => {
+  it('keeps the original fields at their types while adding a brand', () => {
     type Inner = { a: number; b: string }
     type S = Sealed<Inner>
-    // Original fields remain the same types
     AssertType.assertType<S['a'], number>(0)
     AssertType.assertType<S['b'], string>(0)
   })
 
-  it('can be used to mark a single-capture subtree', () => {
+  it('marks a single-capture subtree whose fields stay reachable', () => {
     type Inner = { type: 'ReturnStatement'; argument: Capture<'x', number> }
     type S = Sealed<Inner>
-    // Structural access to existing fields still works
     type Arg = S['argument']
     void (null as unknown as Arg)
   })

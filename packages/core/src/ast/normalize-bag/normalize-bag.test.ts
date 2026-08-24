@@ -3,7 +3,7 @@ import type { TSESTree } from '@typescript-eslint/types'
 import type { NormalizeBag } from '@/ast/normalize-bag'
 import AssertType from '@/test-utils/assert-type'
 
-describe('NormalizeBag (type-level)', () => {
+describe('normalize-bag', () => {
   it('normalizes each entry using NormalizeCaptured', () => {
     type Bag = {
       a: { type: 'Literal' }

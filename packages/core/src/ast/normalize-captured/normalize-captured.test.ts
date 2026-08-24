@@ -4,17 +4,13 @@ import type { FluentNode } from '@/ast/fluent-node'
 import type { NormalizeCaptured } from '@/ast/normalize-captured'
 import AssertType from '@/test-utils/assert-type'
 
-describe('NormalizeCaptured (type-level)', () => {
-  it(
-    'unwraps FluentNode and rehydrates tagged shapes, collapsing to ' +
-      'categories',
-    () => {
-      type N = { type: 'Literal'; value: string }
-      type F = FluentNode<N>
-      type Out = NormalizeCaptured<F>
-      AssertType.assertType<Out, TSESTree.Expression>(0)
-    },
-  )
+describe('normalize-captured', () => {
+  it('unwraps a FluentNode and collapses its tag to a category', () => {
+    type N = { type: 'Literal'; value: string }
+    type F = FluentNode<N>
+    type Out = NormalizeCaptured<F>
+    AssertType.assertType<Out, TSESTree.Expression>(0)
+  })
 
   it('collapses statements to Statement and expressions to Expression', () => {
     type S = NormalizeCaptured<{ type: 'ReturnStatement' }>

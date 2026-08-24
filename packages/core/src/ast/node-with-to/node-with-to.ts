@@ -1,5 +1,3 @@
-import type { AstTransform } from '@/ast/ast-transform'
-import type { HasSingleCapture } from '@/ast/capture-cardinality'
 import type { NodeByKind } from '@/ast/node-by-kind'
 import type { NodeKind } from '@/ast/node-kind'
 import type { NormalizeCaptured } from '@/ast/normalize-captured'
@@ -7,45 +5,35 @@ import type {
   PatternBuilder,
   PATTERN_BUILDER_BRAND,
 } from '@/ast/pattern-builder'
+import type { SingleCaptureOnly } from '@/ast/single-capture-only'
 import type { ExtractCaptures } from '@/pattern'
 import type { WithoutInternalAstFields } from '@/type-utils'
 import type { SingleValueOf } from '@/type-utils/single-value-of'
 
-/**
- * Result of attaching `.to(...)` to a node — both an `AstTransform`
- * (carries `from`, `to`, `message`, etc.) and a `Pattern<Node>` (embeddable
- * inside another pattern's structural shape).
- */
-export type ToAttached<
-  Node,
-  Result,
-  Cfg extends Record<string, unknown> = {},
-> = Node & AstTransform<Node, Result, Cfg>
+import type { ToAttached } from './to-attached'
 
 /**
- * Add a `.to` method to a node value `N`.
+ * Adds a `.to` method to a node value `N`, attaching a rewrite factory
+ * that receives the capture bag derived from the node.
  *
- * `.to` attaches a rewrite factory that receives the capture bag derived
- * from the node. The result remains embeddable inside another pattern
- * (so inner `.to(...)` declares a local rewrite at that sub-position), and
- * also exposes the chainable rule-level helpers `.message`, `.recommended`,
- * `.config`, and `.imports` for top-level rule definitions.
- *
- * See `nested-to.spec.md` for the bottom-up evaluation semantics.
+ * The result still embeds inside another pattern, where an inner `.to()`
+ * declares a local rewrite at that position, and carries the rule-level
+ * helpers `.message`, `.recommended`, `.config` and `.imports`.
  */
 export type NodeWithTo<Node> = {
   /**
-   * Zero-arg sugar: finalize by returning the single capture value as output.
-   * Enabled only when the capture bag has exactly one key.
+   * Attaches the rewrite whose output is the one capture's value.
+   *
+   * Callable only on a node with exactly one capture.
    */
   to(
-    ..._enforce: [HasSingleCapture<Node>] extends [true] ? [] : [never]
+    ..._enforce: SingleCaptureOnly<Node>
   ): ToAttached<Node, NormalizeCaptured<SingleValueOf<ExtractCaptures<Node>>>>
 
   /**
-   * Finalize the node by directly providing a builder for the output kind.
-   * Accepts a `PatternBuilder<K>` and uses the concrete node shape for `K` as
-   * the output type. Equivalent to `.to((bag) => Builder(bag))`.
+   * Attaches the rewrite that fills a node kind with the captures, as
+   * `.to(bag => Builder(bag))` would.
+   * @param builder the builder of the output kind
    */
   to<K extends NodeKind>(
     builder: PatternBuilder<K>,
@@ -58,12 +46,8 @@ export type NodeWithTo<Node> = {
   ): ToAttached<Node, WithoutInternalAstFields<NodeByKind[K]>>
 
   /**
-   * Finalize the node with a rewrite factory.
-   *
-   * @typeParam Result Arbitrary result type produced by the factory (e.g., a
-   * builder-produced node). Provider leaves this unconstrained; consumers may
-   * restrict it further.
-   * @param factory Callback receiving the capture bag.
+   * Attaches the rewrite whose output the factory builds from the bag.
+   * @param factory receives the capture bag of a match
    */
   to<Result>(
     factory: ((bag: ExtractCaptures<Node>) => Result) & {

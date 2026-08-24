@@ -1,20 +1,23 @@
 import type { HasSingleCapture } from '@/ast/capture-cardinality'
-import type { FluentNode } from '@/ast/fluent-node'
-import type { SubstituteSingleCapture } from '@/ast/substitute-single-capture'
+import type { NarrowSingleCapture } from '@/ast/narrow-single-capture'
 
+/**
+ * Adds a fluent `.default(expr)` for single-capture nodes: where the
+ * capture is absent, the match substitutes `expr`.
+ */
 export type NodeWithDefault<Node> = Node & {
   /**
-   * Single-capture overload — available only when there is exactly one capture.
-   * Equivalent to `.map(v => v ?? expr)`.
+   * Substitutes the given expression for the one capture when it is
+   * absent, as `.map(v => v ?? expr)` would.
+   *
+   * Callable only on a node with exactly one capture.
    */
   default<Expr>(
     expr: [HasSingleCapture<Node>] extends [true] ? Expr : never,
-  ): [HasSingleCapture<Node>] extends [true]
-    ? FluentNode<SubstituteSingleCapture<Node, Expr>>
-    : never
+  ): NarrowSingleCapture<Node, Expr>
 
   /**
-   * Fallback overload — unusable when there isn't exactly one capture.
+   * The overload a node with no single capture falls to; unusable.
    */
   default(expr: never): never
 }
