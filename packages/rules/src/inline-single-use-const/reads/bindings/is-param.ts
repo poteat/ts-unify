@@ -1,4 +1,4 @@
-import type { Node } from './tree'
+import type { Node } from '../tree'
 
 /**
  * Whether an identifier is one of a function's parameters.

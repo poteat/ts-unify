@@ -16,7 +16,7 @@ import Tree from './tree'
  */
 export function moves(read: Read, stmt: Tree.Node, init: Tree.Node) {
   const { node, above } = read
-  const parent: Tree.Node | undefined = above[above.length - 1]
+  const parent = above.length > 0 ? above[above.length - 1] : undefined
   if (parent?.type === 'Property' && parent.shorthand) return true
   if (parent?.type === 'TemplateLiteral') return true
 

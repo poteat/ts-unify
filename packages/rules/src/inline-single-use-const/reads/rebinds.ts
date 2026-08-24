@@ -1,4 +1,4 @@
-import { isParam } from './is-param'
+import Bindings from './bindings'
 import Kinds from './kinds'
 import Tree from './tree'
 
@@ -26,15 +26,13 @@ export function rebinds(tree: unknown, name: string) {
     ([n, parent]) =>
       Tree.spells(n, name) &&
       parent !== null &&
-      ((parent.type === 'VariableDeclarator' && parent.id === n) ||
+      (Bindings.isDirectBinding(parent, n) ||
         (Kinds.FUNCTIONS.has(parent.type) &&
-          (parent.id === n || isParam(parent, n))) ||
+          (parent.id === n || Bindings.isParam(parent, n))) ||
         parent.type === 'ArrayPattern' ||
         parent.type === 'RestElement' ||
         (parent.type === 'Property' &&
           parent.value === n &&
-          inPattern(parent)) ||
-        (parent.type === 'AssignmentPattern' && parent.left === n) ||
-        (parent.type === 'CatchClause' && parent.param === n)),
+          inPattern(parent))),
   )
 }

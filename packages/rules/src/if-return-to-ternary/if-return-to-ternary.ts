@@ -1,6 +1,6 @@
 import { U, $ } from '@ts-unify/core'
 
-import { anyReturnForm } from './any-return-form'
+import IfGuardedReturnToTernary from '../if-guarded-return-to-ternary'
 
 /**
  * An `if` whose two branches each return is one return of a ternary.
@@ -9,8 +9,8 @@ import { anyReturnForm } from './any-return-form'
  */
 export const ifReturnToTernary = U.IfStatement({
   test: $,
-  consequent: anyReturnForm,
-  alternate: anyReturnForm,
+  consequent: IfGuardedReturnToTernary.anyReturnForm,
+  alternate: IfGuardedReturnToTernary.anyReturnForm,
 })
   .to(bag => U.ReturnStatement({ argument: U.ConditionalExpression(bag) }))
   .message('Collapse if/else return into ternary')

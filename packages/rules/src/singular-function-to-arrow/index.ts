@@ -1,3 +1,4 @@
+export * from './any-expression-statement'
 export * from './expr-block'
 export * from './fn-boundary'
 export * from './is-method-body'

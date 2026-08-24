@@ -1,5 +1,6 @@
-import { U, $ } from '@ts-unify/core'
+import { U } from '@ts-unify/core'
 
+import { anyReturn } from './any-return'
 import { PARENTHESIZED_BODY } from './parenthesized-body'
 
 /**
@@ -10,7 +11,7 @@ import { PARENTHESIZED_BODY } from './parenthesized-body'
  */
 export const elideBracesForReturn = U.BlockStatement({
   parent: U.ArrowFunctionExpression(),
-  body: [U.ReturnStatement({ argument: $ }).defaultUndefined()],
+  body: [anyReturn],
 })
   .to(bag => {
     const argument = (bag as { argument?: { type?: string } }).argument

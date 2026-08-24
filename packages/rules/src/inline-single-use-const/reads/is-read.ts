@@ -1,4 +1,4 @@
-import { isParam } from './is-param'
+import Bindings from './bindings'
 import Kinds from './kinds'
 import type { Node } from './tree'
 
@@ -20,13 +20,11 @@ export const isRead = (id: Node, parent: Node | undefined) =>
     (parent.type === 'MemberExpression' &&
       parent.property === id &&
       !parent.computed) ||
-    (parent.type === 'VariableDeclarator' && parent.id === id) ||
-    (Kinds.FUNCTIONS.has(parent.type) && isParam(parent, id)) ||
+    Bindings.isDirectBinding(parent, id) ||
+    (Kinds.FUNCTIONS.has(parent.type) && Bindings.isParam(parent, id)) ||
     parent.type === 'ArrayPattern' ||
     parent.type === 'ObjectPattern' ||
     parent.type === 'RestElement' ||
-    (parent.type === 'AssignmentPattern' && parent.left === id) ||
-    (parent.type === 'CatchClause' && parent.param === id) ||
     parent.type === 'LabeledStatement' ||
     parent.type === 'BreakStatement' ||
     parent.type === 'ContinueStatement' ||
