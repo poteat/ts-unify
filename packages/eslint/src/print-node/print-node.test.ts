@@ -31,6 +31,10 @@ describe('print-node', () => {
     expect(printNode(first('f<number>(1);'))).toBe('f<number>(1);')
   })
 
+  it('keeps a tab at the start of a line inside a template', () => {
+    expect(printNode(first('const s = `a\n\tb`;'))).toBe('const s = `a\n\tb`;')
+  })
+
   it('does not mutate the input node', () => {
     const node = first('type T = ReturnType<typeof f>;')
     printNode(node)

@@ -26,6 +26,12 @@ printer. It is the one place the ESLint package hands nodes to recast.
   already reads `params` before `parameters`, so that pair needs nothing.
 - recast's upstream printer (0.24.0) still reads the old names, so the
   mapping lives here rather than in a version bump.
+- The copy carries no source positions, so recast's `print` finds no
+  original text to reuse at any node and prints as `prettyPrint` does,
+  after a search per node for it. `prettyPrint` is used, except for a
+  tree whose text holds whitespace other than spaces and line ends (a
+  tab at the start of a line inside a template): `print` keeps such a
+  character where `prettyPrint` writes spaces, so `print` is used there.
 
 ## Semantics
 

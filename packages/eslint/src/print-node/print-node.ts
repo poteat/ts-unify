@@ -1,11 +1,21 @@
-import { print } from 'recast'
+import { prettyPrint, print } from 'recast'
 
+import { hasOddWhitespace } from './has-odd-whitespace'
 import RecastShape from './recast-shape'
 
 /**
  * Print an ESTree node (typescript-estree v8 shape) to source text via recast.
  *
+ * The tree printed is a copy without source positions, so recast's
+ * reprinting printer finds no original text at any node and prints as
+ * its generic printer does, at the cost of the search; the generic
+ * printer is used unless the text holds odd whitespace, which only the
+ * reprinting printer keeps.
+ *
  * @param node the node to print
  */
-export const printNode = (node: unknown) =>
-  print(RecastShape.toRecastShape(node) as Parameters<typeof print>[0]).code
+export function printNode(node: unknown) {
+  const shaped = RecastShape.toRecastShape(node) as Parameters<typeof print>[0]
+
+  return (hasOddWhitespace(shaped) ? print(shaped) : prettyPrint(shaped)).code
+}
