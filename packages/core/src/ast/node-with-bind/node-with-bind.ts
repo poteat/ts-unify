@@ -13,10 +13,13 @@ export type NodeWithBind<Node> = Node & {
    * Capture the whole subtree under the provided `name`. Clears any existing
    * capture entries contributed by the node while keeping the node unsealed.
    */
-  readonly bind: (<const S extends string>(
-    name: S,
-  ) => FluentNode<BindExclusive<Node, S>>) &
-    (() => FluentNode<Sealed<BindExclusive<Node, 'node'>>>)
+  bind<const S extends string>(name: S): FluentNode<BindExclusive<Node, S>>
+
+  /**
+   * Zero-arg sugar: capture the whole subtree under the canonical `"node"`
+   * name, seal the subtree, and clear the capture bag.
+   */
+  bind(): FluentNode<Sealed<BindExclusive<Node, 'node'>>>
 }
 
 type BindBagEntries<Node, Name extends string> = {

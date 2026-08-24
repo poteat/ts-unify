@@ -33,20 +33,48 @@ export type NodeWithWhen<Node> = Node & {
    * result excludes the node from matching.
    * @returns A node with the capture and its occurrences narrowed.
    */
-  readonly when: (<VNarrow extends SingleValueOf<ExtractCaptures<Node>>>(
+  when<VNarrow extends SingleValueOf<ExtractCaptures<Node>>>(
     guard: [HasSingleCapture<Node>] extends [true]
       ? (value: SingleValueOf<ExtractCaptures<Node>>) => value is VNarrow
       : never,
-  ) => [HasSingleCapture<Node>] extends [true]
+  ): [HasSingleCapture<Node>] extends [true]
     ? FluentNode<SubstituteSingleCapture<Node, VNarrow>>
-    : never) &
-    ((
-      predicate: [HasSingleCapture<Node>] extends [true]
-        ? (value: SingleValueOf<ExtractCaptures<Node>>) => boolean
-        : never,
-    ) => [HasSingleCapture<Node>] extends [true] ? FluentNode<Node> : never) &
-    (<Narrow extends ExtractCaptures<Node>>(
-      guard: (bag: ExtractCaptures<Node>) => bag is Narrow,
-    ) => FluentNode<SubstituteCaptures<Node, Narrow>>) &
-    ((predicate: (bag: ExtractCaptures<Node>) => boolean) => FluentNode<Node>)
+    : never
+
+  /**
+   * Single-capture boolean predicate overload. When the node has exactly one
+   * capture, accepts a value predicate without changing types.
+   *
+   * @param predicate Predicate over the single capture's value. A false result
+   * excludes the node from matching.
+   * @returns The same node type (no narrowing).
+   */
+  when(
+    predicate: [HasSingleCapture<Node>] extends [true]
+      ? (value: SingleValueOf<ExtractCaptures<Node>>) => boolean
+      : never,
+  ): [HasSingleCapture<Node>] extends [true] ? FluentNode<Node> : never
+
+  /**
+   * Bag type guard overload. Accepts a guard over the capture bag derived from
+   * the node, and refines all matching capture/spread occurrences in the node.
+   *
+   * @typeParam Narrow The refined capture bag type.
+   * @param guard Predicate that refines the capture bag. A false result
+   * excludes the node from matching.
+   * @returns A node with all occurrences narrowed per the refined bag.
+   */
+  when<Narrow extends ExtractCaptures<Node>>(
+    guard: (bag: ExtractCaptures<Node>) => bag is Narrow,
+  ): FluentNode<SubstituteCaptures<Node, Narrow>>
+
+  /**
+   * Bag boolean predicate overload. Accepts a predicate over the capture bag
+   * without changing types.
+   *
+   * @param predicate Predicate over the capture bag. A false result excludes
+   * the node from matching.
+   * @returns The same node type (no narrowing).
+   */
+  when(predicate: (bag: ExtractCaptures<Node>) => boolean): FluentNode<Node>
 }

@@ -38,24 +38,36 @@ export type NodeWithTo<Node> = {
    * Zero-arg sugar: finalize by returning the single capture value as output.
    * Enabled only when the capture bag has exactly one key.
    */
-  readonly to: ((
+  to(
     ..._enforce: [HasSingleCapture<Node>] extends [true] ? [] : [never]
-  ) => ToAttached<
-    Node,
-    NormalizeCaptured<SingleValueOf<ExtractCaptures<Node>>>
-  >) &
-    (<K extends NodeKind>(
-      builder: PatternBuilder<K>,
-      ..._enforce: ExtractCaptures<Node> extends Omit<
-        WithoutInternalAstFields<NodeByKind[K]>,
-        'type'
-      >
-        ? []
-        : [never]
-    ) => ToAttached<Node, WithoutInternalAstFields<NodeByKind[K]>>) &
-    (<Result>(
-      factory: ((bag: ExtractCaptures<Node>) => Result) & {
-        readonly [PATTERN_BUILDER_BRAND]?: never
-      },
-    ) => ToAttached<Node, Result>)
+  ): ToAttached<Node, NormalizeCaptured<SingleValueOf<ExtractCaptures<Node>>>>
+
+  /**
+   * Finalize the node by directly providing a builder for the output kind.
+   * Accepts a `PatternBuilder<K>` and uses the concrete node shape for `K` as
+   * the output type. Equivalent to `.to((bag) => Builder(bag))`.
+   */
+  to<K extends NodeKind>(
+    builder: PatternBuilder<K>,
+    ..._enforce: ExtractCaptures<Node> extends Omit<
+      WithoutInternalAstFields<NodeByKind[K]>,
+      'type'
+    >
+      ? []
+      : [never]
+  ): ToAttached<Node, WithoutInternalAstFields<NodeByKind[K]>>
+
+  /**
+   * Finalize the node with a rewrite factory.
+   *
+   * @typeParam Result Arbitrary result type produced by the factory (e.g., a
+   * builder-produced node). Provider leaves this unconstrained; consumers may
+   * restrict it further.
+   * @param factory Callback receiving the capture bag.
+   */
+  to<Result>(
+    factory: ((bag: ExtractCaptures<Node>) => Result) & {
+      readonly [PATTERN_BUILDER_BRAND]?: never
+    },
+  ): ToAttached<Node, Result>
 }

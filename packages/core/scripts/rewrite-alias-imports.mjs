@@ -21,13 +21,16 @@ const relativeTo = (file, target) => {
 let rewritten = 0;
 for (const file of walk(dist)) {
   const before = readFileSync(file, "utf8");
-  const after = before.replace(/(from\s+|import\s*\(\s*)"@\/([^"]*)"/g, (_, lead, target) => {
-    rewritten += 1;
-    return `${lead}"${relativeTo(file, target)}"`;
-  });
+  const after = before.replace(
+    /(from\s+|import\s*\(\s*)(["'])@\/([^"']*)\2/g,
+    (_, lead, quote, target) => {
+      rewritten += 1;
+      return `${lead}${quote}${relativeTo(file, target)}${quote}`;
+    },
+  );
   if (after !== before) writeFileSync(file, after);
 }
-const leftover = walk(dist).filter((f) => /"@\//.test(readFileSync(f, "utf8")));
+const leftover = walk(dist).filter((f) => /["']@\//.test(readFileSync(f, "utf8")));
 if (leftover.length) {
   console.error(`alias imports remain in: ${leftover.join(", ")}`);
   process.exit(1);

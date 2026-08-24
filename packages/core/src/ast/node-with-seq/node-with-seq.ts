@@ -20,9 +20,9 @@ export type SeqResult<Elements extends readonly unknown[]> = {
    * Attach an inline rewrite factory. The factory receives the merged
    * captures from all seq elements — fully typed via ExtractCaptures.
    */
-  readonly to: <Result>(
+  to<Result>(
     factory: (bag: Prettify<ExtractCaptures<SeqResult<Elements>>>) => Result,
-  ) => SeqResult<Elements>
+  ): SeqResult<Elements>
 }
 
 export type SeqCombinator = {

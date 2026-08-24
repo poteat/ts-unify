@@ -7,10 +7,14 @@ export type NodeWithDefault<Node> = Node & {
    * Single-capture overload — available only when there is exactly one capture.
    * Equivalent to `.map(v => v ?? expr)`.
    */
-  readonly default: (<Expr>(
+  default<Expr>(
     expr: [HasSingleCapture<Node>] extends [true] ? Expr : never,
-  ) => [HasSingleCapture<Node>] extends [true]
+  ): [HasSingleCapture<Node>] extends [true]
     ? FluentNode<SubstituteSingleCapture<Node, Expr>>
-    : never) &
-    ((expr: never) => never)
+    : never
+
+  /**
+   * Fallback overload — unusable when there isn't exactly one capture.
+   */
+  default(expr: never): never
 }
