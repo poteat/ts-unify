@@ -74,3 +74,26 @@ export const longSummary = U.Comment({ kind: "jsdoc", summary: [$, $, $, ...$] }
 // Non-ASCII in a comment
 export const asciiComments = U.Comment({ text: /[^\x00-\x7f]/ });
 ```
+
+A string position also takes a string predicate from `U.string`, which is the
+same mechanism as the `RegExp`. Each predicate is a plain function too, for a
+captured value.
+
+```ts
+// An identifier spelling a reserved word (strict-mode words included)
+export const reservedName = U.Identifier({ name: U.string.reserved() });
+
+// A quoted key that need not be quoted
+export const quotedKey = U.Property({ key: U.Literal({ value: U.string.identifierName() }) });
+
+// A destructuring rename whose key could have been the binding: the test sits
+// on the capture over the or, once for either spelling of the key
+export const renamedKey = U.Property({
+  shorthand: false,
+  key: U.or(U.Identifier({ name: $("key") }), U.Literal({ value: $("key") })).when(
+    (bag: { key: unknown }): bag is { key: string } =>
+      U.string.identifierName()(bag.key) && !U.string.reserved()(bag.key),
+  ),
+  value: U.Identifier({ name: $("name") }),
+});
+```
