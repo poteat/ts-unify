@@ -30,8 +30,9 @@ export function matchRunPlans(
           Context.childCursor(at, index),
         ),
       )
-    )
+    ) {
       return null
+    }
   }
 
   return bag

@@ -13,11 +13,16 @@ export function candidateOf(
     !Tree.isNode(statement) ||
     statement.type !== 'VariableDeclaration' ||
     statement.kind !== 'const'
-  )
+  ) {
     return null
+  }
+
   const decls = statement.declarations
-  if (!Array.isArray(decls) || decls.length !== 1 || !Tree.isNode(decls[0]))
+
+  if (!Array.isArray(decls) || decls.length !== 1 || !Tree.isNode(decls[0])) {
     return null
+  }
+
   const { id, init } = decls[0]
 
   return Tree.isNode(id) &&

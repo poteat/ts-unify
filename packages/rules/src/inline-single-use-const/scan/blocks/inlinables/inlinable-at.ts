@@ -23,8 +23,10 @@ export function inlinableAt(
   tally: Tally | undefined,
   nextEffectEnd: number,
 ): Inlinable | null {
-  if (!tally || tally.rebinds || tally.typeNamed || tally.read === null)
+  if (!tally || tally.rebinds || tally.typeNamed || tally.read === null) {
     return null
+  }
+
   const { read } = tally
 
   return read.statement === index + 1 && !Moves.moves(read, init, nextEffectEnd)

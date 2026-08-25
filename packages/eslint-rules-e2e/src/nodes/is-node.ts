@@ -1,4 +1,4 @@
-import type { Walked } from './walked'
+import type { Walked } from './types'
 
 /**
  * Whether a value is a node: an object carrying a string `type`.

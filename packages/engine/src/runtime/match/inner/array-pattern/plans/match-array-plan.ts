@@ -71,8 +71,10 @@ export function matchArrayPlan(
           bag,
           Ends.matchRunPlans(actual, { elements: middle, start: pos }, at),
         )
-      )
+      ) {
         continue
+      }
+
       const n1 = spreads[0].name || at.key
 
       if (n1) {

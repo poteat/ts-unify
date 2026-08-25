@@ -15,9 +15,7 @@ import Util from './util'
 export function buildTree<E>(rows: readonly Row<E>[]): DecisionTree<E> {
   const key = Util.chooseKey(rows)
 
-  if (key === null) {
-    return { isLeaf: true, entries: rows.map(it => it.entry) }
-  }
+  if (key === null) return { isLeaf: true, entries: rows.map(it => it.entry) }
 
   const at = (row: Row<E>) => row.literals.filter(it => it.key === key)
   const without = (row: Row<E>): Row<E> => ({

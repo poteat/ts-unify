@@ -53,8 +53,10 @@ export function matchFields(
               Context.childCursor(at, key),
             ),
           )
-        )
+        ) {
           return null
+        }
+
         continue
       case 'fields':
         if (
@@ -62,11 +64,14 @@ export function matchFields(
             bag,
             matchFields(actual, expected, Context.childCursor(at, key)),
           )
-        )
+        ) {
           return null
+        }
+
         continue
       case 'array':
         if (!Array.isArray(actual)) return null
+
         if (
           !Util.absorb(
             bag,
@@ -76,8 +81,10 @@ export function matchFields(
               Context.childCursor(at, key),
             ),
           )
-        )
+        ) {
           return null
+        }
+
         continue
       case 'literal':
         if (actual !== expected.value) return null

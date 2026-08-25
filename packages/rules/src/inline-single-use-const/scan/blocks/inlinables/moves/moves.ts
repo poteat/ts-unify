@@ -23,12 +23,15 @@ export function moves(read: ReadEvent, init: Tree.Node, effectEnd: number) {
   if (parent?.type === 'TemplateLiteral') return true
 
   for (const node of Frames.above(read)) {
-    if (Kinds.FUNCTIONS.has(node.type) || Kinds.LOOPS.has(node.type))
+    if (Kinds.FUNCTIONS.has(node.type) || Kinds.LOOPS.has(node.type)) {
       return true
+    }
   }
 
-  if (![...Tree.walk(init)].some(([n]) => Kinds.EFFECTS.has(n.type)))
+  if (![...Tree.walk(init)].some(([n]) => Kinds.EFFECTS.has(n.type))) {
     return false
+  }
+
   const [start] = read.node.range as [number, number]
   if (effectEnd <= start) return true
 
