@@ -2,7 +2,7 @@ import type { TSESTree } from '@typescript-eslint/types'
 
 import type { CommentNode } from '@/ast/comment-node'
 
-import type { UpstreamByKind } from './upstream-by-kind'
+import type { UpstreamByKind } from './types'
 
 /**
  * Each node kind mapped to its concrete `TSESTree.Node` interface, plus

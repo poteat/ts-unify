@@ -1,4 +1,4 @@
-import type { SeqResult } from './seq-result'
+import type { SeqResult } from './types'
 
 /**
  * `U.seq(...)`: sequential composition for array patterns. Matches a

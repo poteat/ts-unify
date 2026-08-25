@@ -1,9 +1,9 @@
-import type { Bag } from '../../bag'
-import type { Cursor } from '../../context'
-import type { Plan } from '../../plan'
-import { matchFields } from './match-fields'
-import { matchProxyPlan } from './match-proxy-plan'
+import type { Cursor } from '@ts-unify/engine/runtime/match/context'
+import type { Plan } from '@ts-unify/engine/runtime/match/plan'
+import type { Bag } from '@ts-unify/engine/runtime/types'
 
+import Fields from './fields'
+import Proxies from './proxies'
 /**
  * Matches one value against the plan of one pattern value, and returns
  * the captures, or null on mismatch.
@@ -30,9 +30,9 @@ export function matchPlan(actual: unknown, plan: Plan, at: Cursor): Bag | null {
     case 'string':
       return plan.test(actual) ? {} : null
     case 'proxy':
-      return matchProxyPlan(actual, plan, at)
+      return Proxies.matchProxyPlan(actual, plan, at)
     case 'fields':
-      return matchFields(actual, plan, at)
+      return Fields.matchFields(actual, plan, at)
     case 'literal':
       return actual === plan.value ? {} : null
   }

@@ -1,7 +1,7 @@
 import { U } from '@ts-unify/core'
 
-import { anyReturn } from './any-return'
-import { PARENTHESIZED_BODY } from './parenthesized-body'
+import Patterns from './patterns'
+import Util from './util'
 
 /**
  * An arrow whose block is one `return` has that expression as its body;
@@ -11,10 +11,10 @@ import { PARENTHESIZED_BODY } from './parenthesized-body'
  */
 export const elideBracesForReturn = U.BlockStatement({
   parent: U.ArrowFunctionExpression(),
-  body: [anyReturn],
+  body: [Patterns.anyReturn],
 })
   .to(({ argument }) =>
-    PARENTHESIZED_BODY.has(argument.type)
+    Util.PARENTHESIZED_BODY.has(argument.type)
       ? { ...argument, extra: { parenthesized: true } }
       : argument,
   )

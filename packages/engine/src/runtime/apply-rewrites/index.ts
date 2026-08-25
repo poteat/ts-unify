@@ -1,10 +1,7 @@
 export * from './apply-rewrites'
-export * from './clone-node'
-export * from './is-path-prefix'
-export * from './locate-parent'
-export type * from './located'
-export * from './metadata-keys'
+export * from './clones'
 export * from './outside'
-export * from './set-at'
+export * from './paths'
+export * from './util'
 
 export * as default from '.'

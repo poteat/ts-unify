@@ -1,4 +1,4 @@
-import type { CAPTURE_MODS_BRAND } from './capture-mods-brand'
+import type { CAPTURE_MODS_BRAND } from './brand'
 
 /**
  * Attach a set of modifiers to a capture token.

@@ -1,7 +1,6 @@
 import type { UnwrapFluent } from '@/ast/unwrap-fluent'
 
-import type { CollapseCategories } from './collapse-categories'
-import type { Rehydrate } from './rehydrate'
+import type { CollapseCategories, Rehydrate } from './steps'
 
 /**
  * Normalizes a captured value or template value for substitution: the

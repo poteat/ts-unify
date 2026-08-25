@@ -1,7 +1,6 @@
 import type { ExtractCaptures } from '@/pattern'
 
-import type { ExtractConfigFromImports } from './extract-config-from-imports'
-import type { ImportMap } from './import-map'
+import type { ExtractConfigFromImports, ImportMap } from './imports'
 
 /**
  * What `.to(...)` produces: the input pattern, an output factory, and the

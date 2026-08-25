@@ -2,10 +2,8 @@ import { U, $ } from '@ts-unify/core'
 import { AST_NODE_TYPES } from '@typescript-eslint/types'
 import type { TSESTree } from '@typescript-eslint/types'
 
-import { exprBlock } from './expr-block'
-import { fnBoundary } from './fn-boundary'
-import { isMethodBody } from './is-method-body'
-import { returnBlock } from './return-block'
+import Patterns from './patterns'
+import Util from './util'
 
 /**
  * A function declaration or expression whose body is one statement is an
@@ -21,15 +19,18 @@ export const singularFunctionToArrow = U.fromNode({
     AST_NODE_TYPES.FunctionDeclaration,
     AST_NODE_TYPES.FunctionExpression,
   ),
-  body: U.or(returnBlock, exprBlock),
+  body: U.or(Patterns.returnBlock, Patterns.exprBlock),
   generator: false,
   parent: $('parent'),
   ...$,
 })
-  .when(bag => !isMethodBody((bag as { parent?: TSESTree.Node | null }).parent))
+  .when(
+    bag =>
+      !Util.isMethodBody((bag as { parent?: TSESTree.Node | null }).parent),
+  )
   .where(
     U.or(U.ThisExpression(), U.Identifier({ name: 'arguments' }))
-      .until(fnBoundary)
+      .until(Patterns.fnBoundary)
       .none(),
   )
   .with(bag => ({

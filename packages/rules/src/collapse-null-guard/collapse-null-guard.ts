@@ -1,8 +1,7 @@
 import { U, $ } from '@ts-unify/core'
 
-import { coalesced } from './coalesced'
-import { nullCheck } from './null-check'
-import { returnOfValue } from './return-of-value'
+import Patterns from './patterns'
+import Rewrites from './rewrites'
 
 /**
  * A guard that returns a fallback when a value is `null`, followed by a
@@ -15,14 +14,14 @@ import { returnOfValue } from './return-of-value'
  * @example `if (v === null) return d; return v` becomes `return v ?? d`
  */
 export const collapseNullGuard = U.BlockStatement({
-  body: [...$, nullCheck, returnOfValue],
+  body: [...$, Patterns.nullCheck, Patterns.returnOfValue],
 })
   .to(({ body, value, fallback, typeAnnotation }) =>
     U.BlockStatement({
       body: [
         ...body,
         U.ReturnStatement({
-          argument: coalesced(value, fallback, typeAnnotation),
+          argument: Rewrites.coalesced(value, fallback, typeAnnotation),
         }),
       ],
     }),

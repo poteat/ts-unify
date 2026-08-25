@@ -1,10 +1,6 @@
 export type * from './bind-captures'
-export type * from './bind-node'
-export type * from './bind-object'
-export type * from './bind-placeholder'
-export type * from './bind-value'
+export * from './bind-node'
 export * from './mods'
-export type * from './pattern-keys'
 export * from './sequence'
 export * from './shape'
 

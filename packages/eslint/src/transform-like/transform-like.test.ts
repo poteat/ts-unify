@@ -1,6 +1,6 @@
 import { U, $ } from '@ts-unify/core'
 
-import type { MatchLike } from './match-like'
+import type { MatchLike } from './matches'
 import type { TransformLike } from './transform-like'
 
 describe('transform-like', () => {

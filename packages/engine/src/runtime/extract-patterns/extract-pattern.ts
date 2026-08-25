@@ -1,6 +1,5 @@
-import { extractPatterns } from './extract-patterns'
-import type { PatternEntry } from './pattern-entry'
-
+import Entries from './entries'
+import type { PatternEntry } from './entries'
 /**
  * The first entry pattern of a rule's proxy trace, or null when the
  * rule has none.
@@ -8,4 +7,4 @@ import type { PatternEntry } from './pattern-entry'
  * @param rule the rule's pattern proxy
  */
 export const extractPattern = (rule: unknown): PatternEntry | null =>
-  extractPatterns(rule)[0] ?? null
+  Entries.extractPatterns(rule)[0] ?? null

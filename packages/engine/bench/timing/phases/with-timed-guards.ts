@@ -1,8 +1,7 @@
 import type { ChainEntry } from '@ts-unify/core/internal'
 import type { RuleMeta } from '@ts-unify/runner'
 
-import type { GuardClock } from './guard-clock'
-
+import type { GuardClock } from './types'
 /**
  * The rule with every root `.when()` guard of its entry patterns wrapped
  * to add its time to the clock.

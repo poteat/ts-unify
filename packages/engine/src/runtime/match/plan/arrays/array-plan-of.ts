@@ -1,6 +1,5 @@
-import type { ArrayPlan } from './array-plan'
-import { arrayPlans } from './array-plans'
-
+import Memo from './memo'
+import type { ArrayPlan } from './types'
 /**
  * What an array pattern under a property asks, read once per array
  * object.
@@ -8,4 +7,4 @@ import { arrayPlans } from './array-plans'
  * @param expected the array pattern
  */
 export const arrayPlanOf = (expected: unknown[]): ArrayPlan =>
-  arrayPlans.of(expected)
+  Memo.arrayPlans.of(expected)

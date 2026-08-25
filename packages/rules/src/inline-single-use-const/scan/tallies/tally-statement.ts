@@ -1,11 +1,17 @@
-import Kinds from '../../reads/kinds'
-import Tree from '../../reads/tree'
-import type { Analysis } from '../analysis'
-import type { Frame, Suppressed } from '../frames'
-import { endOf } from './end-of'
-import { merge } from './merge'
-import { record } from './record'
-import type { Tally } from './tally'
+import Kinds from '@ts-unify/rules/inline-single-use-const/reads/kinds'
+import Tree from '@ts-unify/rules/inline-single-use-const/reads/tree'
+import type {
+  Frame,
+  Suppressed,
+} from '@ts-unify/rules/inline-single-use-const/scan/frames'
+import type {
+  Analysis,
+  Tally,
+} from '@ts-unify/rules/inline-single-use-const/scan/types'
+
+import Merging from './merging'
+import Ranges from './ranges'
+import Records from './records'
 
 /**
  * Adds every identifier under one statement of a block to the tallies,
@@ -40,12 +46,12 @@ export function tallyStatement(
 
     if (!Tree.isNode(value)) return
     if (Kinds.EFFECTS.has(value.type))
-      minEffectEnd = Math.min(minEffectEnd, endOf(value))
+      minEffectEnd = Math.min(minEffectEnd, Ranges.endOf(value))
     const frame = { node: value, up }
 
     if (value.type === 'BlockStatement' && Array.isArray(value.body)) {
       const nested = of(value.body)
-      merge(tallies, nested, frame, index, suppressed)
+      Merging.merge(tallies, nested, frame, index, suppressed)
       minEffectEnd = Math.min(minEffectEnd, nested.minEffectEnd)
 
       return
@@ -54,7 +60,7 @@ export function tallyStatement(
     let below = suppressed
 
     if (value.type === 'Identifier') {
-      record(value, frame, index, tallies, suppressed)
+      Records.record(value, frame, index, tallies, suppressed)
       below = { name: value.name as string, up: suppressed }
     }
 

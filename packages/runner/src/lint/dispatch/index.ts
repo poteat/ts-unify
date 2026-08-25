@@ -1,4 +1,4 @@
 export * from './dispatchers-of'
-export type * from './rule-entry'
+export * from './types'
 
 export * as default from '.'

@@ -1,5 +1,5 @@
 export * from './parse-corpus'
-export type * from './parsed-file'
 export * from './source-files'
+export * from './types'
 
 export * as default from '.'

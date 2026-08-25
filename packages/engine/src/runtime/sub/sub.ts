@@ -1,7 +1,4 @@
-import { deepEqual } from './deep-equal'
-import { isLeaf } from './is-leaf'
-import { POSITION_KEYS } from './position-keys'
-
+import Util from './util'
 /**
  * Structural substitution on an AST tree: a new tree in which every node
  * structurally equal to the target is the replacement.
@@ -11,8 +8,8 @@ import { POSITION_KEYS } from './position-keys'
  * @param replacement what stands in its place
  */
 export function sub<T>(tree: T, target: unknown, replacement: unknown): T {
-  if (deepEqual(tree, target)) return replacement as T
-  if (isLeaf(tree)) return tree
+  if (Util.deepEqual(tree, target)) return replacement as T
+  if (Util.isLeaf(tree)) return tree
 
   if (Array.isArray(tree)) {
     return tree.map(v => sub(v, target, replacement)) as T
@@ -22,7 +19,7 @@ export function sub<T>(tree: T, target: unknown, replacement: unknown): T {
   const result: Record<string, unknown> = {}
 
   for (const [k, v] of Object.entries(rec)) {
-    if (POSITION_KEYS.has(k)) {
+    if (Util.POSITION_KEYS.has(k)) {
       result[k] = v
       continue
     }

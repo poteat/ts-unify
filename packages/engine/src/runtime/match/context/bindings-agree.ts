@@ -1,6 +1,6 @@
-import Sub from '../../sub'
-import type { NamedBinding } from './named-binding'
+import Sub from '@ts-unify/engine/runtime/sub'
 
+import type { NamedBinding } from './types'
 /**
  * Whether every name bound more than once was bound to equal values.
  *

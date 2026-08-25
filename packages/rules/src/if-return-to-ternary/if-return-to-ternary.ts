@@ -1,6 +1,5 @@
 import { U, $ } from '@ts-unify/core'
-
-import IfGuardedReturnToTernary from '../if-guarded-return-to-ternary'
+import IfGuardedReturnToTernary from '@ts-unify/rules/if-guarded-return-to-ternary'
 
 /**
  * An `if` whose two branches each return is one return of a ternary.

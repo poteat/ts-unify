@@ -1,7 +1,7 @@
 import { prettyPrint, print } from 'recast'
 
-import { hasOddWhitespace } from './has-odd-whitespace'
 import RecastShape from './recast-shape'
+import Whitespace from './whitespace'
 
 /**
  * Print an ESTree node (typescript-estree v8 shape) to source text via recast.
@@ -17,5 +17,7 @@ import RecastShape from './recast-shape'
 export function printNode(node: unknown) {
   const shaped = RecastShape.toRecastShape(node) as Parameters<typeof print>[0]
 
-  return (hasOddWhitespace(shaped) ? print(shaped) : prettyPrint(shaped)).code
+  return (
+    Whitespace.hasOddWhitespace(shaped) ? print(shaped) : prettyPrint(shaped)
+  ).code
 }

@@ -1,7 +1,6 @@
-import { buildFieldsPlan } from './build-fields-plan'
-import type { FieldsPlan } from './fields-plan'
-import { fieldsPlans } from './fields-plans'
-
+import Builders from './builders'
+import Memo from './memo'
+import type { FieldsPlan } from './types'
 /**
  * What a fields record asks, read once per record object; a primitive's
  * plan is read each time.
@@ -10,5 +9,5 @@ import { fieldsPlans } from './fields-plans'
  */
 export const fieldsPlanOf = (record: unknown): FieldsPlan =>
   typeof record === 'object' && record
-    ? fieldsPlans.of(record)
-    : buildFieldsPlan(record)
+    ? Memo.fieldsPlans.of(record)
+    : Builders.buildFieldsPlan(record)

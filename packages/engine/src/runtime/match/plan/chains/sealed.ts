@@ -1,5 +1,4 @@
-import type { Bag } from '../../bag'
-
+import type { Bag } from '@ts-unify/engine/runtime/types'
 /**
  * The bag after `.seal()` under a key: a lone capture re-keyed to that
  * key; no capture, or several, left as they are.

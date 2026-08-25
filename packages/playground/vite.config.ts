@@ -21,6 +21,7 @@ export default defineConfig({
       '@ts-unify/engine': src('engine'),
       '@ts-unify/runner': src('runner'),
       '@ts-unify/rules': src('rules'),
+      '@ts-unify/playground': path.join(root, 'packages/playground/src'),
       '@/': path.join(root, 'packages/core/src/') + path.sep,
       '@': src('core'),
     },

@@ -1,4 +1,4 @@
 export type * from './string-predicate-table'
-export * from './string-predicates'
+export * from './table'
 
 export * as default from '.'

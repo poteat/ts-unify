@@ -6,7 +6,9 @@
     "paths": {
       "@ts-unify/core/internal": ["../core/src/internal.ts"],
       "@ts-unify/core": ["../core/src/index.ts"],
-      "@ts-unify/engine": ["../engine/src/index.ts"]
+      "@ts-unify/engine": ["../engine/src/index.ts"],
+      "@ts-unify/engine/*": ["../engine/src/*"],
+      "@ts-unify/runner/*": ["./src/*"]
     }
   },
   "include": ["src/**/*"],

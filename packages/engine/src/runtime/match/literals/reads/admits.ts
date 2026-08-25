@@ -1,5 +1,4 @@
-import type { RootLiteral } from '../root-literal'
-
+import type { RootLiteral } from '@ts-unify/engine/runtime/match/literals/types'
 /**
  * Whether a root literal allows a value read at its path.
  *

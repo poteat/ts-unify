@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit",
     "build": "npm run build --workspace=packages/core && npm run build --workspace=packages/engine && npm run build --workspace=packages/rules && npm run build --workspace=packages/runner && npm run build --workspace=packages/eslint",
     "test": "jest --config packages/core/jest.config.js",
+    "test:coverage": "jest --config packages/core/jest.config.js --coverage",
     "version:set": "npm run set-version --workspace=packages/scripts --",
     "publish:all": "npm run build && npm publish --workspace=packages/core --access=public && npm publish --workspace=packages/engine --access=public && npm publish --workspace=packages/rules --access=public && npm publish --workspace=packages/eslint --access=public"
   },

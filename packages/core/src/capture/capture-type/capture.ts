@@ -1,4 +1,4 @@
-import type { CAPTURE_BRAND } from './capture-brand'
+import type { CAPTURE_BRAND } from './brand'
 
 /**
  * Sentinel that marks a position in a pattern for type extraction, keeping

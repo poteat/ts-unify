@@ -1,4 +1,4 @@
 export type * from './seq-combinator'
-export type * from './seq-result'
+export * from './types'
 
 export * as default from '.'

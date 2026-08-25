@@ -1,8 +1,4 @@
-export * from './flip-op'
-export * from './inequality-ternary'
-export * from './negated-ternary'
 export * from './normalize-ternary-order'
-export * from './positive-test'
-export type * from './ternary-test'
+export * from './tests'
 
 export * as default from '.'

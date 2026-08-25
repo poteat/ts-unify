@@ -1,7 +1,6 @@
 import type { CommentNode } from '@ts-unify/core/internal'
 
 import Views from './views'
-
 /**
  * The `Comment` node built from one raw parser comment, or undefined
  * when the program has no node for it.

@@ -1,4 +1,4 @@
 export * from './add-return-to-block'
-export * from './function-parent'
+export * from './patterns'
 
 export * as default from '.'

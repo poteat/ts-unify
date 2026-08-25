@@ -1,9 +1,9 @@
-import type { Bag } from '../bag'
-import Chain from '../chain'
-import type { Cursor } from '../context'
-import type { RewriteFactory } from '../rewrite-factory'
-import type { SeqInfo } from './seq-info'
+import Chain from '@ts-unify/engine/runtime/match/chain'
+import type { Cursor } from '@ts-unify/engine/runtime/match/context'
+import type { RewriteFactory } from '@ts-unify/engine/runtime/match/types'
+import type { Bag } from '@ts-unify/engine/runtime/types'
 
+import type { SeqInfo } from './types'
 /**
  * Records a seq's `.to()` factory as a rewrite site spanning the seq's
  * elements; nothing happens for a seq whose chain has no `.to()` factory.

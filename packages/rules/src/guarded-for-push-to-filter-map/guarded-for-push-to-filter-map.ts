@@ -1,8 +1,7 @@
 import { U, $ } from '@ts-unify/core'
 
-import { arrowFrom } from './arrow-from'
-import { emptyArrayDecl } from './empty-array-decl'
-import { guardedFor } from './guarded-for'
+import Patterns from './patterns'
+import Rewrites from './rewrites'
 
 /**
  * An empty array filled by a guarded push inside a `for...of` is one
@@ -12,7 +11,12 @@ import { guardedFor } from './guarded-for'
  * `const out = xs.filter(x => p(x)).map(x => f(x))`
  */
 export const guardedForPushToFilterMap = U.BlockStatement({
-  body: [...$('before'), emptyArrayDecl, guardedFor, ...$('after')],
+  body: [
+    ...$('before'),
+    Patterns.emptyArrayDecl,
+    Patterns.guardedFor,
+    ...$('after'),
+  ],
 })
   .to(({ before, after, arrayId, loopVar, source, condition, pushValue }) =>
     U.BlockStatement({
@@ -30,11 +34,11 @@ export const guardedForPushToFilterMap = U.BlockStatement({
                       object: source,
                       property: U.Identifier({ name: 'filter' }),
                     }),
-                    arguments: [arrowFrom(loopVar, condition)],
+                    arguments: [Rewrites.arrowFrom(loopVar, condition)],
                   }),
                   property: U.Identifier({ name: 'map' }),
                 }),
-                arguments: [arrowFrom(loopVar, pushValue)],
+                arguments: [Rewrites.arrowFrom(loopVar, pushValue)],
               }),
             }),
           ],

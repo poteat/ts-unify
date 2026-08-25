@@ -1,4 +1,4 @@
-import type { ReportDescriptor } from './report-descriptor'
+import type { ReportDescriptor } from './reports'
 
 /**
  * The part of ESLint's rule context a rule here reads: the source, by

@@ -1,7 +1,7 @@
-import { ROUNDS } from '../rounds'
-import type { MatchRecord } from './match-record'
-import { rewriteMatch } from './rewrite-match'
+import Util from '@bench/timing/util'
 
+import Rewrites from './rewrites'
+import type { MatchRecord } from './types'
 /**
  * The rewrite phase over a rule's matches, the round with the least time
  * in the rewrites and their prints: how many printed, and that time.
@@ -14,12 +14,12 @@ export function bestRewriteRound(records: readonly MatchRecord[]): {
 } {
   let best = { printed: 0, ms: Infinity }
 
-  for (let round = 0; round < ROUNDS.rewrite; round++) {
+  for (let round = 0; round < Util.ROUNDS.rewrite; round++) {
     let printed = 0
     let ms = 0
 
     for (const record of records) {
-      const rewrite = rewriteMatch(record)
+      const rewrite = Rewrites.rewriteMatch(record)
       if (rewrite.text === null) continue
       printed++
       ms += rewrite.ms

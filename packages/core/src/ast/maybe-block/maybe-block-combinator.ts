@@ -1,7 +1,7 @@
 import type { OrNode } from '@/ast/or'
 import type { UnwrapFluent } from '@/ast/unwrap-fluent'
 
-import type { BlockWithSingle } from './block-with-single'
+import type { BlockWithSingle } from './types'
 
 /**
  * `U.maybeBlock(stmt)`: matches the statement on its own or as the one

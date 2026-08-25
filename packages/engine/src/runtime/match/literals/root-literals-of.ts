@@ -1,7 +1,6 @@
-import { buildRootLiterals } from './build-root-literals'
-import type { RootLiteral } from './root-literal'
-import { rootLiterals } from './root-literals'
-
+import FromPlan from './from-plan'
+import Memo from './memo'
+import type { RootLiteral } from './types'
 /**
  * Every literal a pattern requires under the node it matches, read once
  * per pattern object; a primitive's are read each time.
@@ -10,5 +9,5 @@ import { rootLiterals } from './root-literals'
  */
 export const rootLiteralsOf = (pattern: unknown): readonly RootLiteral[] =>
   (typeof pattern === 'object' || typeof pattern === 'function') && pattern
-    ? rootLiterals.of(pattern)
-    : buildRootLiterals(pattern)
+    ? Memo.rootLiterals.of(pattern)
+    : FromPlan.buildRootLiterals(pattern)

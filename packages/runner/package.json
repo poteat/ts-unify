@@ -11,7 +11,7 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --external @ts-unify/core --external @ts-unify/engine && tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "build": "tsup --clean src/index.ts --format esm --external @ts-unify/core --external @ts-unify/engine && tsc -p tsconfig.build.json --emitDeclarationOnly && node ../scripts/src/rewrite-self-imports/rewrite-self-imports.mjs dist",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "jest"
   },

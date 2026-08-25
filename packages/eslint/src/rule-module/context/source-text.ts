@@ -6,8 +6,10 @@
  */
 export function sourceText(sourceCode: unknown) {
   if (typeof sourceCode !== 'object' || !sourceCode) return ''
-  if ('text' in sourceCode && typeof sourceCode.text === 'string')
+
+  if ('text' in sourceCode && typeof sourceCode.text === 'string') {
     return sourceCode.text
+  }
 
   if ('getText' in sourceCode && typeof sourceCode.getText === 'function') {
     const text: unknown = sourceCode.getText()

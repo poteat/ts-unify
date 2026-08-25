@@ -1,5 +1,5 @@
-export type * from './bind-against-node-kind'
+export * from './brand'
 export type * from './pattern-builder'
-export * from './pattern-builder-brand'
+export * from './types'
 
 export * as default from '.'

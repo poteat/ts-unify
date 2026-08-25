@@ -4,6 +4,6 @@
  *
  * @entry
  */
-import { setWorkspaceVersion } from './set-workspace-version'
+import Workspace from './workspace'
 
-setWorkspaceVersion(process.argv[2])
+Workspace.setWorkspaceVersion(process.argv[2])

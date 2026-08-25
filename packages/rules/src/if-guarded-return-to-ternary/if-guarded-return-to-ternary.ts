@@ -1,6 +1,6 @@
 import { U, $ } from '@ts-unify/core'
 
-import { anyReturnForm } from './any-return-form'
+import Patterns from './patterns'
 
 /**
  * An `if` with no `else` that returns, followed by a return, is one return
@@ -13,7 +13,7 @@ export const ifGuardedReturnToTernary = U.BlockStatement({
     ...$,
     U.IfStatement({
       test: $,
-      consequent: anyReturnForm,
+      consequent: Patterns.anyReturnForm,
       alternate: null,
     }),
     U.ReturnStatement({ argument: $('alternate') }).defaultUndefined(),

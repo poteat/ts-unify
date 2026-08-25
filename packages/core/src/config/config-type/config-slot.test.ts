@@ -1,6 +1,6 @@
 import AssertType from '@/test-utils/assert-type'
 
-import { CONFIG_BRAND } from './config-brand'
+import type { CONFIG_BRAND } from './brand'
 import type { ConfigSlot } from './config-slot'
 
 describe('config-slot', () => {

@@ -1,6 +1,6 @@
 import { U, $ } from '@ts-unify/core'
 
-import { functionParent } from './function-parent'
+import Patterns from './patterns'
 
 /**
  * A function body that is one expression statement returns that
@@ -9,7 +9,7 @@ import { functionParent } from './function-parent'
  * @example `() => { f() }` becomes `() => { return f() }`
  */
 export const addReturnToBlock = U.BlockStatement({
-  parent: functionParent,
+  parent: Patterns.functionParent,
   body: [
     U.ExpressionStatement({ expression: $ }).to(it =>
       U.ReturnStatement({ argument: it.expression }),

@@ -4,6 +4,5 @@
  *
  * @entry
  */
-import { runBench } from './run-bench'
-
-console.log(runBench(process.argv[2]))
+import Run from './run'
+console.log(Run.runBench(process.argv[2]))

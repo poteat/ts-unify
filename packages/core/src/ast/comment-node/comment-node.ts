@@ -1,7 +1,6 @@
 import type { TSESTree } from '@typescript-eslint/types'
 
-import type { CommentKind } from './comment-kind'
-import type { JsdocTag } from './jsdoc-tag'
+import type { CommentKind, JsdocTag } from './types'
 
 /**
  * A comment seen as a node, so `U.Comment({ ... })` can match it.

@@ -1,6 +1,5 @@
 export * from './fix'
-export type * from './fix-options'
-export * from './max-iterations'
-export * from './non-overlapping'
+export * from './types'
+export * from './util'
 
 export * as default from '.'

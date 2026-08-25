@@ -1,8 +1,5 @@
-export * from './any-expression-statement'
-export * from './expr-block'
-export * from './fn-boundary'
-export * from './is-method-body'
-export * from './return-block'
+export * from './patterns'
 export * from './singular-function-to-arrow'
+export * from './util'
 
 export * as default from '.'

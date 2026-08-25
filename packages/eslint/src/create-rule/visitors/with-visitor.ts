@@ -1,7 +1,6 @@
 import { commentNodes } from '@ts-unify/engine'
+import type { Visitor } from '@ts-unify/eslint/rule-module'
 import type { TSESTree } from '@typescript-eslint/types'
-
-import type { Visitor } from '../../rule-module'
 
 /**
  * A visitor table with one more visitor.

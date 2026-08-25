@@ -2,11 +2,10 @@ import { extractPatterns } from '@ts-unify/engine'
 import { createRule } from '@ts-unify/eslint/internal'
 import type { RuleMeta } from '@ts-unify/runner'
 
-import { bestOf } from './best-of'
+import Best from './best'
 import Phases from './phases'
-import { ROUNDS } from './rounds'
-import type { RuleTiming } from './rule-timing'
-
+import type { RuleTiming } from './types'
+import Util from './util'
 /**
  * The timings of every rule over the corpus: the match phase, the
  * rewrite phase over the matches it made, and the setup of the rule.
@@ -21,7 +20,7 @@ export const timeRules = (
   rules.map(({ meta, transform }) => {
     const tried = { count: 0, admitted: 0 }
     const clock = { ms: 0 }
-    const matching = bestOf(ROUNDS.match, () => {
+    const matching = Best.bestOf(Util.ROUNDS.match, () => {
       tried.count = 0
       tried.admitted = 0
       clock.ms = 0
@@ -36,11 +35,13 @@ export const timeRules = (
       }
     })
     const rewriting = Phases.bestRewriteRound(matching.result.records)
-    const extracting = bestOf(ROUNDS.setup, () => {
-      for (let i = 0; i < ROUNDS.setupBatch; i++) extractPatterns(transform)
+    const extracting = Best.bestOf(Util.ROUNDS.setup, () => {
+      for (let i = 0; i < Util.ROUNDS.setupBatch; i++) {
+        extractPatterns(transform)
+      }
     })
-    const creating = bestOf(ROUNDS.setup, () => {
-      for (let i = 0; i < ROUNDS.setupBatch; i++) {
+    const creating = Best.bestOf(Util.ROUNDS.setup, () => {
+      for (let i = 0; i < Util.ROUNDS.setupBatch; i++) {
         createRule(transform as Parameters<typeof createRule>[0])
       }
     })
@@ -55,7 +56,9 @@ export const timeRules = (
       guardMs: matching.result.guardMs,
       rewritten: rewriting.printed,
       rewriteMs: rewriting.ms,
-      extractUs: (extracting.ms * ROUNDS.microsPerMs) / ROUNDS.setupBatch,
-      createRuleUs: (creating.ms * ROUNDS.microsPerMs) / ROUNDS.setupBatch,
+      extractUs:
+        (extracting.ms * Util.ROUNDS.microsPerMs) / Util.ROUNDS.setupBatch,
+      createRuleUs:
+        (creating.ms * Util.ROUNDS.microsPerMs) / Util.ROUNDS.setupBatch,
     }
   })

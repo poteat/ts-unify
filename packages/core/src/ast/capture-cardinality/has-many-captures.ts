@@ -1,5 +1,4 @@
-import type { HasSingleCapture } from './has-single-capture'
-import type { HasZeroCaptures } from './has-zero-captures'
+import type { HasSingleCapture, HasZeroCaptures } from './types'
 
 /**
  * `true` when a node shape declares two or more captures.
