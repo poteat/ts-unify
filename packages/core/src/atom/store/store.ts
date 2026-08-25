@@ -6,7 +6,7 @@ import IsFilling from '@/atom/is-filling'
 import IsKeyed from '@/atom/is-keyed'
 import type { Keyed } from '@/atom/keyed'
 import type { Scoped } from '@/atom/scoped'
-import type { Atom } from '@/atom/slot'
+import type { ValueOf } from '@/atom/value-of'
 
 import type { Above } from './above'
 import Errors from './errors'
@@ -87,8 +87,8 @@ export class Store<
    * @param slot the slot to read
    * @throws when a slot read is unfilled or part of a cycle
    */
-  get<T>(slot: Accepted<this, Atom<T>>): T {
-    if (IsKeyed.isKeyed(slot)) return this.resolve(slot) as T
+  get<A extends Keyed>(slot: Accepted<this, A>): ValueOf<A> {
+    if (IsKeyed.isKeyed(slot)) return this.resolve(slot) as ValueOf<A>
 
     throw new TypeError('get takes an atom')
   }

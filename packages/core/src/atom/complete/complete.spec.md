@@ -7,8 +7,8 @@
 call fails on its first argument with the missing slot named:
 
 ```
-Argument of type 'Definition<Clock, NoDeps>' is not assignable to
-parameter of type 'MissingDeps<Atom<Settings>>'.
+Argument of type 'Definition<RepoRoot, NoDeps>' is not assignable to
+parameter of type 'MissingDeps<CacheDir>'.
 ```
 
 `R` is still inferred from the arguments, so the binding keeps its type

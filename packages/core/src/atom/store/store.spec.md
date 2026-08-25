@@ -39,11 +39,12 @@ if (flag) store.add(twice)
 
 ## get
 
-`get` takes `Accepted<this, Atom<T>>`: the slot itself when the store
-fills it and everything reachable from its definition's deps; otherwise
-`Unfilled<Atom<T>>` or `MissingDeps<M>` with the missing slots in `M`, so
-the argument fails to type-check with them named. The walk carries what
-it has visited, so a cycle ends it.
+`get` takes `Accepted<this, A>`, `A` the slot's `Atom` alias, and returns
+`ValueOf<A>`: the slot itself is accepted when the store fills it and
+everything reachable from its definition's deps; otherwise the parameter
+is `Unfilled<A>` or `MissingDeps<M>` with the missing slots in `M`, so the
+argument fails to type-check with them named. The walk carries what it
+has visited, so a cycle ends it.
 
 ## scope
 
@@ -58,7 +59,7 @@ reads the re-filled slot is built in the parent's memo with the parent's
 value, so a child's `get` of it would see the parent's value and a child
 definition over the same slot would see the child's. Rather than two
 answers for one slot, a re-fill is refused: at the type level the rest
-parameter collapses to `Refills<Atom<T>>` naming the slot, and at runtime
+parameter collapses to `Refills<Clock>` naming the slot, and at runtime
 the child throws `Clock is filled above this scope already`.
 
 ## Runtime

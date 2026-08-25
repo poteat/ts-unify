@@ -1,9 +1,10 @@
 import Atom from '@/atom/atom'
+import Slot from '@/atom/slot'
 
 /**
- * A shape alike to `Two`, on a slot of its own.
+ * A shape alike to `Two`; the name keeps the two slot types apart.
  */
-export type One = { readonly n: number }
+export type One = Slot.Atom<{ readonly n: number }, 'One'>
 
 /**
  * The slot `one` fills.

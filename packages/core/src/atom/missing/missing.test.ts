@@ -16,14 +16,18 @@ describe('missing', () => {
   it('names each slot read but filled by nothing', () => {
     AssertType.assertType<
       Missing<[typeof Fixtures.stamp]>,
-      typeof Fixtures.Clock | typeof Fixtures.Settings
+      Fixtures.Clock | Fixtures.Settings
     >(0)
   })
 
-  it('sees two alike slots as one type', () => {
+  it('tells two alike slots apart by their names', () => {
     AssertType.assertType<
       Missing<[typeof Fixtures.one, typeof Fixtures.needsTwo]>,
-      never
+      Fixtures.Two
+    >(0)
+    AssertType.assertType<
+      Missing<[typeof Fixtures.repoRoot, typeof Fixtures.cache]>,
+      Fixtures.CacheDir
     >(0)
   })
 })

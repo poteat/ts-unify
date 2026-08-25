@@ -18,8 +18,10 @@ store.get(Stamp) // Stamp
 - The call type-checks only when every slot any definition reads is
   filled by one of them (`Complete`); a missing slot is named in the
   error on the first argument.
-- `get` accepts only a filled slot (`Accepted`); an unfilled one fails
-  with `Unfilled<Atom<T>>` named.
+- `get` accepts only a filled slot (`Accepted`), and hands back its value
+  type, `ValueOf`; an unfilled one fails with `Unfilled<CacheDir>` named.
+  Two slots over one value type are told apart by their names: a store
+  filling `RepoRoot` alone refuses `get(CacheDir)`.
 - A later definition for a slot replaces an earlier one.
 
 ## Runtime

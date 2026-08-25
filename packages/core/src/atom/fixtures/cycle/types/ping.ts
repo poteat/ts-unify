@@ -1,9 +1,10 @@
 import Atom from '@/atom/atom'
+import Slot from '@/atom/slot'
 
 /**
  * One half of a cycle; the other half reads this one.
  */
-export type Ping = { readonly pings: number }
+export type Ping = Slot.Atom<{ readonly pings: number }>
 
 /**
  * The slot `ping` fills.
