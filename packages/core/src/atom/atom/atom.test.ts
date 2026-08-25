@@ -1,3 +1,4 @@
+import CreateStore from '@/atom/create-store'
 import Fixtures from '@/atom/fixtures'
 import type { Of } from '@/atom/of'
 import Slot from '@/atom/slot'
@@ -24,6 +25,16 @@ describe('atom', () => {
     expect(slot.key.description).toBe('n')
     AssertType.assertType<typeof slot, Slot.Atom<number>>(0)
     AssertType.assertType<typeof slot, N>(0)
+  })
+
+  it('declares one slot over a union value type', () => {
+    const slot = atom<string | undefined>('maybe')
+
+    expect(
+      CreateStore.createStore(atom(slot, () => undefined)).get(slot),
+    ).toBeUndefined()
+    AssertType.assertType<typeof slot, Slot.Atom<string | undefined>>(0)
+    AssertType.assertType<ValueOf<typeof slot>, string | undefined>(0)
   })
 
   it('defines a slot with no deps from two arguments', () => {

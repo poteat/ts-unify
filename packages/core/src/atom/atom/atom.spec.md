@@ -21,7 +21,9 @@ const stamp = atom(Stamp, { clock: Clock }, deps => `at ${deps.clock.now}`)
 - `atom<T>(label?)`: a slot, `Declared<T>`: `T` itself when it is the
   slot's `Atom` alias, else the unnamed `Atom<T>` over the value type `T`,
   the form an entry of `atoms` takes. The type is given explicitly; the
-  label is for error text alone. A slot carries no value and no deps.
+  label is for error text alone. A union value type declares one slot
+  over the union, `Atom<string | undefined>`, never a slot per member.
+  A slot carries no value and no deps.
 - `atom(slot, read)`: a definition that reads nothing, `Definition<A,
 NoDeps>`; `read` takes no parameter and returns `ValueOf<A>`. This is
   the form for a value with no deps; the three-argument form with `{}` is
