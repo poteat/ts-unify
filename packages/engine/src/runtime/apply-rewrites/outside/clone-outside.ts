@@ -1,8 +1,8 @@
-import Sub from '../../sub'
-import { cloneNode } from '../clone-node'
-import { METADATA_KEYS } from '../metadata-keys'
-import type { SiteTree } from './site-tree'
+import Clones from '@engine/runtime/apply-rewrites/clones'
+import Util from '@engine/runtime/apply-rewrites/util'
+import Sub from '@engine/runtime/sub'
 
+import type { SiteTree } from './types'
 /**
  * A deep copy of an AST node without its `METADATA_KEYS`, the positions
  * of the sites left undefined for their rewrites to fill.
@@ -14,7 +14,7 @@ import type { SiteTree } from './site-tree'
  *   when absent
  */
 export function cloneOutside(node: unknown, sites?: SiteTree): unknown {
-  if (!sites || sites.size === 0) return cloneNode(node)
+  if (!sites || sites.size === 0) return Clones.cloneNode(node)
 
   if (Array.isArray(node)) {
     return node.map((item, index) => {
@@ -28,7 +28,7 @@ export function cloneOutside(node: unknown, sites?: SiteTree): unknown {
   const copy: Record<string, unknown> = {}
 
   for (const key of Object.keys(node as Record<string, unknown>)) {
-    if (METADATA_KEYS.has(key)) continue
+    if (Util.METADATA_KEYS.has(key)) continue
     const below = sites.get(key)
     copy[key] =
       below === null

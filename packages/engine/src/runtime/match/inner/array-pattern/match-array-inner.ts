@@ -1,8 +1,8 @@
-import type { Bag } from '../../bag'
-import type { Cursor } from '../../context'
-import Plan from '../../plan'
-import { matchArrayPlan } from './match-array-plan'
+import type { Cursor } from '@engine/runtime/match/context'
+import Plan from '@engine/runtime/match/plan'
+import type { Bag } from '@engine/runtime/types'
 
+import Plans from './plans'
 /**
  * Matches an array against an array pattern holding up to two spread
  * captures, and returns the captures; null on mismatch.
@@ -19,4 +19,4 @@ export const matchArrayInner = (
   actual: unknown[],
   expected: unknown[],
   at: Cursor,
-): Bag | null => matchArrayPlan(actual, Plan.arrayPlanOf(expected), at)
+): Bag | null => Plans.matchArrayPlan(actual, Plan.arrayPlanOf(expected), at)

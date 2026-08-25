@@ -1,7 +1,5 @@
+import SymGet from '@engine/runtime/sym-get'
 import { CAPTURE_BRAND } from '@ts-unify/core/internal'
-
-import SymGet from '../../sym-get'
-
 /**
  * Whether a pattern value is a named capture, such as `$('name')`.
  *

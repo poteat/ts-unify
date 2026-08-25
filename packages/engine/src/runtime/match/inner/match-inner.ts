@@ -1,10 +1,9 @@
+import Context from '@engine/runtime/match/context'
+import Plan from '@engine/runtime/match/plan'
+import type { Bag } from '@engine/runtime/types'
 import { $ } from '@ts-unify/core/internal'
 
-import type { Bag } from '../bag'
-import Context from '../context'
-import Plan from '../plan'
 import Planned from './planned'
-
 /**
  * Matches a node against a fields record, one property at a time, and
  * returns the captures, or null on mismatch.

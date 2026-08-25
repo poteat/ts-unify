@@ -1,7 +1,5 @@
+import type { Bag } from '@engine/runtime/types'
 import type { ChainEntry } from '@ts-unify/core/internal'
-
-import type { Bag } from '../bag'
-
 /**
  * Whether every `.when()` guard in a chain accepts the bag; true without
  * any.

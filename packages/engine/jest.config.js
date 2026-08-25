@@ -9,6 +9,7 @@ module.exports = {
   moduleNameMapper: {
     "^@ts-unify/core/internal$": "<rootDir>/../core/src/internal.ts",
     "^@ts-unify/core$": "<rootDir>/../core/src/index.ts",
+    "^@engine/(.*)$": "<rootDir>/src/$1",
     "^@$": "<rootDir>/../core/src/index.ts",
     "^@/(.*)$": "<rootDir>/../core/src/$1",
   },

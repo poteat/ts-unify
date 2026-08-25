@@ -1,6 +1,6 @@
-import Literals from '../../match/literals'
-import type { DecisionTree } from './decision-tree'
+import Literals from '@engine/runtime/match/literals'
 
+import type { DecisionTree } from './types'
 /**
  * The entries of the leaf a node reaches down the tree: every entry
  * whose pattern the node could match, in the list's order.

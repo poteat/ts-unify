@@ -1,0 +1,33 @@
+import type { Cursor } from '@engine/runtime/match/context'
+import { matchPlan } from '@engine/runtime/match/inner/planned/match-plan'
+import type { Plan } from '@engine/runtime/match/plan'
+import type { Bag } from '@engine/runtime/types'
+/**
+ * Matches the plan of a statement pattern against a value that may be
+ * the statement itself or a block holding only it, the block tried first.
+ *
+ * @param actual the value
+ * @param statement the statement pattern's plan
+ * @param at where the value sits in the match
+ */
+export function matchMaybeBlockPlan(
+  actual: unknown,
+  statement: Plan,
+  at: Cursor,
+): Bag | null {
+  const actualRec = actual as Record<string, unknown> | null | undefined
+
+  if (
+    actualRec?.type === 'BlockStatement' &&
+    Array.isArray(actualRec.body) &&
+    actualRec.body.length === 1
+  ) {
+    const result = matchPlan((actualRec.body as unknown[])[0], statement, {
+      ctx: at.ctx,
+      path: [...at.path, 'body', 0],
+    })
+    if (result) return result
+  }
+
+  return matchPlan(actual, statement, at)
+}

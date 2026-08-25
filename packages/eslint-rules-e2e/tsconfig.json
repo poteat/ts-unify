@@ -2,19 +2,47 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
-    "types": ["jest", "node"],
+    "types": [
+      "jest",
+      "node"
+    ],
     "paths": {
-      "@ts-unify/core/internal": ["../core/src/internal.ts"],
-      "@ts-unify/core": ["../core/src/index.ts"],
-      "@ts-unify/engine": ["../engine/src/index.ts"],
-      "@ts-unify/runner": ["../runner/src/index.ts"],
-      "@ts-unify/eslint/internal": ["../eslint/src/internal.ts"],
-      "@ts-unify/eslint": ["../eslint/src/index.ts"],
-      "@ts-unify/rules": ["../rules/src/index.ts"],
-      "@/*": ["../core/src/*"],
-      "@": ["../core/src/index.ts"]
+      "@ts-unify/core/internal": [
+        "../core/src/internal.ts"
+      ],
+      "@ts-unify/core": [
+        "../core/src/index.ts"
+      ],
+      "@ts-unify/engine": [
+        "../engine/src/index.ts"
+      ],
+      "@ts-unify/runner": [
+        "../runner/src/index.ts"
+      ],
+      "@ts-unify/eslint/internal": [
+        "../eslint/src/internal.ts"
+      ],
+      "@ts-unify/eslint": [
+        "../eslint/src/index.ts"
+      ],
+      "@ts-unify/rules": [
+        "../rules/src/index.ts"
+      ],
+      "@/*": [
+        "../core/src/*"
+      ],
+      "@": [
+        "../core/src/index.ts"
+      ],
+      "@engine/*": [
+        "../engine/src/*"
+      ]
     }
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

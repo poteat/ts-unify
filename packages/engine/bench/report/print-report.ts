@@ -1,7 +1,7 @@
-import type { RuleTiming } from '../timing'
-import { formatTable } from './format-table'
-import { rate } from './rate'
+import type { RuleTiming } from '@bench/timing'
 
+import Rates from './rates'
+import Tables from './tables'
 /**
  * The benchmark's report: one line per rule, then the corpus totals as
  * rates.
@@ -39,7 +39,7 @@ export function printReport(
   const setupUs = sum(t => t.extractUs + t.createRuleUs)
 
   return [
-    formatTable(
+    Tables.formatTable(
       [
         'rule',
         'tags',
@@ -58,12 +58,12 @@ export function printReport(
     '',
     `corpus: ${corpus.files} files, ${corpus.nodes} nodes`,
     `match: ${tried} tries, ${admitted} admitted, ${matched} matches` +
-      ` in ${matchMs.toFixed(1)} ms (${rate(tried, matchMs)} tries/s);` +
+      ` in ${matchMs.toFixed(1)} ms (${Rates.rate(tried, matchMs)} tries/s);` +
       ` ${guardMs.toFixed(1)} ms of it in the rules' own guards,` +
       ` ${engineMs.toFixed(1)} ms in the engine` +
-      ` (${rate(tried, engineMs)} tries/s)`,
+      ` (${Rates.rate(tried, engineMs)} tries/s)`,
     `rewrite: ${rewritten} printed in ${rewriteMs.toFixed(1)} ms` +
-      ` (${rate(rewritten, rewriteMs)} rewrites/s)`,
+      ` (${Rates.rate(rewritten, rewriteMs)} rewrites/s)`,
     `setup: ${setupUs.toFixed(0)} us for all rules`,
   ].join('\n')
 }

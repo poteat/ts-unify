@@ -1,6 +1,5 @@
-import Node from '../node'
-import Pattern from '../pattern'
-
+import Node from '@engine/runtime/match/node'
+import Pattern from '@engine/runtime/match/pattern'
 /**
  * Whether a node is where an `.until()` boundary stops the descent: its
  * type is the boundary proxy's tag, or one of an or-proxy's.

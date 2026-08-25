@@ -1,6 +1,6 @@
-import Pattern from '../pattern'
-import type { SeqInfo } from './seq-info'
+import Pattern from '@engine/runtime/match/pattern'
 
+import type { SeqInfo } from './types'
 /**
  * The elements of an array pattern with every `U.seq()` proxy replaced by
  * its constituents, and where each seq landed, for its inline rewrite.

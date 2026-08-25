@@ -1,5 +1,4 @@
-import type { DollarPlan } from './dollar-plan'
-
+import type { DollarPlan } from './types'
 /**
  * The one plan of a bare `$`.
  */

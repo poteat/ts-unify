@@ -1,6 +1,6 @@
-import type { RewriteSite } from '../../match'
-import type { SiteTree } from './site-tree'
+import type { RewriteSite } from '@engine/runtime/match'
 
+import type { SiteTree } from './types'
 /**
  * The tree of the positions the inner sites replace; a site under another
  * site's position adds nothing, that position being replaced whole.

@@ -1,4 +1,4 @@
 export * from './is-raw-comment'
-export * from './node-type'
+export * from './util'
 
 export * as default from '.'

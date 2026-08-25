@@ -4,13 +4,33 @@
     "noEmit": true,
     "declaration": false,
     "paths": {
-      "@/*": ["./packages/core/src/*"],
-      "@": ["./packages/core/src/index.ts"],
-      "@ts-unify/core": ["./packages/core/src/index.ts"],
-      "@ts-unify/core/internal": ["./packages/core/src/internal.ts"],
-      "@ts-unify/engine": ["./packages/engine/src/index.ts"]
+      "@/*": [
+        "./packages/core/src/*"
+      ],
+      "@": [
+        "./packages/core/src/index.ts"
+      ],
+      "@ts-unify/core": [
+        "./packages/core/src/index.ts"
+      ],
+      "@ts-unify/core/internal": [
+        "./packages/core/src/internal.ts"
+      ],
+      "@ts-unify/engine": [
+        "./packages/engine/src/index.ts"
+      ],
+      "@engine/*": [
+        "./packages/engine/src/*"
+      ]
     }
   },
-  "include": ["packages/core/src/**/*", "packages/engine/src/**/*", "packages/rules/src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "packages/core/src/**/*",
+    "packages/engine/src/**/*",
+    "packages/rules/src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

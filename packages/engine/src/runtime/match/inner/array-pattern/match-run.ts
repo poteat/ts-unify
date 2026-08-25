@@ -1,8 +1,8 @@
-import type { Bag } from '../../bag'
-import type { Cursor } from '../../context'
-import Plan from '../../plan'
-import { matchRunPlans } from './match-run-plans'
+import type { Cursor } from '@engine/runtime/match/context'
+import Plan from '@engine/runtime/match/plan'
+import type { Bag } from '@engine/runtime/types'
 
+import Plans from './plans'
 /**
  * Matches a run of pattern elements against the array elements from an
  * index on, and returns their merged captures.
@@ -18,7 +18,7 @@ export const matchRun = (
   run: { elements: unknown[]; start: number },
   at: Cursor,
 ): Bag | null =>
-  matchRunPlans(
+  Plans.matchRunPlans(
     actual,
     { elements: run.elements.map(Plan.planOf), start: run.start },
     at,

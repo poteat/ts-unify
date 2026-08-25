@@ -4,7 +4,12 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "paths": {
+      "@engine/*": [
+        "./src/*"
+      ]
+    }
   },
   "include": [
     "src/**/*"

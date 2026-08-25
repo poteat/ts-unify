@@ -1,9 +1,7 @@
+import type { Bag } from '@engine/runtime/types'
 import type { ChainEntry } from '@ts-unify/core/internal'
 
-import type { Bag } from '../bag'
-import { chainGet } from './chain-get'
-import { chainHas } from './chain-has'
-
+import Reads from './reads'
 /**
  * The bag after a chain's `.bind()` and `.seal()` entries.
  *
@@ -20,7 +18,7 @@ export function applyChainModifiers(
   bag: Bag,
   matched: { node: unknown; key?: string },
 ): Bag {
-  const bindEntry = chainGet(chain, 'bind')
+  const bindEntry = Reads.chainGet(chain, 'bind')
 
   if (bindEntry) {
     return {
@@ -29,7 +27,7 @@ export function applyChainModifiers(
     }
   }
 
-  if (chainHas(chain, 'seal') && matched.key) {
+  if (Reads.chainHas(chain, 'seal') && matched.key) {
     const keys = Object.keys(bag)
 
     return keys.length === 1

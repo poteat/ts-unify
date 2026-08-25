@@ -1,8 +1,8 @@
-import type { Bag } from '../bag'
-import type { Cursor } from '../context'
-import Plan from '../plan'
-import Planned from './planned'
+import type { Cursor } from '@engine/runtime/match/context'
+import Plan from '@engine/runtime/match/plan'
+import type { Bag } from '@engine/runtime/types'
 
+import Planned from './planned'
 /**
  * Matches a statement pattern against a value that may be the statement
  * itself or a block holding only it, the block tried first.

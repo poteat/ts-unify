@@ -1,7 +1,5 @@
+import SymGet from '@engine/runtime/sym-get'
 import { CONFIG_BRAND } from '@ts-unify/core/internal'
-
-import SymGet from '../../sym-get'
-
 /**
  * Whether a pattern value is a config slot, such as `C('name')`.
  *
