@@ -1,6 +1,6 @@
 import { U, $ } from '@ts-unify/core'
 
-import { callConsequent } from './call-consequent'
+import Patterns from './patterns'
 
 /**
  * An `if` that tests a value and only calls it is an optional call. The
@@ -10,7 +10,7 @@ import { callConsequent } from './call-consequent'
  */
 export const ifGuardedCallToOptional = U.IfStatement({
   test: $('callee'),
-  consequent: callConsequent,
+  consequent: Patterns.callConsequent,
   alternate: null,
 })
   .to(({ callee, args }) =>

@@ -1,6 +1,6 @@
 import { U, $ } from '@ts-unify/core'
 
-import { anyExprForm } from './any-expr-form'
+import Patterns from './patterns'
 
 /**
  * An `if` whose two branches are each one expression statement is one
@@ -10,8 +10,8 @@ import { anyExprForm } from './any-expr-form'
  */
 export const ifToTernarySideEffect = U.IfStatement({
   test: $,
-  consequent: anyExprForm,
-  alternate: anyExprForm,
+  consequent: Patterns.anyExprForm,
+  alternate: Patterns.anyExprForm,
 })
   .to(bag =>
     U.ExpressionStatement({

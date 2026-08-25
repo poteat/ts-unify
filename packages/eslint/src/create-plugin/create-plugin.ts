@@ -1,10 +1,9 @@
+import CreateRule from '@ts-unify/eslint/create-rule'
+import type { RuleModule } from '@ts-unify/eslint/rule-module'
+import type { TransformLike } from '@ts-unify/eslint/transform-like'
 import { kebabCase } from '@ts-unify/runner'
 
-import CreateRule from '../create-rule'
-import type { RuleModule } from '../rule-module'
-import type { TransformLike } from '../transform-like'
-import { isRecommended } from './is-recommended'
-import { pluginConfigs } from './plugin-configs'
+import Configs from './configs'
 
 /**
  * Create an ESLint plugin from a map of rule names to AstTransform values.
@@ -28,10 +27,13 @@ export function createPlugin(
     const kebab = kebabCase(name)
     ruleModules[kebab] = CreateRule.createRule(transform)
 
-    if (isRecommended(transform)) {
+    if (Configs.isRecommended(transform)) {
       recommendedRules[`${prefix}/${kebab}`] = 'warn'
     }
   }
 
-  return { rules: ruleModules, configs: pluginConfigs(recommendedRules) }
+  return {
+    rules: ruleModules,
+    configs: Configs.pluginConfigs(recommendedRules),
+  }
 }

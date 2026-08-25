@@ -1,4 +1,4 @@
-import type { Node } from './node'
+import type { Node } from './nodes'
 
 /**
  * Whether a node is an identifier spelling a name.

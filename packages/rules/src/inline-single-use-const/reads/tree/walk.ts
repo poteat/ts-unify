@@ -1,6 +1,5 @@
-import { children } from './children'
-import { isNode } from './is-node'
-import type { Node } from './node'
+import Nodes from './nodes'
+import type { Node } from './nodes'
 
 /**
  * Every node under a tree, depth first, each with the node above it; the
@@ -19,8 +18,8 @@ export function* walk(
     return
   }
 
-  if (!isNode(tree)) return
+  if (!Nodes.isNode(tree)) return
   yield [tree, parent]
 
-  for (const v of children(tree)) yield* walk(v, tree)
+  for (const v of Nodes.children(tree)) yield* walk(v, tree)
 }

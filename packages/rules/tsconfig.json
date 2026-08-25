@@ -6,7 +6,8 @@
     "paths": {
       "@/*": ["../core/src/*"],
       "@": ["../core/src/index.ts"],
-      "@ts-unify/core": ["../core/src/index.ts"]
+      "@ts-unify/core": ["../core/src/index.ts"],
+      "@ts-unify/rules/*": ["./src/*"]
     }
   },
   "include": ["src/**/*"],

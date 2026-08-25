@@ -1,5 +1,5 @@
 export { extractRuleMeta, kebabCase } from './extract-rule-meta'
-export type { RuleMeta, Bag, Factory, WithFn } from './extract-rule-meta'
+export type { RuleMeta, Bag, Factory, WithFn } from './types'
 export { lint, rootSites } from './lint'
 export type { LintMatch, LintResult } from './lint'
 export { fix, nonOverlapping } from './fix'

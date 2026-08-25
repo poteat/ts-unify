@@ -4,18 +4,16 @@ import {
   dispatcherOf,
   proxyNodeOf,
 } from '@ts-unify/engine'
+import KeepsComments from '@ts-unify/eslint/keeps-comments'
+import PrintNode from '@ts-unify/eslint/print-node'
+import RuleModule from '@ts-unify/eslint/rule-module'
+import type { TransformLike } from '@ts-unify/eslint/transform-like'
 import { extractRuleMeta, rootSites } from '@ts-unify/runner'
 import type { TSESTree } from '@typescript-eslint/types'
 
-import KeepsComments from '../keeps-comments'
-import PrintNode from '../print-node'
-import RuleModule from '../rule-module'
-import type { TransformLike } from '../transform-like'
-import { DEFAULT_MESSAGE } from './default-message'
 import Imports from './imports'
-import { patternContainsInnerTo } from './pattern-contains-inner-to'
-import { ruleMeta } from './rule-meta'
-import type { RuleOptions } from './rule-options'
+import Meta from './meta'
+import type { RuleOptions } from './types'
 import Visitors from './visitors'
 
 /**
@@ -31,19 +29,19 @@ export function createRule(
 ): RuleModule.RuleModule {
   const meta = extractRuleMeta('', transform)
   const entries = meta.patterns
-  const message = opts.message ?? (meta.message || DEFAULT_MESSAGE)
+  const message = opts.message ?? (meta.message || Meta.DEFAULT_MESSAGE)
   const canFix = opts.canFix !== false
   const factory = canFix ? meta.factory : null
   const withEntries = meta.withs
   const proxyNode = proxyNodeOf(transform)
-  const isFixable = factory !== null || patternContainsInnerTo(entries)
+  const isFixable = factory !== null || Meta.patternContainsInnerTo(entries)
   const importMap = proxyNode ? Imports.resolveImports(proxyNode.chain) : null
   const dispatchers = [...Visitors.groupByTag(entries)].map(
     ([tag, candidates]) => [tag, dispatcherOf(candidates)] as const,
   )
 
   return {
-    meta: ruleMeta(message, isFixable),
+    meta: Meta.ruleMeta(message, isFixable),
     create(context) {
       const sourceCode = context.sourceCode ?? context.getSourceCode?.()
       let visitors: ReadonlyMap<string, RuleModule.Visitor> = new Map()

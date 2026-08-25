@@ -13,6 +13,9 @@
       ],
       "@": [
         "../core/src/index.ts"
+      ],
+      "@ts-unify/rules/*": [
+        "./src/*"
       ]
     }
   },

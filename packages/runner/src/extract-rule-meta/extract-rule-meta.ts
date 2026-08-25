@@ -1,11 +1,8 @@
 import type { ChainEntry } from '@ts-unify/core/internal'
 import { extractPatterns, proxyNodeOf } from '@ts-unify/engine'
+import type { Factory, RuleMeta, WithFn } from '@ts-unify/runner/types'
 
-import type { Factory } from './factory'
-import { kebabCase } from './kebab-case'
-import type { RuleMeta } from './rule-meta'
-import { singleCaptureFactory } from './single-capture-factory'
-import type { WithFn } from './with-fn'
+import Util from './util'
 
 /**
  * Extract runtime metadata from a rule transform's proxy chain.
@@ -18,7 +15,7 @@ export function extractRuleMeta(
   exportName: string,
   transform: unknown,
 ): RuleMeta {
-  const kebab = kebabCase(exportName)
+  const kebab = Util.kebabCase(exportName)
   const patterns = extractPatterns(transform)
   const node = proxyNodeOf(transform)
 
@@ -27,7 +24,7 @@ export function extractRuleMeta(
 
   const toEntry = node?.chain.find((c: ChainEntry) => c.method === 'to')
   const factory: Factory | null = toEntry
-    ? ((toEntry.args[0] as Factory | undefined) ?? singleCaptureFactory)
+    ? ((toEntry.args[0] as Factory | undefined) ?? Util.singleCaptureFactory)
     : null
 
   const withs: WithFn[] = []

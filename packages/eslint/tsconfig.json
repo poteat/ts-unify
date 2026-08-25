@@ -7,6 +7,8 @@
       "@ts-unify/core/internal": ["../core/src/internal.ts"],
       "@ts-unify/engine": ["../engine/src/index.ts"],
       "@ts-unify/runner": ["../runner/src/index.ts"],
+      "@ts-unify/runner/*": ["../runner/src/*"],
+      "@ts-unify/eslint/*": ["./src/*"],
       "@/*": ["../core/src/*"],
       "@": ["../core/src/index.ts"]
     }

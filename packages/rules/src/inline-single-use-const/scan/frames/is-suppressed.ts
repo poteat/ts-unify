@@ -1,4 +1,4 @@
-import type { Suppressed } from './suppressed'
+import type { Suppressed } from './types'
 
 /**
  * Whether a name is among the suppressed ones.

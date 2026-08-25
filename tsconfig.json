@@ -8,7 +8,8 @@
       "@": ["./packages/core/src/index.ts"],
       "@ts-unify/core": ["./packages/core/src/index.ts"],
       "@ts-unify/core/internal": ["./packages/core/src/internal.ts"],
-      "@ts-unify/engine": ["./packages/engine/src/index.ts"]
+      "@ts-unify/engine": ["./packages/engine/src/index.ts"],
+      "@ts-unify/rules/*": ["./packages/rules/src/*"]
     }
   },
   "include": ["packages/core/src/**/*", "packages/engine/src/**/*", "packages/rules/src/**/*"],

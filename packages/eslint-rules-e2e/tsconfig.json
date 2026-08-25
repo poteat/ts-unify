@@ -11,6 +11,9 @@
       "@ts-unify/eslint/internal": ["../eslint/src/internal.ts"],
       "@ts-unify/eslint": ["../eslint/src/index.ts"],
       "@ts-unify/rules": ["../rules/src/index.ts"],
+      "@ts-unify/runner/*": ["../runner/src/*"],
+      "@ts-unify/eslint/*": ["../eslint/src/*"],
+      "@ts-unify/rules/*": ["../rules/src/*"],
       "@/*": ["../core/src/*"],
       "@": ["../core/src/index.ts"]
     }

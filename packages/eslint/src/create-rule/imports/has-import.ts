@@ -1,4 +1,4 @@
-import { escapeRegExp } from './escape-reg-exp'
+import Util from './util'
 
 /**
  * Whether a source already holds `import { ..., specifier, ... } from
@@ -14,7 +14,7 @@ export function hasImport(
   modulePath: string,
 ) {
   const names = String.raw`\{[^}]*\b${specifier}\b[^}]*\}`
-  const origin = String.raw`from\s+["']${escapeRegExp(modulePath)}["']`
+  const origin = String.raw`from\s+["']${Util.escapeRegExp(modulePath)}["']`
 
   return new RegExp(String.raw`import\s+${names}\s+${origin}`).test(source)
 }

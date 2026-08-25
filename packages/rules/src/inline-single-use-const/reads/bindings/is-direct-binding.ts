@@ -1,4 +1,4 @@
-import type { Node } from '../tree'
+import type { Node } from '@ts-unify/rules/inline-single-use-const/reads/tree'
 
 /**
  * Whether a node binds an identifier outright: a declarator's name, a

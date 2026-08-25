@@ -1,12 +1,11 @@
 import { matchAdmitted, applyRewrites, commentNodes } from '@ts-unify/engine'
+import type { RuleMeta } from '@ts-unify/runner/types'
 
-import type { RuleMeta } from '../extract-rule-meta'
-import type { AstNode } from './ast-node'
 import Dispatch from './dispatch'
-import { isAstNode } from './is-ast-node'
-import type { LintMatch } from './lint-match'
-import { mergeWiths } from './merge-withs'
-import { rootSites } from './root-sites'
+import Nodes from './nodes'
+import type { AstNode } from './nodes'
+import Rewrites from './rewrites'
+import type { LintMatch } from './types'
 
 /**
  * Run a set of rules over a pre-parsed AST: every match, with its reified
@@ -31,13 +30,13 @@ export function lint(ast: unknown, rules: readonly RuleMeta[]): LintMatch[] {
       const { kebab, message, factory, withs } = rule
       const result = matchAdmitted(node, pattern, chain)
       if (!result) continue
-      mergeWiths(result.bag, withs)
+      Rewrites.mergeWiths(result.bag, withs)
       let reified: unknown = null
 
       try {
         reified = applyRewrites(
           node,
-          rootSites(result, factory),
+          Rewrites.rootSites(result, factory),
           result.capturePaths,
         )
       } catch (e) {
@@ -60,7 +59,7 @@ export function lint(ast: unknown, rules: readonly RuleMeta[]): LintMatch[] {
   function walk(node: unknown, parent: unknown) {
     if (typeof node !== 'object' || !node) return
 
-    if (isAstNode(node)) {
+    if (Nodes.isAstNode(node)) {
       node.parent = parent
       check(node)
       if (node.type === 'Program') for (const c of commentNodes(node)) check(c)
@@ -73,7 +72,7 @@ export function lint(ast: unknown, rules: readonly RuleMeta[]): LintMatch[] {
 
       if (Array.isArray(child)) {
         for (const c of child) walk(c, node)
-      } else if (isAstNode(child)) walk(child, node)
+      } else if (Nodes.isAstNode(child)) walk(child, node)
     }
   }
 
