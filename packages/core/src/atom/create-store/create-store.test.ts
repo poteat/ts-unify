@@ -1,0 +1,81 @@
+import Fixtures from '@/atom/fixtures'
+import type { Missing } from '@/atom/missing'
+import AssertType from '@/test-utils/assert-type'
+
+import { createStore } from './create-store'
+
+describe('create-store', () => {
+  it('builds each slot once and hands readers the same value', () => {
+    const store = createStore(Fixtures.clock, Fixtures.settings, Fixtures.stamp)
+    const stamp = store.get(Fixtures.Stamp)
+
+    expect(stamp.text).toBe('atom@1')
+    expect(store.get(Fixtures.Stamp)).toBe(stamp)
+    expect(stamp.clock).toBe(store.get(Fixtures.Clock))
+  })
+
+  it('resolves the same graph with the definitions reversed', () => {
+    expect(
+      createStore(Fixtures.stamp, Fixtures.settings, Fixtures.clock).get(
+        Fixtures.Stamp,
+      ).text,
+    ).toBe('atom@1')
+  })
+
+  it('refuses a list with a slot read and filled by nothing', () => {
+    AssertType.assertType<
+      Missing<[typeof Fixtures.clock, typeof Fixtures.stamp]>,
+      typeof Fixtures.Settings
+    >(0)
+
+    // @ts-expect-error Settings is read by stamp and filled by nothing
+    const incomplete = createStore(Fixtures.clock, Fixtures.stamp)
+
+    // @ts-expect-error Settings is still missing under Stamp
+    expect(() => incomplete.get(Fixtures.Stamp)).toThrow(
+      'Settings is not filled (read by Stamp)',
+    )
+  })
+
+  it('refuses get for a slot outside the list', () => {
+    const store = createStore(Fixtures.clock, Fixtures.settings)
+
+    // @ts-expect-error Twice is filled by nothing in the list
+    expect(() => store.get(Fixtures.Twice)).toThrow(
+      'Twice is not filled (read by get)',
+    )
+  })
+
+  it('throws naming both slots of a cycle', () => {
+    const store = createStore(Fixtures.ping, Fixtures.pong)
+
+    expect(() => store.get(Fixtures.Ping)).toThrow(
+      'Pong reads Ping, which is still being built',
+    )
+  })
+
+  it('keeps two alike slots apart, where the checker sees one type', () => {
+    const store = createStore(Fixtures.one, Fixtures.two, Fixtures.needsTwo)
+
+    expect(store.get(Fixtures.One).n).toBe(1)
+    expect(store.get(Fixtures.Two).n).toBe(2)
+    expect(store.get(Fixtures.NeedsTwo).doubled).toBe(4)
+    AssertType.assertType<typeof Fixtures.One, typeof Fixtures.Two>(0)
+    AssertType.assertType<
+      Missing<[typeof Fixtures.one, typeof Fixtures.needsTwo]>,
+      never
+    >(0)
+    expect(() =>
+      createStore(Fixtures.one, Fixtures.needsTwo).get(Fixtures.NeedsTwo),
+    ).toThrow('Two is not filled (read by NeedsTwo)')
+  })
+
+  it('names a slot by its label, or as unlabelled', () => {
+    const store = createStore(Fixtures.clock)
+
+    // @ts-expect-error Nameless is filled by nothing
+    expect(() => store.get(Fixtures.Nameless)).toThrow(
+      'an unlabelled atom is not filled (read by get)',
+    )
+  })
+})
