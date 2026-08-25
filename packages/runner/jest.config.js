@@ -11,5 +11,6 @@ module.exports = {
     "^@ts-unify/core/internal$": "<rootDir>/../core/src/internal.ts",
     "^@ts-unify/core$": "<rootDir>/../core/src/index.ts",
     "^@ts-unify/engine$": "<rootDir>/../engine/src/index.ts",
+    "^@ts-unify/engine/(.*)$": "<rootDir>/../engine/src/$1",
   },
 };

@@ -1,9 +1,7 @@
-import Literals from '../../match/literals'
-import { chooseKey } from './choose-key'
-import type { DecisionTree } from './decision-tree'
-import { innerNode } from './inner-node'
-import type { Row } from './row'
+import Literals from '@ts-unify/engine/runtime/match/literals'
 
+import type { DecisionTree, Row } from './types'
+import Util from './util'
 /**
  * The decision tree over rows: a leaf of their entries when none holds
  * a literal left to read, else an inner node at the path most rows hold.
@@ -15,7 +13,7 @@ import type { Row } from './row'
  * @param rows the entries with the literals not read yet, in order
  */
 export function buildTree<E>(rows: readonly Row<E>[]): DecisionTree<E> {
-  const key = chooseKey(rows)
+  const key = Util.chooseKey(rows)
 
   if (key === null) {
     return { isLeaf: true, entries: rows.map(it => it.entry) }
@@ -28,7 +26,7 @@ export function buildTree<E>(rows: readonly Row<E>[]): DecisionTree<E> {
   })
   const values = new Set(rows.flatMap(row => at(row).flatMap(it => it.values)))
 
-  return innerNode(
+  return Util.innerNode(
     rows.flatMap(at)[0].path,
 
     new Map(

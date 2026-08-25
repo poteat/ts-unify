@@ -1,10 +1,9 @@
-import type { Path, RewriteSite } from '../match'
-import Reify from '../reify'
-import { isPathPrefix } from './is-path-prefix'
-import { locateParent } from './locate-parent'
-import Outside from './outside'
-import { setAt } from './set-at'
+import type { RewriteSite } from '@ts-unify/engine/runtime/match'
+import Reify from '@ts-unify/engine/runtime/reify'
+import type { Path } from '@ts-unify/engine/runtime/types'
 
+import Outside from './outside'
+import Paths from './paths'
 /**
  * The rewritten copy of a matched node once every inner `.to()` site of
  * the match has run, or null when the match has no sites.
@@ -48,7 +47,7 @@ export function applyRewrites(
     }
 
     if (!rootSite) {
-      const { parent, key } = locateParent(root, site.path)
+      const { parent, key } = Paths.locateParent(root, site.path)
 
       if (!parent || key == null) continue
 
@@ -56,15 +55,15 @@ export function applyRewrites(
         const items = Array.isArray(reified) ? reified : [reified]
         const after = parent.slice(key + (site.span ?? 1))
         const spliced = [...parent.slice(0, key), ...items, ...after]
-        root = setAt(root, site.path.slice(0, -1), spliced)
+        root = Paths.setAt(root, site.path.slice(0, -1), spliced)
       } else {
-        root = setAt(root, site.path, reified)
+        root = Paths.setAt(root, site.path, reified)
       }
     }
 
     if (site.span === undefined || site.span === 1) {
       for (const [name, capPath] of Object.entries(capturePaths)) {
-        if (isPathPrefix(site.path, capPath)) {
+        if (Paths.isPathPrefix(site.path, capPath)) {
           site.scopeBag[name] = reified
         }
       }

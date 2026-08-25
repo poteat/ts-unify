@@ -1,8 +1,6 @@
 import { NODE } from '@ts-unify/core/internal'
 import type { ProxyNode } from '@ts-unify/core/internal'
-
-import SymGet from '../../sym-get'
-
+import SymGet from '@ts-unify/engine/runtime/sym-get'
 /**
  * The tag, arguments and chain a pattern's proxy node carries; the caller
  * has checked {@link isProxyNode}.

@@ -1,8 +1,7 @@
 export * from './best-rewrite-round'
-export type * from './guard-clock'
-export type * from './match-record'
 export * from './match-rule'
-export * from './rewrite-match'
+export * from './rewrites'
+export * from './types'
 export * from './with-timed-guards'
 
 export * as default from '.'

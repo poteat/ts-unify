@@ -1,5 +1,4 @@
-import SymGet from '../sym-get'
-
+import SymGet from '@ts-unify/engine/runtime/sym-get'
 /**
  * Converts a proxy tree (or a real AST node) into a plain ESTree object,
  * the form recast's `print()` takes.

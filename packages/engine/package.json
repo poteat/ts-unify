@@ -11,7 +11,7 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --external @ts-unify/core && tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "build": "tsup --clean src/index.ts --format esm --external @ts-unify/core && tsc -p tsconfig.build.json --emitDeclarationOnly && node ../scripts/src/rewrite-self-imports/rewrite-self-imports.mjs dist",
     "bench": "esbuild bench/bench.ts --bundle --platform=node --format=esm --packages=external --tsconfig=bench/tsconfig.json --outfile=bench/dist/bench.mjs --log-level=warning && node bench/dist/bench.mjs",
     "bench:profile": "esbuild bench/profile.ts --bundle --platform=node --format=esm --packages=external --tsconfig=bench/tsconfig.json --outfile=bench/dist/profile.mjs --log-level=warning && node --cpu-prof --cpu-prof-dir=bench/dist bench/dist/profile.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",

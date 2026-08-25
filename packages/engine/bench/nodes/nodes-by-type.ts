@@ -1,6 +1,6 @@
-import type { ParsedFile } from '../corpus'
-import { walkNodes } from './walk-nodes'
+import type { ParsedFile } from '@bench/corpus'
 
+import Walk from './walk'
 /**
  * Every node of the corpus grouped by its `type`, each in visit order,
  * so a rule's entry pattern is tried against the nodes its tag names.
@@ -10,7 +10,7 @@ import { walkNodes } from './walk-nodes'
 export function nodesByType(
   corpus: readonly ParsedFile[],
 ): ReadonlyMap<string, readonly object[]> {
-  const nodes = corpus.flatMap(it => walkNodes(it.program))
+  const nodes = corpus.flatMap(it => Walk.walkNodes(it.program))
   const kindOf = (node: object) => (node as { type: string }).type
 
   return new Map(

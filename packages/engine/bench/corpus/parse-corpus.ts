@@ -1,8 +1,7 @@
 import { parse } from '@typescript-eslint/typescript-estree'
 import fs from 'node:fs'
 
-import type { ParsedFile } from './parsed-file'
-
+import type { ParsedFile } from './types'
 /**
  * The files parsed as the ESLint adapter sees them: with comments,
  * tokens, positions and ranges. A file that does not parse is left out.

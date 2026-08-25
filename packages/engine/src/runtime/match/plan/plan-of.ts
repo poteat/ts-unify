@@ -1,11 +1,10 @@
 import { $, isStringPredicate, regex } from '@ts-unify/core/internal'
+import Pattern from '@ts-unify/engine/runtime/match/pattern'
 
-import Pattern from '../pattern'
 import Fields from './fields'
-import type { Plan } from './plan'
 import Proxies from './proxies'
+import type { Plan } from './types'
 import Values from './values'
-
 /**
  * What a pattern value asks at a value position: a capture, a config
  * slot, a string predicate, a proxy, a fields record, or a literal.

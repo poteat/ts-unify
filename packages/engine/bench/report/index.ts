@@ -1,8 +1,5 @@
-export * from './decimals'
-export * from './format-number'
-export * from './format-table'
-export * from './ms-per-s'
 export * from './print-report'
-export * from './rate'
+export * from './rates'
+export * from './tables'
 
 export * as default from '.'

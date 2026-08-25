@@ -6,5 +6,6 @@ export * from './match'
 export * from './reify'
 export * from './sub'
 export * from './sym-get'
+export * from './types'
 
 export * as default from '.'

@@ -1,7 +1,7 @@
-import Literals from '../match/literals'
-import type { Dispatcher } from './dispatcher'
-import Tree from './tree'
+import Literals from '@ts-unify/engine/runtime/match/literals'
 
+import Tree from './tree'
+import type { Dispatcher } from './types'
 /**
  * A dispatcher over entries sharing a tag, built once for the list as a
  * decision tree over the root literals of their patterns.

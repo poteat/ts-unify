@@ -1,7 +1,5 @@
 import { SPREAD_BRAND } from '@ts-unify/core/internal'
-
-import SymGet from '../../sym-get'
-
+import SymGet from '@ts-unify/engine/runtime/sym-get'
 /**
  * Whether an array pattern element is a spread capture, such as `...$`.
  *

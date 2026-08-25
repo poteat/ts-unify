@@ -1,8 +1,7 @@
 import type { ChainEntry } from '@ts-unify/core/internal'
+import type { Bag } from '@ts-unify/engine/runtime/types'
 
-import type { Bag } from './bag'
-import { matchWithSites } from './match-with-sites'
-
+import WithSites from './with-sites'
 /**
  * Matches an AST node against a pattern and returns its captures, or null
  * on mismatch.
@@ -21,7 +20,7 @@ export function match(
   pattern: unknown,
   chain?: ChainEntry[],
 ): Bag | null {
-  const result = matchWithSites(node, pattern, chain)
+  const result = WithSites.matchWithSites(node, pattern, chain)
 
   return result?.bag ?? null
 }

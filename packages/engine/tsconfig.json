@@ -6,6 +6,7 @@
     "paths": {
       "@ts-unify/core/internal": ["../core/src/internal.ts"],
       "@ts-unify/core": ["../core/src/index.ts"],
+      "@ts-unify/engine/*": ["./src/*"],
       "@/*": ["../core/src/*"],
       "@": ["../core/src/index.ts"]
     }

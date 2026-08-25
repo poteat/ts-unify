@@ -1,8 +1,7 @@
 import { dispatcherOf, matchAdmitted } from '@ts-unify/engine'
 import type { RuleMeta } from '@ts-unify/runner'
 
-import type { MatchRecord } from './match-record'
-
+import type { MatchRecord } from './types'
 /**
  * Every match one rule makes over the corpus, as the ESLint adapter's
  * visitor makes them.

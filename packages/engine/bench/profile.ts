@@ -4,11 +4,10 @@
  *
  * @entry
  */
-import { profileEngine } from './profile-engine'
+import Profiling from './profiling'
 import Timing from './timing'
-
 console.log(
-  profileEngine(
+  Profiling.profileEngine(
     process.argv[2],
     Number(process.argv[3] ?? Timing.ROUNDS.profile),
   ),

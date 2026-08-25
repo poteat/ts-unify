@@ -1,9 +1,8 @@
 import type { ChainEntry } from '@ts-unify/core/internal'
+import Plan from '@ts-unify/engine/runtime/match/plan'
 
-import Plan from '../plan'
-import type { MatchContext } from './match-context'
-import { matchContextOf } from './match-context-of'
-
+import FromPlan from './from-plan'
+import type { MatchContext } from './types'
 /**
  * A fresh context for one match, holding its own sites and bindings.
  *
@@ -13,4 +12,4 @@ import { matchContextOf } from './match-context-of'
 export const createMatchContext = (
   chain: ChainEntry[] = [],
   program: unknown = undefined,
-): MatchContext => matchContextOf(Plan.chainPlanOf(chain), program)
+): MatchContext => FromPlan.matchContextOf(Plan.chainPlanOf(chain), program)
