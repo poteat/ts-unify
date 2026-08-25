@@ -1,8 +1,8 @@
 import { dispatcherOf } from '@ts-unify/engine'
 import type { Dispatcher } from '@ts-unify/engine'
+import type { RuleMeta } from '@ts-unify/runner/types'
 
-import type { RuleMeta } from '../../extract-rule-meta'
-import type { RuleEntry } from './rule-entry'
+import type { RuleEntry } from './types'
 
 /**
  * One dispatcher per tag over every entry pattern of a rule set, the

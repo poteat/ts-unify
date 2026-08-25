@@ -1,6 +1,6 @@
 import { U, $ } from '@ts-unify/core'
 
-import Parts from './parts'
+import Forms from './forms'
 
 /**
  * A ternary with a boolean literal arm is a boolean operator: `c ? true : r`
@@ -17,6 +17,6 @@ export const ternaryToBooleanOp = U.ConditionalExpression({
   consequent: $('consequent'),
   alternate: $('alternate'),
 })
-  .when(bag => Parts.form(bag) !== null)
-  .to(bag => Parts.form(bag))
+  .when(bag => Forms.form(bag) !== null)
+  .to(bag => Forms.form(bag))
   .message('A ternary with a boolean literal arm is a boolean operator')

@@ -1,7 +1,5 @@
-export * from './coalesced'
 export * from './collapse-null-guard'
-export * from './null-check'
-export * from './return-fallback'
-export * from './return-of-value'
+export * from './patterns'
+export * from './rewrites'
 
 export * as default from '.'

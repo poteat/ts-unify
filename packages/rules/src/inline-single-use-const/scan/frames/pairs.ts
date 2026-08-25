@@ -1,6 +1,7 @@
-import type { Node } from '../../reads/tree'
-import { above } from './above'
-import type { ReadEvent } from './read-event'
+import type { Node } from '@ts-unify/rules/inline-single-use-const/reads/tree'
+
+import Ancestors from './ancestors'
+import type { ReadEvent } from './types'
 
 /**
  * Every node above a read with the node it holds on the way down to the
@@ -11,7 +12,7 @@ import type { ReadEvent } from './read-event'
 export function* pairs(read: ReadEvent): Generator<[Node, Node]> {
   let below = read.node
 
-  for (const node of above(read)) {
+  for (const node of Ancestors.above(read)) {
     yield [node, below]
     below = node
   }

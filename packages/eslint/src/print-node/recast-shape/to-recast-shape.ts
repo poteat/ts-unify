@@ -1,4 +1,4 @@
-import { recastNode } from './recast-node'
+import Nodes from './nodes'
 
 /**
  * A copy of a typescript-estree tree in the shape recast prints; the
@@ -15,4 +15,4 @@ export const toRecastShape = (value: unknown): unknown =>
     ? value
     : Array.isArray(value)
       ? value.map(toRecastShape)
-      : recastNode(value)
+      : Nodes.recastNode(value)

@@ -1,6 +1,4 @@
-export * from './children'
-export * from './is-node'
-export type * from './node'
+export * from './nodes'
 export * from './spells'
 export * from './walk'
 

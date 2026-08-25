@@ -1,4 +1,4 @@
-import type { Node } from '../tree'
+import type { Node } from '@ts-unify/rules/inline-single-use-const/reads/tree'
 
 /**
  * Whether an identifier is one of a function's parameters.

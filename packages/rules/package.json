@@ -9,7 +9,7 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --external @ts-unify/core --external @typescript-eslint/types",
+    "build": "tsup --clean src/index.ts --format esm --external @ts-unify/core --external @typescript-eslint/types",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

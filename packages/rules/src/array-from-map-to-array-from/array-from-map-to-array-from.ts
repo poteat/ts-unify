@@ -1,6 +1,6 @@
 import { U, $ } from '@ts-unify/core'
 
-import { arrayFrom } from './array-from'
+import Patterns from './patterns'
 
 /**
  * A `map` over `Array.from(x)` is the second argument of `Array.from`.
@@ -10,7 +10,7 @@ import { arrayFrom } from './array-from'
 export const arrayFromMapToArrayFrom = U.CallExpression({
   callee: U.MemberExpression({
     object: U.CallExpression({
-      callee: arrayFrom,
+      callee: Patterns.arrayFrom,
       arguments: [$('iterable')],
       optional: false,
     }),
@@ -23,7 +23,7 @@ export const arrayFromMapToArrayFrom = U.CallExpression({
 })
   .to(({ iterable, mapFn }) =>
     U.CallExpression({
-      callee: arrayFrom,
+      callee: Patterns.arrayFrom,
       arguments: [iterable, mapFn],
       optional: false,
     }),

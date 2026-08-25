@@ -1,7 +1,6 @@
 import { U, $ } from '@ts-unify/core'
 
-import { inlinableConst } from './inlinable-const'
-import { substituted } from './substituted'
+import Inlining from './inlining'
 
 /**
  * A `const` whose one read is in the very next statement goes, and that
@@ -14,13 +13,15 @@ import { substituted } from './substituted'
  * `config.onError?.(err)`
  */
 export const inlineSingleUseConst = U.BlockStatement({ body: $('body') })
-  .when(bag => inlinableConst((bag as { body?: unknown }).body) !== null)
+  .when(
+    bag => Inlining.inlinableConst((bag as { body?: unknown }).body) !== null,
+  )
   .to(bag => {
     const body = (bag as { body?: unknown }).body
-    const it = inlinableConst(body)
+    const it = Inlining.inlinableConst(body)
     const list = body as unknown[]
     if (!it) return { type: 'BlockStatement', body: list }
-    const next = substituted(list[it.index + 1], it.read, it.init)
+    const next = Inlining.substituted(list[it.index + 1], it.read, it.init)
 
     return {
       type: 'BlockStatement',

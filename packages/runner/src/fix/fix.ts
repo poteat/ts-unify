@@ -1,9 +1,9 @@
-import type { RuleMeta } from '../extract-rule-meta'
-import Lint from '../lint'
-import type { LintMatch } from '../lint'
-import type { FixOptions } from './fix-options'
-import { MAX_ITERATIONS } from './max-iterations'
-import { nonOverlapping } from './non-overlapping'
+import Lint from '@ts-unify/runner/lint'
+import type { LintMatch } from '@ts-unify/runner/lint'
+import type { RuleMeta } from '@ts-unify/runner/types'
+
+import type { FixOptions } from './types'
+import Util from './util'
 
 /**
  * Apply all rule rewrites to the source text in a fixpoint loop, until the
@@ -21,7 +21,7 @@ export function fix(
   rules: readonly RuleMeta[],
   options: FixOptions,
 ) {
-  const { parse, serialize, maxIterations = MAX_ITERATIONS } = options
+  const { parse, serialize, maxIterations = Util.MAX_ITERATIONS } = options
   let current = source
 
   for (let iter = 0; iter < maxIterations; iter++) {
@@ -42,7 +42,7 @@ export function fix(
     )
 
     if (fixable.length === 0) break
-    const usable = nonOverlapping(fixable)
+    const usable = Util.nonOverlapping(fixable)
     if (usable.length === 0) break
     const lines = [...current.split('\n')]
 
