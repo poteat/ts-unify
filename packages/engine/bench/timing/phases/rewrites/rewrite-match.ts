@@ -1,8 +1,8 @@
 import type { MatchRecord } from '@bench/timing/phases/types'
 import { applyRewrites, matchWithSites } from '@ts-unify/engine'
+import { printNode } from '@ts-unify/eslint/internal'
 import { rootSites } from '@ts-unify/runner'
 
-import PrintNode from '../../../../../eslint/src/print-node'
 /**
  * The printed rewrite of one match, as the ESLint adapter's fix builds
  * it, and the milliseconds the rewrite and its print took.
@@ -27,7 +27,7 @@ export function rewriteMatch(record: MatchRecord): {
   if (sites.length === 0) return { text: null, ms: 0 }
 
   try {
-    const text = PrintNode.printNode(
+    const text = printNode(
       applyRewrites(record.node, sites, result.capturePaths),
     )
 
