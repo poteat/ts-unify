@@ -1,4 +1,5 @@
 export * from './ast'
+export * from './atom'
 export * from './capture'
 export * from './config'
 export * from './pattern'
