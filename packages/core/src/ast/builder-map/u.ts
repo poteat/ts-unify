@@ -1,7 +1,7 @@
-import type { BuilderMap } from './builder-map'
-import { makeProxy } from './make-proxy'
+import MakeProxy from './make-proxy'
+import type { BuilderMap } from './types'
 
 /**
  * AST pattern builder namespace.
  */
-export const U = makeProxy() as BuilderMap
+export const U = MakeProxy.makeProxy() as BuilderMap

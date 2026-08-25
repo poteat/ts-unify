@@ -1,4 +1,4 @@
-import type { SPREAD_BRAND } from './spread-brand'
+import type { SPREAD_BRAND } from './brand'
 
 /**
  * Sequence-only capture token for a contiguous slice of an array or tuple.

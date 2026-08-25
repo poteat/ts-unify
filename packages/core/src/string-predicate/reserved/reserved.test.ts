@@ -1,9 +1,7 @@
 import ts from 'typescript'
 
-import { CONTEXTUAL_KEYWORDS } from './contextual-keywords'
 import { reserved } from './reserved'
-import { RESERVED_WORDS } from './reserved-words'
-import { STRICT_MODE_RESERVED_WORDS } from './strict-mode-reserved-words'
+import Words from './words'
 
 describe('reserved', () => {
   const kinds = ts.SyntaxKind as unknown as Record<string, number>
@@ -24,9 +22,11 @@ describe('reserved', () => {
     ].sort()
 
   it("matches the installed TypeScript's keyword table", () => {
-    expect([...RESERVED_WORDS]).toEqual(range('ReservedWord'))
-    expect([...STRICT_MODE_RESERVED_WORDS]).toEqual(range('FutureReservedWord'))
-    expect([...CONTEXTUAL_KEYWORDS]).toEqual(range('ContextualKeyword'))
+    expect([...Words.RESERVED_WORDS]).toEqual(range('ReservedWord'))
+    expect([...Words.STRICT_MODE_RESERVED_WORDS]).toEqual(
+      range('FutureReservedWord'),
+    )
+    expect([...Words.CONTEXTUAL_KEYWORDS]).toEqual(range('ContextualKeyword'))
   })
 
   it('always counts the ECMAScript reserved words', () => {

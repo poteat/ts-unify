@@ -1,5 +1,5 @@
 export * from './identifier-name'
-export type * from './identifier-name-predicate'
-export * from './identifier-name-regex'
+export * from './regex'
+export * from './types'
 
 export * as default from '.'

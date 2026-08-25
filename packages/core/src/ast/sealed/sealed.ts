@@ -1,4 +1,4 @@
-import type { SEALED_BRAND } from './sealed-brand'
+import type { SEALED_BRAND } from './brand'
 
 /**
  * A node shape branded by `.seal()`.

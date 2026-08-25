@@ -1,4 +1,4 @@
-export type * from './block-with-single'
 export type * from './maybe-block-combinator'
+export * from './types'
 
 export * as default from '.'

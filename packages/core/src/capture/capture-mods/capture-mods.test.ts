@@ -1,7 +1,7 @@
 import AssertType from '@/test-utils/assert-type'
 
+import type { CAPTURE_MODS_BRAND } from './brand'
 import type { CaptureMods } from './capture-mods'
-import { CAPTURE_MODS_BRAND } from './capture-mods-brand'
 
 describe('capture-mods', () => {
   it('brands with a Mods record', () => {

@@ -1,8 +1,7 @@
 import AssertType from '@/test-utils/assert-type'
 
-import type { CommentKind } from './comment-kind'
 import type { CommentNode } from './comment-node'
-import type { JsdocTag } from './jsdoc-tag'
+import type { CommentKind, JsdocTag } from './types'
 
 describe('comment-node', () => {
   it("is discriminated by type 'Comment'", () => {

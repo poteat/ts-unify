@@ -1,4 +1,4 @@
 export type * from './from-node'
-export type * from './kind-for-type'
+export * from './types'
 
 export * as default from '.'

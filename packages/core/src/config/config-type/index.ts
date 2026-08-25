@@ -1,4 +1,4 @@
-export * from './config-brand'
+export * from './brand'
 export type * from './config-slot'
 
 export * as default from '.'

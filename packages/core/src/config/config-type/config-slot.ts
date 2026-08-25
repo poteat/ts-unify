@@ -1,4 +1,4 @@
-import type { CONFIG_BRAND } from './config-brand'
+import type { CONFIG_BRAND } from './brand'
 
 /**
  * Marks a position in a pattern or output that takes its value from the

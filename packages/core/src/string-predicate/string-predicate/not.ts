@@ -1,6 +1,6 @@
-import { brandStringPredicate } from './brand-string-predicate'
-import type { StringPredicate } from './string-predicate'
-import { testString } from './test-string'
+import Branding from './branding'
+import TestString from './test-string'
+import type { StringPredicate } from './types'
 
 /**
  * Negate a string predicate. Like every predicate, `false` for a non-string.
@@ -9,4 +9,6 @@ import { testString } from './test-string'
  * U.Identifier({ name: U.string.not(U.string.reserved()) })
  */
 export const not = (predicate: StringPredicate | RegExp): StringPredicate =>
-  brandStringPredicate(value => !testString(predicate, value))
+  Branding.brandStringPredicate(
+    value => !TestString.testString(predicate, value),
+  )
