@@ -1,4 +1,4 @@
-export * from './arm'
+export type * from './arm'
 export * from './boolean-shaped'
 export * from './flipped'
 export * from './form'

@@ -1,4 +1,4 @@
-export * from './array-plan'
+export type * from './array-plan'
 export * from './array-plan-of'
 export * from './array-plans'
 export * from './build-array-plan'

@@ -1,3 +1,3 @@
-export * from './overwrite'
+export type * from './overwrite'
 
 export * as default from '.'

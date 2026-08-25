@@ -1,7 +1,7 @@
 export * from './boundary-tags-of'
-export * from './constraint-plan'
+export type * from './constraint-plan'
 export * from './constraint-plans-of'
-export * from './count-plan'
+export type * from './count-plan'
 export * from './count-plan-of'
 export * from './quantifier'
 

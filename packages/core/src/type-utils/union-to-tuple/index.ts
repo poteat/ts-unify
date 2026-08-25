@@ -1,3 +1,3 @@
-export * from './union-to-tuple'
+export type * from './union-to-tuple'
 
 export * as default from '.'

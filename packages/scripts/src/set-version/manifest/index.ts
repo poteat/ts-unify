@@ -1,4 +1,4 @@
-export * from './manifest'
+export type * from './manifest'
 export * from './read-manifest'
 export * from './write-manifest'
 

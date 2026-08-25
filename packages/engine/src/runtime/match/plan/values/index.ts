@@ -1,8 +1,8 @@
-export * from './capture-plan'
-export * from './config-plan'
+export type * from './capture-plan'
+export type * from './config-plan'
 export * from './dollar'
-export * from './dollar-plan'
-export * from './literal-plan'
-export * from './string-plan'
+export type * from './dollar-plan'
+export type * from './literal-plan'
+export type * from './string-plan'
 
 export * as default from '.'

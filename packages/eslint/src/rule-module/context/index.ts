@@ -1,8 +1,8 @@
-export * from './report-descriptor'
-export * from './report-site'
-export * from './rule-context'
-export * from './rule-fix'
-export * from './rule-fixer'
+export type * from './report-descriptor'
+export type * from './report-site'
+export type * from './rule-context'
+export type * from './rule-fix'
+export type * from './rule-fixer'
 export * from './source-text'
 
 export * as default from '.'

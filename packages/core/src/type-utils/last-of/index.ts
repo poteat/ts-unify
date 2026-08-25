@@ -1,3 +1,3 @@
-export * from './last-of'
+export type * from './last-of'
 
 export * as default from '.'

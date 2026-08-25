@@ -1,3 +1,3 @@
-export * from './narrow-single-capture'
+export type * from './narrow-single-capture'
 
 export * as default from '.'

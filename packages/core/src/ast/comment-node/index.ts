@@ -1,5 +1,5 @@
-export * from './comment-kind'
-export * from './comment-node'
-export * from './jsdoc-tag'
+export type * from './comment-kind'
+export type * from './comment-node'
+export type * from './jsdoc-tag'
 
 export * as default from '.'

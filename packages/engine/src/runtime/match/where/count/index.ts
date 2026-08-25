@@ -1,4 +1,4 @@
-export * from './count'
+export type * from './count'
 export * from './count-children'
 export * from './count-children-of'
 export * from './count-cursor'

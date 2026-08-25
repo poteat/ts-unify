@@ -1,4 +1,4 @@
-export * from './separated-write'
+export type * from './separated-write'
 export * from './write-list'
 export * from './write-node'
 export * from './write-separated'

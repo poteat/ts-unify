@@ -10,7 +10,7 @@ export function memo<K extends object, V>(
 ): { of: (key: K) => V } {
   const kept = new WeakMap<K, V>()
 
-  const of = (key: K): V => {
+  function of(key: K): V {
     const hit = kept.get(key)
     if (hit) return hit
     const built = build(key, of)

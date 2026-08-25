@@ -1,3 +1,3 @@
-export * from './capturable'
+export type * from './capturable'
 
 export * as default from '.'

@@ -1,3 +1,3 @@
-export * from './intersect-values'
+export type * from './intersect-values'
 
 export * as default from '.'

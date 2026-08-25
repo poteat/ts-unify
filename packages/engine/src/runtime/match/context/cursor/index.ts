@@ -1,4 +1,4 @@
 export * from './child-cursor'
-export * from './cursor'
+export type * from './cursor'
 
 export * as default from '.'

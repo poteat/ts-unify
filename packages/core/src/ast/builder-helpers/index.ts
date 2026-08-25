@@ -1,5 +1,5 @@
-export * from './falsy'
-export * from './truthy'
-export * from './truthy-guard'
+export type * from './falsy'
+export type * from './truthy'
+export type * from './truthy-guard'
 
 export * as default from '.'

@@ -1,5 +1,5 @@
-export * from './capture-base'
-export * from './fluent-capture'
-export * from './fluent-ops'
+export type * from './capture-base'
+export type * from './fluent-capture'
+export type * from './fluent-ops'
 
 export * as default from '.'

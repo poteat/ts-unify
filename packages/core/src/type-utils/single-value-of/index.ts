@@ -1,3 +1,3 @@
-export * from './single-value-of'
+export type * from './single-value-of'
 
 export * as default from '.'

@@ -1,5 +1,5 @@
 export * from './fix'
-export * from './fix-options'
+export type * from './fix-options'
 export * from './max-iterations'
 export * from './non-overlapping'
 

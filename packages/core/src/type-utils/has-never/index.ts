@@ -1,3 +1,3 @@
-export * from './has-never'
+export type * from './has-never'
 
 export * as default from '.'

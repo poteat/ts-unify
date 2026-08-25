@@ -1,4 +1,4 @@
-export * from './dispatcher'
+export type * from './dispatcher'
 export * from './dispatcher-of'
 export * from './tree'
 

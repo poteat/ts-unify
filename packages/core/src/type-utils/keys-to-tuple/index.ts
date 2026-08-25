@@ -1,3 +1,3 @@
-export * from './keys-to-tuple'
+export type * from './keys-to-tuple'
 
 export * as default from '.'

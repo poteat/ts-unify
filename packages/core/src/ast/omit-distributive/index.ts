@@ -1,3 +1,3 @@
-export * from './omit-distributive'
+export type * from './omit-distributive'
 
 export * as default from '.'

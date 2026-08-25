@@ -1,5 +1,5 @@
-export * from './bind-bag-entries'
-export * from './bind-exclusive'
-export * from './node-with-bind'
+export type * from './bind-bag-entries'
+export type * from './bind-exclusive'
+export type * from './node-with-bind'
 
 export * as default from '.'

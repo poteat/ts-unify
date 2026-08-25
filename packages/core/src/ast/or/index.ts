@@ -1,6 +1,6 @@
 export * from './or-brand'
-export * from './or-combinator'
-export * from './or-node'
-export * from './primitive-literal'
+export type * from './or-combinator'
+export type * from './or-node'
+export type * from './primitive-literal'
 
 export * as default from '.'

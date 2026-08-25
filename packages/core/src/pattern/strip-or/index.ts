@@ -1,3 +1,3 @@
-export * from './strip-or'
+export type * from './strip-or'
 
 export * as default from '.'

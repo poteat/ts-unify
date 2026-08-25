@@ -1,3 +1,3 @@
-export * from './equal'
+export type * from './equal'
 
 export * as default from '.'

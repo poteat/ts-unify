@@ -1,8 +1,8 @@
 export * from './above'
-export * from './frame'
+export type * from './frame'
 export * from './is-suppressed'
 export * from './pairs'
-export * from './read-event'
-export * from './suppressed'
+export type * from './read-event'
+export type * from './suppressed'
 
 export * as default from '.'

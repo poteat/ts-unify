@@ -1,9 +1,9 @@
-export * from './ast-node'
+export type * from './ast-node'
 export * from './dispatch'
 export * from './is-ast-node'
 export * from './lint'
-export * from './lint-match'
-export * from './lint-result'
+export type * from './lint-match'
+export type * from './lint-result'
 export * from './merge-withs'
 export * from './root-sites'
 

@@ -1,3 +1,3 @@
-export * from './node-with-default'
+export type * from './node-with-default'
 
 export * as default from '.'

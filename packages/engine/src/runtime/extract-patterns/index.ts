@@ -1,6 +1,6 @@
 export * from './extract-pattern'
 export * from './extract-patterns'
-export * from './pattern-entry'
+export type * from './pattern-entry'
 export * from './pattern-of'
 export * from './root-inherited'
 

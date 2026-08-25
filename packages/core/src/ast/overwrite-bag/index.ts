@@ -1,3 +1,3 @@
-export * from './overwrite-bag'
+export type * from './overwrite-bag'
 
 export * as default from '.'

@@ -1,6 +1,6 @@
 export * from './context'
-export * from './rule-module'
-export * from './visitor'
-export * from './visitors'
+export type * from './rule-module'
+export type * from './visitor'
+export type * from './visitors'
 
 export * as default from '.'

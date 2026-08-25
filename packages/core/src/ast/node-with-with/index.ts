@@ -1,3 +1,3 @@
-export * from './node-with-with'
+export type * from './node-with-with'
 
 export * as default from '.'

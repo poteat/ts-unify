@@ -1,6 +1,6 @@
-export * from './capture-keys'
-export * from './has-many-captures'
-export * from './has-single-capture'
-export * from './has-zero-captures'
+export type * from './capture-keys'
+export type * from './has-many-captures'
+export type * from './has-single-capture'
+export type * from './has-zero-captures'
 
 export * as default from '.'
