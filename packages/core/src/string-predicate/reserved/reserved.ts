@@ -1,10 +1,8 @@
 import StringPredicate from '@/string-predicate/string-predicate'
 
-import { CONTEXTUAL_KEYWORDS } from './contextual-keywords'
-import { DEFAULT_RESERVED_OPTIONS } from './default-reserved-options'
-import type { ReservedOptions } from './reserved-options'
-import { RESERVED_WORDS } from './reserved-words'
-import { STRICT_MODE_RESERVED_WORDS } from './strict-mode-reserved-words'
+import Options from './options'
+import type { ReservedOptions } from './options'
+import Words from './words'
 
 /**
  * A string predicate: the string is a reserved word, so cannot be a binding
@@ -21,15 +19,15 @@ import { STRICT_MODE_RESERVED_WORDS } from './strict-mode-reserved-words'
 export function reserved(
   options: Partial<ReservedOptions> = {},
 ): StringPredicate.StringPredicate {
-  const isStrict = options.isStrict ?? DEFAULT_RESERVED_OPTIONS.isStrict
+  const isStrict = options.isStrict ?? Options.DEFAULT_RESERVED_OPTIONS.isStrict
   const isTypeScript =
-    options.isTypeScript ?? DEFAULT_RESERVED_OPTIONS.isTypeScript
+    options.isTypeScript ?? Options.DEFAULT_RESERVED_OPTIONS.isTypeScript
 
   return StringPredicate.brandStringPredicate(
     name =>
-      RESERVED_WORDS.has(name) ||
+      Words.RESERVED_WORDS.has(name) ||
       (isStrict &&
-        (STRICT_MODE_RESERVED_WORDS.has(name) || name === 'await')) ||
-      (isTypeScript && CONTEXTUAL_KEYWORDS.has(name)),
+        (Words.STRICT_MODE_RESERVED_WORDS.has(name) || name === 'await')) ||
+      (isTypeScript && Words.CONTEXTUAL_KEYWORDS.has(name)),
   )
 }

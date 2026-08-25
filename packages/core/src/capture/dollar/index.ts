@@ -1,5 +1,4 @@
-export * from './define-spread-iterator'
 export * from './dollar'
-export * from './rest-capture'
+export * from './util'
 
 export * as default from '.'

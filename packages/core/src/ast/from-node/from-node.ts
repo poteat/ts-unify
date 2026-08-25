@@ -5,7 +5,7 @@ import type { OmitDistributive } from '@/ast/omit-distributive'
 import type { BindCaptures } from '@/capture'
 import type { WithoutInternalAstFields } from '@/type-utils'
 
-import type { KindForType } from './kind-for-type'
+import type { KindForType } from './types'
 
 /**
  * Builds a fluent node from an object whose `type` field names the kind,

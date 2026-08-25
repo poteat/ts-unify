@@ -1,9 +1,8 @@
-export * from './brand-string-predicate'
+export * from './brand'
+export * from './branding'
 export * from './is-string-predicate'
 export * from './not'
-export * from './regex'
-export type * from './string-predicate'
-export * from './string-predicate-brand'
 export * from './test-string'
+export * from './types'
 
 export * as default from '.'

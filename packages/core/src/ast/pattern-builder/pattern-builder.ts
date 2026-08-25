@@ -5,8 +5,8 @@ import type { OmitDistributive } from '@/ast/omit-distributive'
 import type { Pattern } from '@/pattern'
 import type { WithoutInternalAstFields } from '@/type-utils'
 
-import type { BindAgainstNodeKind } from './bind-against-node-kind'
-import type { PATTERN_BUILDER_BRAND } from './pattern-builder-brand'
+import type { PATTERN_BUILDER_BRAND } from './brand'
+import type { BindAgainstNodeKind } from './types'
 
 /**
  * `U.<K>`, the builder for the AST kind `K`.

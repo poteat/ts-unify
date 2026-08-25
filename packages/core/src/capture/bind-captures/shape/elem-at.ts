@@ -1,5 +1,4 @@
-import type { ArrayElem } from './array-elem'
-import type { IsTuple } from './is-tuple'
+import type { ArrayElem, IsTuple } from './types'
 
 /**
  * The type an array shape holds at an index: the position's own type for a

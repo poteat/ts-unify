@@ -1,10 +1,10 @@
 import Dollar from '@/capture/dollar'
 
-import { SPREAD_BRAND } from './spread-brand'
+import Brand from './brand'
 
 describe('spread', () => {
   it('exports a brand symbol', () => {
-    expect(typeof SPREAD_BRAND).toBe('symbol')
+    expect(typeof Brand.SPREAD_BRAND).toBe('symbol')
   })
 
   it('$ spread sugar yields exactly one token at runtime', () => {

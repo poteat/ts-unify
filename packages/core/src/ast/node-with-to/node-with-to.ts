@@ -10,7 +10,7 @@ import type { ExtractCaptures } from '@/pattern'
 import type { WithoutInternalAstFields } from '@/type-utils'
 import type { SingleValueOf } from '@/type-utils/single-value-of'
 
-import type { ToAttached } from './to-attached'
+import type { ToAttached } from './types'
 
 /**
  * Adds a `.to` method to a node value `N`, attaching a rewrite factory

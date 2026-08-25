@@ -1,4 +1,4 @@
 export type * from './node-with-to'
-export type * from './to-attached'
+export * from './types'
 
 export * as default from '.'

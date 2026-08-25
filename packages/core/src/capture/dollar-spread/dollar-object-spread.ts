@@ -1,4 +1,4 @@
-import type { OBJECT_SPREAD_BRAND } from './object-spread-brand'
+import type { OBJECT_SPREAD_BRAND } from './brand'
 
 /**
  * Type-only brand on an object pattern written with `{ ...$ }`: the binder

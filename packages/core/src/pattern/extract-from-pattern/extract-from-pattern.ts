@@ -7,7 +7,7 @@ import type { StripSeal } from '@/pattern/strip-seal'
 import type { UnionToIntersection } from '@/type-utils'
 
 import type { ExtractFromObject } from './extract-from-object'
-import type { TokenBag } from './token-bag'
+import type { TokenBag } from './types'
 
 /**
  * The bag of every `Token` in a pattern, keyed by the token's name; `Token`

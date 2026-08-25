@@ -3,9 +3,7 @@ import type { TSESTree } from '@typescript-eslint/types'
 import type { DollarObjectSpread } from '@/capture'
 import type { Capturable } from '@/capture/capturable'
 
-import type { PatternChildren } from './pattern-children'
-import type { SequenceItem } from './sequence-item'
-import type { StringPattern } from './string-pattern'
+import type { PatternChildren, SequenceItem, StringPattern } from './types'
 import type { WithParent } from './with-parent'
 
 /**

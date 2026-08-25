@@ -1,5 +1,4 @@
-import type { CaptureBase } from './capture-base'
-import type { FluentOps } from './fluent-ops'
+import type { CaptureBase, FluentOps } from './types'
 
 /**
  * A capture token with the fluent methods, each of which returns this same

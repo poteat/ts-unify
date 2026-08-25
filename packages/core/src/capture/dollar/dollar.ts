@@ -3,8 +3,7 @@ import type { DollarObjectSpread } from '@/capture/dollar-spread'
 import type { FluentCapture, FluentOps } from '@/capture/fluent-capture'
 import type { Spread } from '@/capture/spread'
 
-import { defineSpreadIterator } from './define-spread-iterator'
-import { REST_CAPTURE } from './rest-capture'
+import Util from './util'
 
 /**
  * Type of the `$` sentinel: a call makes a named capture; the bare value
@@ -49,14 +48,14 @@ export const $ = (<const Name extends string, Value = unknown>(name: Name) => {
     name,
   } as unknown as CaptureType.Capture<Name, Value> &
     Iterable<Spread<Name, Value>>
-  defineSpreadIterator<Name, Value>(obj, name)
+  Util.defineSpreadIterator<Name, Value>(obj, name)
 
   return Object.freeze(obj)
 }) as unknown as $
 
-defineSpreadIterator<'', unknown>($, '')
+Util.defineSpreadIterator<'', unknown>($, '')
 
-Object.defineProperty($, REST_CAPTURE, {
+Object.defineProperty($, Util.REST_CAPTURE, {
   enumerable: true,
   configurable: false,
   writable: false,

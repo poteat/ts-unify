@@ -1,7 +1,6 @@
 import type { UnwrapFluent } from '@/ast/unwrap-fluent'
 
-import type { OrNode } from './or-node'
-import type { PrimitiveLiteral } from './primitive-literal'
+import type { OrNode, PrimitiveLiteral } from './types'
 
 /**
  * A disjunction over its arguments, `U.or(a, b, ...)`.

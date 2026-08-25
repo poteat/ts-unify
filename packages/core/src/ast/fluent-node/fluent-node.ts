@@ -14,7 +14,7 @@ import type { NodeWithWhen } from '@/ast/node-with-when'
 import type { NodeWithWhere } from '@/ast/node-with-where'
 import type { NodeWithWith } from '@/ast/node-with-with'
 
-import type { FLUENT_INNER } from './fluent-inner'
+import type { FLUENT_INNER } from './brand'
 
 /**
  * A node shape `N` with the fluent helpers on it: `.when()`, `.with()`,

@@ -1,7 +1,7 @@
 import StringPredicate from '@/string-predicate/string-predicate'
 
-import type { IdentifierNamePredicate } from './identifier-name-predicate'
-import { IDENTIFIER_NAME_REGEX } from './identifier-name-regex'
+import Regex from './regex'
+import type { IdentifierNamePredicate } from './types'
 
 /**
  * A string predicate: the string is an ECMAScript IdentifierName. In a slot,
@@ -14,4 +14,4 @@ import { IDENTIFIER_NAME_REGEX } from './identifier-name-regex'
  * U.Property({ key: U.Literal({ value: U.string.identifierName() }) })
  */
 export const identifierName = (): IdentifierNamePredicate =>
-  StringPredicate.regex(IDENTIFIER_NAME_REGEX) as IdentifierNamePredicate
+  StringPredicate.regex(Regex.IDENTIFIER_NAME_REGEX) as IdentifierNamePredicate
