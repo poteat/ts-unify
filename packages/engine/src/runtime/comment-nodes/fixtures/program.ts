@@ -5,6 +5,7 @@ import { parse } from '@typescript-eslint/typescript-estree'
  * `commentNodes` reads one.
  *
  * @param code the source parsed
+ * @returns the `Program` node typescript-estree parses from the source
  */
 export const program = (code: string) =>
   parse(code, {

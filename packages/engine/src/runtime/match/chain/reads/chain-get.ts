@@ -6,6 +6,7 @@ import type { ChainMethod } from './types'
  *
  * @param chain the chain
  * @param method the method
+ * @returns the first entry whose method matches, or undefined when none does
  */
 export const chainGet = (
   chain: ChainEntry[],

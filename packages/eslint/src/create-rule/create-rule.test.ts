@@ -28,10 +28,6 @@ describe('create-rule', () => {
     insertTextBeforeRange: (range, text) => ({ range, text }),
   }
 
-  /**
-   * The rule's visitors over a context that collects what it reports and
-   * applies each fix with `fakeFixer`.
-   */
   function lintWith(rule: Rule, sourceCode?: object) {
     const reported: Descriptor[] = []
     const fixes: Fix[] = []
@@ -52,10 +48,7 @@ describe('create-rule', () => {
       parse(text, { comment: true, tokens: true, loc: true, range: true }),
   }
 
-  /**
-   * ESLint's reports on a file, under one rule.
-   */
-  const lint = (rule: unknown, code: string): Report[] =>
+  const lint = (code: string, rule: unknown): Report[] =>
     new Linter()
       .verify(
         code,
@@ -78,12 +71,12 @@ describe('create-rule', () => {
 
   function valid(rule: unknown, codes: readonly string[]) {
     for (const code of codes)
-      expect({ code, reports: lint(rule, code) }).toEqual({ code, reports: [] })
+      expect({ code, reports: lint(code, rule) }).toEqual({ code, reports: [] })
   }
 
   function invalid(rule: unknown, codes: readonly string[]) {
     for (const code of codes)
-      expect({ code, n: lint(rule, code).length }).toEqual({ code, n: 1 })
+      expect({ code, n: lint(code, rule).length }).toEqual({ code, n: 1 })
   }
 
   it("returns a RuleModule with meta.type = 'suggestion'", () => {
@@ -314,9 +307,6 @@ describe('create-rule', () => {
       U.ExportDefaultDeclaration({ declaration: TOP }),
     )
 
-    /**
-     * Whether every content word of a summary is already in the name.
-     */
     function restates(name: unknown, summary: string) {
       if (typeof name !== 'string') return false
 
@@ -359,7 +349,7 @@ describe('create-rule', () => {
 
     it("reports at the comment's own location", () => {
       expect(
-        lint(noInlineComments, 'const a = 1; // trailing\nconst b = 2;'),
+        lint('const a = 1; // trailing\nconst b = 2;', noInlineComments),
       ).toEqual([
         {
           line: 1,
@@ -456,14 +446,6 @@ describe('create-rule', () => {
   })
 
   describe('with string predicates', () => {
-    /**
-     * A destructuring property that renames a key which could have been
-     * the binding: `{ key: name }` with `key` an unreserved IdentifierName.
-     *
-     * The predicate sits on the capture over the `U.or`, once for both
-     * spellings of the key, and the guard types `key` as a string in the
-     * bag.
-     */
     const renamedKey = U.Property({
       computed: false,
       shorthand: false,
@@ -477,34 +459,31 @@ describe('create-rule', () => {
       value: U.Identifier({ name: $('name') }),
     }).message('{{key}} renamed to {{name}}')
 
-    /**
-     * The slot form, for a slot with nothing to capture.
-     */
     const reservedName = U.Identifier({
       name: U.string.reserved({ isTypeScript: true }),
     }).message('reserved')
 
-    const messages = (rule: unknown, code: string) =>
-      lint(rule, code).map(r => r.message)
+    const messages = (code: string, rule: unknown) =>
+      lint(code, rule).map(r => r.message)
 
     it('applies a .when over a U.or capture once, for either key', () => {
-      expect(messages(renamedKey, 'const { a: b } = o;')).toEqual([
+      expect(messages('const { a: b } = o;', renamedKey)).toEqual([
         'a renamed to b',
       ])
-      expect(messages(renamedKey, "const { 'a': b } = o;")).toEqual([
+      expect(messages("const { 'a': b } = o;", renamedKey)).toEqual([
         'a renamed to b',
       ])
-      expect(messages(renamedKey, 'const { class: b } = o;')).toEqual([])
-      expect(messages(renamedKey, "const { 'data-id': b } = o;")).toEqual([])
-      expect(messages(renamedKey, 'const { 1: b } = o;')).toEqual([])
-      expect(messages(renamedKey, 'const { a } = o;')).toEqual([])
+      expect(messages('const { class: b } = o;', renamedKey)).toEqual([])
+      expect(messages("const { 'data-id': b } = o;", renamedKey)).toEqual([])
+      expect(messages('const { 1: b } = o;', renamedKey)).toEqual([])
+      expect(messages('const { a } = o;', renamedKey)).toEqual([])
     })
 
     it('tests a slot with a predicate the way it does with a RegExp', () => {
-      expect(messages(reservedName, 'o.type;')).toEqual(['reserved'])
-      expect(messages(reservedName, 'o.kind;')).toEqual([])
+      expect(messages('o.type;', reservedName)).toEqual(['reserved'])
+      expect(messages('o.kind;', reservedName)).toEqual([])
       expect(
-        messages(U.Identifier({ name: /^ki/ }).message('re'), 'o.kind;'),
+        messages('o.kind;', U.Identifier({ name: /^ki/ }).message('re')),
       ).toEqual(['re'])
     })
   })

@@ -1,7 +1,7 @@
 import type { BindNode } from '@/capture/bind-captures/bind-node/bind-node'
 import type { KeyStr, ShapeAt } from '@/capture/bind-captures/shape'
 import type { Capture } from '@/capture/capture-type'
-import type { OBJECT_SPREAD_BRAND } from '@/capture/dollar-spread'
+import type { DollarObjectSpread } from '@/capture/dollar-spread'
 
 import type { PatternKeys } from './types'
 
@@ -15,7 +15,7 @@ import type { PatternKeys } from './types'
 export type BindObject<P extends object, S> = {
   readonly [K in
     | PatternKeys<P>
-    | (P extends { readonly [OBJECT_SPREAD_BRAND]: true }
+    | (P extends DollarObjectSpread
         ? Exclude<keyof S, keyof P | 'type'> & string
         : never)]: K extends PatternKeys<P>
     ? BindNode<

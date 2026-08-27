@@ -1,12 +1,12 @@
-import type { FLUENT_INNER } from '@/ast/fluent-node'
-import type { OR_BRAND } from '@/ast/or'
+import type FluentNodeTypes from '@/ast/fluent-node/types'
+import type NodeWithSeqTypes from '@/ast/node-with-seq/types'
+import type OrTypes from '@/ast/or/types'
 import type { Sealed } from '@/ast/sealed'
-import type { SEQ_BRAND } from '@/ast/seq-brand'
-import type { BindSeqElements } from '@/capture/bind-captures/sequence'
 import type { StripOr } from '@/pattern/strip-or'
 import type { StripSeal } from '@/pattern/strip-seal'
 
 import type { BindValue } from './bind-value'
+import type Types from './types'
 
 /**
  * A pattern node unwrapped to the value that binds.
@@ -19,19 +19,19 @@ import type { BindValue } from './bind-value'
  * @typeParam S shape at the node's position
  * @typeParam Key key of the position; empty at the root
  */
-export type BindNode<P, S, Key extends string> = P extends {
-  readonly [FLUENT_INNER]: infer N
-}
-  ? BindNode<N, S, Key>
-  : P extends { readonly [SEQ_BRAND]: infer Elements }
-    ? Elements extends readonly unknown[]
-      ? {
-          readonly [SEQ_BRAND]: BindSeqElements<Elements, S>
-          to: P extends { to: infer T } ? T : never
-        }
-      : P
-    : P extends { readonly [OR_BRAND]: true }
-      ? BindNode<StripOr<P>, S, Key>
-      : P extends Sealed<infer _Inner>
-        ? Sealed<BindValue<StripSeal<P>, S, Key>>
-        : BindValue<P, S, Key>
+export type BindNode<P, S, Key extends string> =
+  P extends FluentNodeTypes.FluentBranded<infer N>
+    ? BindNode<N, S, Key>
+    : P extends NodeWithSeqTypes.SeqBranded<infer Elements>
+      ? Elements extends readonly unknown[]
+        ? Types.BoundSeq<
+            Elements,
+            S,
+            P extends Types.ToMember<infer T> ? T : never
+          >
+        : P
+      : P extends OrTypes.OrBranded
+        ? BindNode<StripOr<P>, S, Key>
+        : P extends Sealed<infer _Inner>
+          ? Sealed<BindValue<StripSeal<P>, S, Key>>
+          : BindValue<P, S, Key>

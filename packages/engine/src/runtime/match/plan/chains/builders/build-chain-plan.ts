@@ -14,17 +14,19 @@ import Binds from './binds'
  * `.where()` constraints.
  *
  * @param chain the chain
+ * @returns a `ChainPlan` with the guards, bind, seal flag, factory, config
+ *          defaults and constraints
  */
 export function buildChainPlan(chain: ChainEntry[]): ChainPlan {
   const bindEntry = Chain.chainGet(chain, 'bind')
   const toEntry = Chain.chainGet(chain, 'to')
 
   return {
-    whens: chain.flatMap(e =>
-      e.method === 'when' && typeof e.args[0] === 'function'
-        ? [e.args[0] as (bag: Bag) => unknown]
-        : [],
-    ),
+    whens: chain.flatMap(e => {
+      const isWhenGuard = e.method === 'when' && typeof e.args[0] === 'function'
+
+      return isWhenGuard ? [e.args[0] as (bag: Bag) => unknown] : []
+    }),
 
     bind: bindEntry ? Binds.bindPlanOf(bindEntry) : null,
     seal: Chain.chainHas(chain, 'seal'),

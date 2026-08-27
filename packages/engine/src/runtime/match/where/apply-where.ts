@@ -11,6 +11,7 @@ import Constraints from './constraints'
  *
  * @param chain the chain
  * @param actual the matched node, whose descendants are counted
+ * @returns true when every quantified constraint's test accepts its count
  */
 export const applyWhere = (chain: ChainEntry[], actual: unknown) =>
-  Constraints.applyConstraints(Plan.chainPlanOf(chain).constraints, actual)
+  Constraints.applyConstraints(actual, Plan.chainPlanOf(chain))

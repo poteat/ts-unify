@@ -11,6 +11,8 @@ import Util from './util'
  * there. Each level consumes the path's literal of every row holding it.
  *
  * @param rows the entries with the literals not read yet, in order
+ * @returns a leaf of the rows' entries, or an inner node branching on the
+ *          chosen path
  */
 export function buildTree<E>(rows: readonly Row<E>[]): DecisionTree<E> {
   const key = Util.chooseKey(rows)

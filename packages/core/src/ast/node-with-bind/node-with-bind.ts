@@ -15,6 +15,8 @@ export type NodeWithBind<Node> = Node & {
    * Called with no name, it binds as `node` and seals.
    *
    * @param name the bag key the subtree lands under
+   * @returns the node with the whole subtree captured under `name`, its own
+   *          captures dropped
    */
   bind<const S extends string>(name: S): FluentNode<BindExclusive<Node, S>>
 

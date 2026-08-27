@@ -6,6 +6,7 @@ import type { Bag } from '@ts-unify/engine/runtime/types'
  *
  * @param chain the chain
  * @param bag the captures so far
+ * @returns false at the first guard that rejects the bag, else true
  */
 export function applyWhenGuards(chain: ChainEntry[], bag: Bag) {
   for (const entry of chain) {

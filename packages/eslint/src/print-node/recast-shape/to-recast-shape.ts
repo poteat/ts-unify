@@ -9,10 +9,15 @@ import Nodes from './nodes'
  *
  * @param value a node, a list of nodes, or a leaf value (a Literal's
  *   RegExp passes through whole)
+ * @returns a leaf as is, a list mapped, a node copied through `recastNode`
  */
-export const toRecastShape = (value: unknown): unknown =>
-  value === null || typeof value !== 'object' || value instanceof RegExp
+export function toRecastShape(value: unknown): unknown {
+  const isLeaf =
+    value === null || typeof value !== 'object' || value instanceof RegExp
+
+  return isLeaf
     ? value
     : Array.isArray(value)
       ? value.map(toRecastShape)
       : Nodes.recastNode(value)
+}

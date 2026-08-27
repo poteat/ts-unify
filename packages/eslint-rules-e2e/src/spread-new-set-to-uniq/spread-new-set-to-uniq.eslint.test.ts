@@ -11,11 +11,11 @@ import Tester from '../tester'
 
 describe('spread-new-set-to-uniq.eslint', () => {
   Tester.run(
-    'spread-new-set-to-uniq',
     createRule(spreadNewSetToUniq, {
       message: 'Use uniq() instead of [...new Set()]',
       canFix: true,
     }),
+    'spread-new-set-to-uniq',
     {
       valid: [
         'const x = new Set(arr);',

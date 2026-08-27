@@ -8,6 +8,7 @@ import ExtractPatterns from '../../extract-patterns'
  * `matchWithSites` takes them after the node.
  *
  * @param proxy a pattern built with `U`
+ * @returns the proxy's fields record and its chain, as a pair
  */
 export function pat(
   proxy: unknown,

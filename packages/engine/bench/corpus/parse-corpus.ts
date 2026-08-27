@@ -7,6 +7,7 @@ import type { ParsedFile } from './types'
  * tokens, positions and ranges. A file that does not parse is left out.
  *
  * @param files the paths parsed
+ * @returns the files that parsed, each with its path, text and program
  */
 export function parseCorpus(files: readonly string[]): ParsedFile[] {
   const parsed: ParsedFile[] = []

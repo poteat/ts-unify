@@ -1,9 +1,8 @@
 import { CONFIG_BRAND } from '@ts-unify/core/internal'
-import SymGet from '@ts-unify/engine/runtime/sym-get'
+
+import Branded from './branded'
 /**
- * Whether a pattern value is a config slot, such as `C('name')`.
- *
- * @param v the pattern value
+ * Whether a pattern value is a config slot, such as `C('name')`: an
+ * object branded `CONFIG_BRAND`.
  */
-export const isConfigSlot = (v: unknown): v is { name: string } =>
-  v != null && typeof v === 'object' && SymGet.symGet(v, CONFIG_BRAND) === true
+export const isConfigSlot = Branded.brandedAs(CONFIG_BRAND)

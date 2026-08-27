@@ -10,6 +10,7 @@ export type NodeWithExactly<N> = {
    * exactly the given count of nodes matching this pattern.
    *
    * @param n the count that passes
+   * @returns this node with the count constraint attached
    */
   readonly exactly: (n: number) => FluentNode<N>
 }

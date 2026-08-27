@@ -3,6 +3,7 @@
  * primitive, a function, null or undefined.
  *
  * @param value the value
+ * @returns true for null, undefined or any non-object
  */
 export const isLeaf = (value: unknown) =>
   value == null || typeof value !== 'object'

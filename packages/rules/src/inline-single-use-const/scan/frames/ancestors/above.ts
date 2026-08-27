@@ -6,6 +6,8 @@ import type { ReadEvent } from '@ts-unify/rules/inline-single-use-const/scan/fra
  * block asked about.
  *
  * @param read the read
+ * @returns each ancestor node, nearest first, then those beyond each frame
+ *          chain
  */
 export function* above(read: ReadEvent): Generator<Node> {
   for (let at = read.frame.up; at !== null; at = at.up) yield at.node

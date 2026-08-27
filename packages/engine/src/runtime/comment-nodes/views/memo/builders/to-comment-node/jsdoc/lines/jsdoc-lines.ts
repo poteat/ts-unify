@@ -3,6 +3,7 @@
  * the blank lines at either end dropped.
  *
  * @param value the comment's text between its delimiters
+ * @returns the stripped lines, with no blank line first or last
  */
 export function jsdocLines(value: string): string[] {
   const lines = value

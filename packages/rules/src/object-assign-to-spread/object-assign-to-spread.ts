@@ -1,4 +1,5 @@
 import { U, $ } from '@ts-unify/core'
+import Patterns from '@ts-unify/rules/patterns'
 
 /**
  * An `Object.assign` onto an empty literal is an object literal spreading
@@ -7,12 +8,7 @@ import { U, $ } from '@ts-unify/core'
  * @example `Object.assign({}, a, b)` becomes `{ ...a, ...b }`
  */
 export const objectAssignToSpread = U.CallExpression({
-  callee: U.MemberExpression({
-    object: U.Identifier({ name: 'Object' }),
-    property: U.Identifier({ name: 'assign' }),
-    computed: false,
-    optional: false,
-  }),
+  callee: Patterns.staticMember('Object', 'assign'),
   arguments: [U.ObjectExpression({ properties: [] as const }), ...$('sources')],
   optional: false,
 })

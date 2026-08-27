@@ -8,6 +8,8 @@ import type { MatchContext } from './types'
  *
  * @param chain the root chain, whose `.config()` entry supplies the defaults
  * @param program the root node when it is a `Program`
+ * @returns a context with empty sites, bindings and capture paths, holding the
+ *          chain's config defaults
  */
 export const createMatchContext = (
   chain: ChainEntry[] = [],

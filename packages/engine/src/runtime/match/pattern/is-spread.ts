@@ -1,9 +1,8 @@
 import { SPREAD_BRAND } from '@ts-unify/core/internal'
-import SymGet from '@ts-unify/engine/runtime/sym-get'
+
+import Branded from './branded'
 /**
- * Whether an array pattern element is a spread capture, such as `...$`.
- *
- * @param v the element
+ * Whether an array pattern element is a spread capture, such as `...$`:
+ * an object branded `SPREAD_BRAND`.
  */
-export const isSpread = (v: unknown): v is { name: string } =>
-  v != null && typeof v === 'object' && SymGet.symGet(v, SPREAD_BRAND) === true
+export const isSpread = Branded.brandedAs(SPREAD_BRAND)

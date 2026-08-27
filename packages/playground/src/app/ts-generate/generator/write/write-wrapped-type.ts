@@ -11,11 +11,11 @@ import Node from './node'
  * after a `TSTypeAnnotation`'s colon, inside parentheses, after `as`.
  *
  * @param table the generator doing the writing
- * @param node the wrapper node
  * @param state astring's output state
+ * @param node the wrapper node
  */
 export const writeWrappedType = (
   table: GeneratorTable,
-  node: GeneratorNode,
   state: State,
-) => Node.writeNode(table, node.typeAnnotation, state)
+  node: GeneratorNode,
+) => Node.writeNode(table, state, node.typeAnnotation)

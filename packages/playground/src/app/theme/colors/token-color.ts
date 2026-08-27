@@ -5,6 +5,7 @@ import Util from './util'
  * names, else the default.
  *
  * @param tokenType the token's type, such as `string.escape.ts`
+ * @returns the color for the longest matching prefix, else the default color
  */
 export function tokenColor(tokenType: string) {
   const parts = tokenType.split('.')

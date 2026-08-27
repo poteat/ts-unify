@@ -1,3 +1,4 @@
+export * from './branded'
 export * from './is-capture'
 export * from './is-config-slot'
 export * from './is-proxy-node'

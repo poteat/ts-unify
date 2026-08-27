@@ -9,6 +9,8 @@ import type { Bag } from '@ts-unify/engine/runtime/types'
  * @param actual the value
  * @param statement the statement pattern's plan
  * @param at where the value sits in the match
+ * @returns the captures of the block's one statement when it matches, else
+ *          those of the whole, or null
  */
 export function matchMaybeBlockPlan(
   actual: unknown,
@@ -17,11 +19,12 @@ export function matchMaybeBlockPlan(
 ): Bag | null {
   const actualRec = actual as Record<string, unknown> | null | undefined
 
-  if (
+  const isSingleStatementBlock =
     actualRec?.type === 'BlockStatement' &&
     Array.isArray(actualRec.body) &&
     actualRec.body.length === 1
-  ) {
+
+  if (isSingleStatementBlock) {
     const result = matchPlan((actualRec.body as unknown[])[0], statement, {
       ctx: at.ctx,
       path: [...at.path, 'body', 0],

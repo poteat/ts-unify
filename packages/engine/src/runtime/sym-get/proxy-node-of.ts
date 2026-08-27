@@ -7,8 +7,12 @@ import Symbols from './symbols'
  * undefined when the value is no proxy.
  *
  * @param value a value that may be a pattern proxy
+ * @returns the descriptor under `NODE` for a function, or undefined
  */
-export const proxyNodeOf = (value: unknown): ProxyNode | undefined =>
-  typeof value === 'function'
+export function proxyNodeOf(value: unknown): ProxyNode | undefined {
+  const isFunction = typeof value === 'function'
+
+  return isFunction
     ? (Symbols.symGet(value, NODE) as ProxyNode | undefined)
     : undefined
+}

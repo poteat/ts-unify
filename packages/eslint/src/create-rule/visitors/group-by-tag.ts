@@ -7,6 +7,7 @@ import type { PatternEntry } from '@ts-unify/engine'
  * one visitor; like `U.or`, the first entry to match wins.
  *
  * @param entries the rule's entry patterns
+ * @returns each tag to its entries, in the order given
  */
 export function groupByTag(
   entries: readonly PatternEntry[],

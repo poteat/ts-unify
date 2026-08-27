@@ -9,6 +9,8 @@ import type { CommentSetting } from './types'
  *
  * @param raw the parser's comment
  * @param setting what the comment is read against
+ * @returns a `Comment` node with its kind, text, lines, JSDoc parts, attached
+ *          declaration and position
  */
 export function toCommentNode(
   raw: TSESTree.Comment,

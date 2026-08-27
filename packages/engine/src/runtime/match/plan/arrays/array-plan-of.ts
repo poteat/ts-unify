@@ -5,6 +5,7 @@ import type { ArrayPlan } from './types'
  * object.
  *
  * @param expected the array pattern
+ * @returns the memoized `ArrayPlan` of the array pattern
  */
 export const arrayPlanOf = (expected: unknown[]): ArrayPlan =>
   Memo.arrayPlans.of(expected)

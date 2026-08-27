@@ -11,14 +11,16 @@ import type { GuardClock } from './types'
  *
  * @param meta the rule
  * @param clock the clock the guards add to
+ * @returns a copy of the rule whose `.when()` guards also add their time to the
+ *          clock
  */
 export function withTimedGuards(meta: RuleMeta, clock: GuardClock): RuleMeta {
   function timedEntry(entry: ChainEntry): ChainEntry {
     const guard = entry.args[0]
+    const isWhenGuard = entry.method === 'when' && typeof guard === 'function'
 
-    return entry.method !== 'when' || typeof guard !== 'function'
-      ? entry
-      : {
+    return isWhenGuard
+      ? {
           method: 'when',
 
           args: [
@@ -31,6 +33,7 @@ export function withTimedGuards(meta: RuleMeta, clock: GuardClock): RuleMeta {
             },
           ],
         }
+      : entry
   }
 
   return {

@@ -6,6 +6,7 @@ import type { RuleModule } from '@ts-unify/eslint/rule-module'
  *
  * @param message the text of `match`
  * @param isFixable whether the rule's reports carry a fix
+ * @returns the `meta` object, `fixable: 'code'` present only when fixable
  */
 export function ruleMeta(
   message: string,

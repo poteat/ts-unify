@@ -11,10 +11,10 @@ import Tester from '../tester'
 
 describe('if-return-to-ternary.eslint', () => {
   Tester.run(
-    'if-return-to-ternary',
     createRule(ifReturnToTernary, {
       message: 'Use ternary return instead of if/else return',
     }),
+    'if-return-to-ternary',
     {
       valid: [
         'return cond ? a : b;',

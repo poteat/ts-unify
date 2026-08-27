@@ -7,6 +7,7 @@ import type { ProxyPlan } from '@ts-unify/engine/runtime/match/plan/proxies'
  * What a root pattern asks: a root proxy's plan, or a fields record's.
  *
  * @param pattern the pattern, a `$` aside
+ * @returns the proxy's plan for a proxy node, else the fields record's plan
  */
 export const buildRootPlan = (pattern: unknown): ProxyPlan | FieldsPlan =>
   Pattern.isProxyNode(pattern)

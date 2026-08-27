@@ -5,6 +5,7 @@ import { genExpr } from './gen-expr'
  *
  * @param rand the generator drawn from
  * @param n how many statements the block holds
+ * @returns a `BlockStatement` node holding n expression statements
  */
 export const genBlock = (rand: () => number, n: number) => ({
   type: 'BlockStatement',

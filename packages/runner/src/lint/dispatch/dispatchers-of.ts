@@ -11,6 +11,7 @@ import type { RuleEntry } from './types'
  * Built per lint: a rule set is small beside a file.
  *
  * @param rules the rule set
+ * @returns each tag to a dispatcher over the entries of that tag
  */
 export function dispatchersOf(
   rules: readonly RuleMeta[],

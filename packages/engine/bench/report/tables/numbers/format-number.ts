@@ -4,8 +4,13 @@ import Util from './util'
  * bound keeps them.
  *
  * @param n the number
+ * @returns the number as text: a small fraction with fixed decimals, else
+ *          rounded with thousands separated
  */
-export const formatNumber = (n: number) =>
-  n < Util.DECIMALS.below && !Number.isInteger(n)
+export function formatNumber(n: number) {
+  const isSmallFraction = n < Util.DECIMALS.below && !Number.isInteger(n)
+
+  return isSmallFraction
     ? n.toFixed(Util.DECIMALS.kept)
     : Math.round(n).toLocaleString('en-US')
+}

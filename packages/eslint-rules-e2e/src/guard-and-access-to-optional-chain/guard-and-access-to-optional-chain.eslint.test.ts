@@ -11,10 +11,10 @@ import Tester from '../tester'
 
 describe('guard-and-access-to-optional-chain.eslint', () => {
   Tester.run(
-    'guard-and-access',
     createRule(guardAndAccessToOptionalChain, {
       message: 'Use optional chaining',
     }),
+    'guard-and-access',
     {
       valid: ['obj?.prop;', 'obj || obj.prop;', 'obj && other.prop;'],
       invalid: [

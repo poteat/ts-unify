@@ -10,12 +10,19 @@ import type { DollarPlan } from './values'
  * or a fields record; read once per pattern object.
  *
  * @param pattern the pattern
+ * @returns `DOLLAR` for a bare `$`, else the memoized or freshly built root
+ *          plan
  */
-export const rootPlanOf = (
+export function rootPlanOf(
   pattern: unknown,
-): ProxyPlan | FieldsPlan | DollarPlan =>
-  pattern === $
+): ProxyPlan | FieldsPlan | DollarPlan {
+  const isDollar = pattern === $
+  const isProxyOrRecord =
+    (typeof pattern === 'object' || typeof pattern === 'function') && pattern
+
+  return isDollar
     ? Values.DOLLAR
-    : (typeof pattern === 'object' || typeof pattern === 'function') && pattern
+    : isProxyOrRecord
       ? Roots.rootPlans.of(pattern)
       : Roots.buildRootPlan(pattern)
+}

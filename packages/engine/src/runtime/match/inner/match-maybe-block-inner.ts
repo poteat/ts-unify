@@ -10,6 +10,7 @@ import Planned from './planned'
  * @param actual the value
  * @param stmtPattern the statement pattern
  * @param at where the value sits in the match
+ * @returns the captures of whichever form matched, or null when neither does
  */
 export const matchMaybeBlockInner = (
   actual: unknown,

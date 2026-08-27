@@ -12,13 +12,17 @@ import Values from '@ts-unify/engine/runtime/match/plan/values'
  * at all is an empty one.
  *
  * @param node the proxy node's descriptor
+ * @returns an or, maybeBlock or node body, the last with its fields plan or
+ *          `DOLLAR`
  */
 export function bodyOf(node: ProxyNode): ProxyBody {
   const inner = node.args[0]
+  const isOr = node.tag === 'or'
+  const isMaybeBlock = node.tag === 'maybeBlock'
 
-  return node.tag === 'or'
+  return isOr
     ? { shape: 'or', alternatives: node.args.map(planOf) }
-    : node.tag === 'maybeBlock'
+    : isMaybeBlock
       ? { shape: 'maybeBlock', statement: planOf(inner) }
       : {
           shape: 'node',

@@ -6,6 +6,7 @@ import type { SiteTree } from './types'
  * site's position adds nothing, that position being replaced whole.
  *
  * @param sites the rewrite sites, the root site among them ignored
+ * @returns a map per path segment, null at each position a site replaces
  */
 export function siteTreeOf(sites: ReadonlyArray<RewriteSite>): SiteTree {
   const tree: SiteTree = new Map()

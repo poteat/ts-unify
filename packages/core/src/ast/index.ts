@@ -38,6 +38,7 @@ export * from './seq-brand'
 export * from './single-capture-only'
 export * from './substitute-captures'
 export * from './substitute-single-capture'
+export * from './types'
 export * from './unwrap-fluent'
 
 export * as default from '.'

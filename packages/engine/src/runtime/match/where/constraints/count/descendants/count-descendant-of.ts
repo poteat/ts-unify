@@ -12,6 +12,8 @@ import type { Count } from '@ts-unify/engine/runtime/match/where/constraints/cou
  * @param node the node
  * @param count what is counted, and under which cursor
  * @param limit a count at which to stop early
+ * @returns the number of matches among the node and its descendants, at most
+ *          the limit; 0 for no node
  */
 export function countDescendantOf(
   node: unknown,
@@ -21,18 +23,23 @@ export function countDescendantOf(
   const nodeKind = Node.nodeType(node)
   if (!nodeKind) return 0
   const { plan, at } = count
-  const found = plan.alternatives.some(
-    alt =>
-      nodeKind === alt.tag &&
-      (alt.fields.kind === 'dollar'
-        ? Context.captureRest(node, at, Context.NO_KEYS)
-        : Inner.matchFields(node, alt.fields, at)) !== null,
-  )
-    ? 1
-    : 0
+  const doesNodeMatch = plan.alternatives.some(alt => {
+    const fields = alt.fields
+    const isDollar = fields.kind === 'dollar'
 
-  return (limit !== undefined && found >= limit) ||
+    return (
+      nodeKind === alt.tag &&
+      (isDollar
+        ? Context.captureRest(node, at, Context.NO_KEYS)
+        : Inner.matchFields(node, fields, at)) !== null
+    )
+  })
+  const found = doesNodeMatch ? 1 : 0
+  const doesDescentStop =
+    (limit !== undefined && found >= limit) ||
     (plan.boundaryTags !== null && plan.boundaryTags.has(nodeKind as string))
+
+  return doesDescentStop
     ? found
     : found +
         Children.countChildrenOf(node, count, limit ? limit - found : undefined)

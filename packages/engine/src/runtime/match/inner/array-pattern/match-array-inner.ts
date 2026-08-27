@@ -14,6 +14,7 @@ import Plans from './plans'
  * @param actual the array
  * @param expected the array pattern
  * @param at where the array sits in the match
+ * @returns the captures of the elements and spreads, or null on mismatch
  */
 export const matchArrayInner = (
   actual: unknown[],

@@ -11,10 +11,10 @@ import Tester from '../tester'
 
 describe('normalize-ternary-order.eslint', () => {
   Tester.run(
-    'normalize-ternary-order',
     createRule(normalizeTernaryOrder, {
       message: 'Normalize ternary to use positive condition',
     }),
+    'normalize-ternary-order',
     {
       valid: [
         {

@@ -4,6 +4,8 @@ import type { Path } from '@ts-unify/engine/runtime/types'
  *
  * @param prefix the shorter path
  * @param path the path that may start with it
+ * @returns true when every segment of the prefix equals the path's at that
+ *          index
  */
 export function isPathPrefix(prefix: Path, path: Path) {
   if (prefix.length > path.length) return false

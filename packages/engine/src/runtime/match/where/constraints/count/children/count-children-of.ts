@@ -8,6 +8,8 @@ import Sub from '@ts-unify/engine/runtime/sub'
  * @param node the node whose children are walked
  * @param count what is counted, and under which cursor
  * @param limit a count at which to stop early
+ * @returns the number of matching descendants, stopping once it reaches the
+ *          limit; 0 for a non-object
  */
 export function countChildrenOf(
   node: unknown,

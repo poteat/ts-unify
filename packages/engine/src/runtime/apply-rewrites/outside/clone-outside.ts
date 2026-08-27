@@ -12,6 +12,8 @@ import type { SiteTree } from './types'
  * @param node the node copied; arrays and primitives pass through
  * @param sites the positions left unfilled, relative to the node; none
  *   when absent
+ * @returns the copy with undefined at each site position, or `cloneNode`'s copy
+ *          when no sites are given
  */
 export function cloneOutside(node: unknown, sites?: SiteTree): unknown {
   if (!sites || sites.size === 0) return Clones.cloneNode(node)

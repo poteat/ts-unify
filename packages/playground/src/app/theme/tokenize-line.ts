@@ -10,6 +10,8 @@ import type { Span } from './types'
  * @param monaco the Monaco instance, once mounted
  * @param line the line's text
  * @param language the Monaco language id to tokenize it as
+ * @returns the line's spans with their colors; one default-colored span when
+ *          untokenized
  */
 export function tokenizeLine(
   monaco: Monaco | null,

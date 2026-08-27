@@ -17,6 +17,8 @@ import type { LintMatch } from './types'
  *
  * @param ast the parsed program, with `loc` on its nodes
  * @param rules the rules to run
+ * @returns every match in walk order, its `reified` null when the rewrite
+ *          failed
  */
 export function lint(ast: unknown, rules: readonly RuleMeta[]): LintMatch[] {
   const found: LintMatch[] = []

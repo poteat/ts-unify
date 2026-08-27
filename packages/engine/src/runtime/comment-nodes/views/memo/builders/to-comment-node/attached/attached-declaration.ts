@@ -8,6 +8,8 @@ import Tokens from './tokens'
  * @param raw the parser's comment
  * @param starts the declarations by start offset
  * @param tokenStarts the start offsets of the tokens, ascending
+ * @returns the declaration starting at the next token, or null when none starts
+ *          there or no token follows
  */
 export function attachedDeclaration(
   raw: TSESTree.Comment,

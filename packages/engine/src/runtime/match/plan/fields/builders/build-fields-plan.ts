@@ -7,6 +7,8 @@ import Entries from './entries'
  * the keys it names when it was written with `{ ...$ }`.
  *
  * @param record the fields record, or a primitive with no properties
+ * @returns a `FieldsPlan` with a plan per property, its named keys set only for
+ *          a `{ ...$ }` record
  */
 export function buildFieldsPlan(record: unknown): FieldsPlan {
   const rec = record as Record<string | symbol, unknown>

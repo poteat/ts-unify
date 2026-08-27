@@ -11,6 +11,8 @@ import type { Cursor } from './types'
  * @param node the node
  * @param at where the node sits in the match
  * @param named the keys the pattern named
+ * @returns a bag of the unnamed, non-position properties, empty for a
+ *          non-object
  */
 export function captureRest(
   node: unknown,

@@ -4,22 +4,22 @@ import type {
 } from '@ts-unify/rules/inline-single-use-const/scan/types'
 
 import Moves from './moves'
+import type { CandidateAt } from './types'
 
 /**
- * The const at a statement as an inlinable, or null: its name is read
- * once after it, in the next statement, never rebound or named in a type,
- * and the initializer can take the read's place.
+ * The const at a statement as an inlinable, or null.
  *
- * @param index the statement's index in the block
- * @param name the const's name
- * @param init its initializer
+ * Its name is read once after it, in the next statement, never rebound
+ * or named in a type, and the initializer can take the read's place.
+ *
+ * @param candidate the const at its place in the block
  * @param tally the name's tally over the statements after it
  * @param nextEffectEnd the earliest end of an effect in the next statement
+ * @returns the inlinable: index, name, init and read node; null when any
+ *          condition fails
  */
 export function inlinableAt(
-  index: number,
-  name: string,
-  init: Inlinable['init'],
+  candidate: CandidateAt,
   tally: Tally | undefined,
   nextEffectEnd: number,
 ): Inlinable | null {
@@ -28,8 +28,9 @@ export function inlinableAt(
   }
 
   const { read } = tally
+  const canInline =
+    read.statement === candidate.index + 1 &&
+    !Moves.moves(read, candidate.init, nextEffectEnd)
 
-  return read.statement === index + 1 && !Moves.moves(read, init, nextEffectEnd)
-    ? { index, name, init, read: read.node }
-    : null
+  return canInline ? { ...candidate, read: read.node } : null
 }

@@ -14,6 +14,7 @@ import Planned from './planned'
  * @param actual the value
  * @param expected the proxy node
  * @param at where the value sits in the match
+ * @returns the captures after the chain applied, or null on mismatch
  */
 export const matchProxyNode = (
   actual: unknown,

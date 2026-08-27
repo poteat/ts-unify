@@ -12,12 +12,6 @@ import { parse } from '@typescript-eslint/typescript-estree'
 import Nodes from '../nodes'
 
 describe('singular-function-to-arrow.fix', () => {
-  /**
-   * Run the rule over parsed source and return each report's fix text,
-   * whitespace collapsed.
-   *
-   * @param src the source text
-   */
   function fixes(src: string): string[] {
     const ast = parse(src, { range: true, loc: true })
     const rule = createRule(singularFunctionToArrow)

@@ -4,6 +4,7 @@ import type { Row } from '@ts-unify/engine/runtime/dispatch/tree/types'
  * row order among equals; null when no row holds any.
  *
  * @param rows the rows
+ * @returns the key held by the most rows, or null when no row holds a literal
  */
 export function chooseKey<E>(rows: readonly Row<E>[]): string | null {
   const counts = new Map<string, number>()

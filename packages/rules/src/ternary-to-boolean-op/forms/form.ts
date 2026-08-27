@@ -2,6 +2,7 @@ import { U } from '@ts-unify/core'
 
 import Booleans from './booleans'
 import Negations from './negations'
+import type Types from './types'
 
 /**
  * The operator form a ternary with a boolean literal arm stands for, or
@@ -11,38 +12,45 @@ import Negations from './negations'
  * is `!c && r`, `c ? true : false` is `c`, `c ? false : true` is `!c`.
  *
  * @param bag the ternary's test and two arms
+ * @returns the test, its negation or a `LogicalExpression`; null when no form
+ *          fits
  */
-export function form(bag: {
-  test?: unknown
-  consequent?: unknown
-  alternate?: unknown
-}): unknown {
+export function form(bag: Types.Ternary): unknown {
   const { test, consequent, alternate } = bag
   const consequentLiteral = Booleans.literalBoolean(consequent)
   const alternateLiteral = Booleans.literalBoolean(alternate)
+  const standsForTest =
+    (consequentLiteral ?? false) && alternateLiteral === false
+  const standsForNegation =
+    consequentLiteral === false && (alternateLiteral ?? false)
+  const standsForOr = consequentLiteral ?? false
+  const standsForAnd =
+    alternateLiteral === false && !Booleans.isLiteral(consequent)
+  const standsForNegatedAnd =
+    consequentLiteral === false && !Booleans.isLiteral(alternate)
 
   return !Booleans.booleanShaped(test)
     ? null
-    : consequentLiteral === true && alternateLiteral === false
+    : standsForTest
       ? test
-      : consequentLiteral === false && alternateLiteral === true
-        ? Negations.negated(test)
-        : consequentLiteral === true
+      : standsForNegation
+        ? Negations.negated(bag)
+        : standsForOr
           ? U.LogicalExpression({
               operator: '||',
               left: test as never,
               right: alternate as never,
             })
-          : alternateLiteral === false && !Booleans.isLiteral(consequent)
+          : standsForAnd
             ? U.LogicalExpression({
                 operator: '&&',
                 left: test as never,
                 right: consequent as never,
               })
-            : consequentLiteral === false && !Booleans.isLiteral(alternate)
+            : standsForNegatedAnd
               ? U.LogicalExpression({
                   operator: '&&',
-                  left: Negations.negated(test) as never,
+                  left: Negations.negated(bag) as never,
                   right: alternate as never,
                 })
               : null

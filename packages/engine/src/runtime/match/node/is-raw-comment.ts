@@ -4,6 +4,7 @@ import Util from './util'
  * engine's `Comment` view of one has its own type.
  *
  * @param v the value
+ * @returns true when its type is `Line` or `Block`
  */
 export function isRawComment(v: unknown) {
   const t = Util.nodeType(v)

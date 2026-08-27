@@ -7,6 +7,7 @@ import type { Node } from './nodes'
  *
  * @param tree a node, an array of them, or anything else, which has none
  * @param parent the node above the tree; none at the top
+ * @returns each node paired with its parent, null at the top, depth first
  */
 export function* walk(
   tree: unknown,

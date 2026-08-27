@@ -1,7 +1,9 @@
 import type { ChainEntry } from '@ts-unify/core/internal'
+import Bags from '@ts-unify/engine/runtime/match/bags'
 import type { Bag } from '@ts-unify/engine/runtime/types'
 
 import Reads from './reads'
+import type { MatchedNode } from './types'
 /**
  * The bag after a chain's `.bind()` and `.seal()` entries.
  *
@@ -12,11 +14,12 @@ import Reads from './reads'
  * @param chain the proxy's chain
  * @param bag the captures of the proxy's own match
  * @param matched the node the proxy matched and the key it sits under
+ * @returns the bound or sealed bag, or the bag as given when neither applies
  */
 export function applyChainModifiers(
   chain: ChainEntry[],
   bag: Bag,
-  matched: { node: unknown; key?: string },
+  matched: MatchedNode,
 ): Bag {
   const bindEntry = Reads.chainGet(chain, 'bind')
 
@@ -27,15 +30,8 @@ export function applyChainModifiers(
     }
   }
 
-  if (Reads.chainHas(chain, 'seal') && matched.key) {
-    const keys = Object.keys(bag)
+  const key = matched.key
+  const isSealed = key !== undefined && Reads.chainHas(chain, 'seal')
 
-    return keys.length === 1
-      ? { [matched.key]: bag[keys[0]] }
-      : keys.length === 0
-        ? {}
-        : bag
-  }
-
-  return bag
+  return isSealed ? Bags.sealed(bag, key) : bag
 }

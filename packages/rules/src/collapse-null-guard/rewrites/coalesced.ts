@@ -8,6 +8,8 @@ import type { TSESTree } from '@typescript-eslint/types'
  * @param value the guarded value
  * @param fallback what the guard returned in its place
  * @param typeAnnotation the asserted type; absent when the return was bare
+ * @returns a `??` expression, wrapped in a `TSAsExpression` when a type is
+ *          given
  */
 export function coalesced(
   value: TSESTree.Expression,

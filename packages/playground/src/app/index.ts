@@ -1,6 +1,13 @@
 export * from './app'
+export * from './editing'
+export * from './panes'
+export * from './running'
 export * from './scenarios'
+export * from './sets'
+export * from './settings'
+export * from './tabs'
 export * from './theme'
 export * from './ts-generate'
+export * from './types'
 
 export * as default from '.'

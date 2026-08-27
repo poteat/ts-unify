@@ -6,21 +6,25 @@ import type { TSESTree } from '@typescript-eslint/types'
  *
  * @param sourceCode the rule context's source
  * @param node the node
+ * @returns the comments inside the node's range; empty when the source cannot
+ *          list them
  */
 export function commentsInside(
   sourceCode: unknown,
   node: TSESTree.Node,
 ): readonly TSESTree.Comment[] {
-  if (
-    typeof sourceCode !== 'object' ||
-    !sourceCode ||
-    !('getCommentsInside' in sourceCode) ||
-    typeof sourceCode.getCommentsInside !== 'function'
-  ) {
-    return []
-  }
+  const hasGetCommentsInside =
+    typeof sourceCode === 'object' &&
+    sourceCode !== null &&
+    'getCommentsInside' in sourceCode
+  const getCommentsInside = hasGetCommentsInside
+    ? sourceCode.getCommentsInside
+    : undefined
+  const hasCommentsInside = typeof getCommentsInside === 'function'
 
-  const comments: unknown = sourceCode.getCommentsInside(node)
+  if (!hasCommentsInside) return []
+
+  const comments: unknown = getCommentsInside.call(sourceCode, node)
 
   return Array.isArray(comments) ? (comments as TSESTree.Comment[]) : []
 }

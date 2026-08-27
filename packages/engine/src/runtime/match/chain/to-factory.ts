@@ -8,6 +8,8 @@ import Reads from './reads'
  * first value. Undefined when the chain has no `.to()`.
  *
  * @param chain the chain
+ * @returns the `.to()` argument, a factory reading the bag's first value for a
+ *          bare `.to()`, or undefined
  */
 export function toFactory(chain: ChainEntry[]): RewriteFactory | undefined {
   const toEntry = Reads.chainGet(chain, 'to')

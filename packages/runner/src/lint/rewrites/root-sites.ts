@@ -10,6 +10,8 @@ import type { Factory } from '@ts-unify/runner/types'
  *
  * @param result the match
  * @param factory the rule's root `.to()`, if any
+ * @returns the sites, with a root site for the factory appended when none had
+ *          an empty path
  */
 export function rootSites(
   result: MatchResult,
@@ -17,7 +19,10 @@ export function rootSites(
 ): RewriteSite[] {
   const sites = [...result.sites]
 
-  if (factory && !sites.some(s => s.path.length === 0)) {
+  const needsRootSite =
+    factory !== null && !sites.some(s => s.path.length === 0)
+
+  if (needsRootSite) {
     sites.push({ path: [], factory, scopeBag: result.bag })
   }
 

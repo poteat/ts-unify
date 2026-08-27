@@ -15,12 +15,16 @@ import Planned from './planned'
  * @param node the node
  * @param pattern the fields record, or `$`
  * @param at where the node sits in the match
+ * @returns the captures of the node's properties, or null on mismatch
  */
-export const matchInner = (
+export function matchInner(
   node: unknown,
   pattern: unknown,
   at: Context.Cursor,
-): Bag | null =>
-  pattern === $
+): Bag | null {
+  const isBareDollar = pattern === $
+
+  return isBareDollar
     ? Context.captureRest(node, at, Context.NO_KEYS)
     : Planned.matchFields(node, Plan.fieldsPlanOf(pattern), at)
+}

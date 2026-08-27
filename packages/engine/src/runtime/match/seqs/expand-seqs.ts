@@ -1,16 +1,14 @@
 import Pattern from '@ts-unify/engine/runtime/match/pattern'
 
-import type { SeqInfo } from './types'
+import type { ExpandedSeqs, SeqInfo } from './types'
 /**
  * The elements of an array pattern with every `U.seq()` proxy replaced by
  * its constituents, and where each seq landed, for its inline rewrite.
  *
  * @param expected the array pattern
+ * @returns the expanded elements, and a start, length and chain per seq
  */
-export function expandSeqs(expected: unknown[]): {
-  expanded: unknown[]
-  seqs: SeqInfo[]
-} {
+export function expandSeqs(expected: unknown[]): ExpandedSeqs {
   const expanded: unknown[] = []
   const seqs: SeqInfo[] = []
 

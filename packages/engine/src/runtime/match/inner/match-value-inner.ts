@@ -14,6 +14,7 @@ import Planned from './planned'
  * @param actual the value
  * @param expected the pattern value
  * @param at where the value sits in the match
+ * @returns the captures for the pattern value's kind, or null on mismatch
  */
 export const matchValueInner = (
   actual: unknown,

@@ -1,5 +1,6 @@
 import { commentNodes } from '@ts-unify/engine'
 
+import type { Parented } from './types'
 import Util from './util'
 /**
  * Every node of a program in visit order, as the ESLint adapter visits
@@ -9,13 +10,14 @@ import Util from './util'
  * ESLint sets it; the program's `Comment` nodes come after the rest.
  *
  * @param program the `Program` node
+ * @returns the program's nodes in visit order, its comments last
  */
 export function walkNodes(program: unknown): object[] {
   const nodes: object[] = []
 
   function visit(node: unknown, parent: unknown) {
     if (!Util.isNode(node)) return
-    ;(node as { parent?: unknown }).parent = parent
+    ;(node as Parented).parent = parent
     nodes.push(node)
 
     for (const key of Object.keys(node)) {

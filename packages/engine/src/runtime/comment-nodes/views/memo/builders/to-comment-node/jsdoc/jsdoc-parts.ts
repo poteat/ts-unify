@@ -1,6 +1,7 @@
 import type { JsdocTag } from '@ts-unify/core/internal'
 
 import Lines from './lines'
+import type { JsdocParts } from './types'
 /**
  * A JSDoc's lines split into its summary, its body and its tags; each
  * tag's continuation lines join its text.
@@ -8,12 +9,10 @@ import Lines from './lines'
  * A blank line between the body and the first tag belongs to neither.
  *
  * @param lines the JSDoc's lines, as `jsdocLines` gives them
+ * @returns the summary lines, the body lines, and a tag per `@` line with its
+ *          name and joined text
  */
-export function jsdocParts(lines: readonly string[]): {
-  summary: string[]
-  body: string[]
-  tags: JsdocTag[]
-} {
+export function jsdocParts(lines: readonly string[]): JsdocParts {
   let i = 0
   const summary: string[] = []
 

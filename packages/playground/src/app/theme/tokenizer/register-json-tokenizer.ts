@@ -7,11 +7,9 @@ import type { Monaco } from '@monaco-editor/react'
  * @param monaco the Monaco instance
  */
 export function registerJsonTokenizer(monaco: Monaco) {
-  if (
-    !monaco.languages
-      .getLanguages()
-      .some((l: { id: string }) => l.id === 'json')
-  ) {
+  const hasJson = monaco.languages.getLanguages().some(l => l.id === 'json')
+
+  if (!hasJson) {
     monaco.languages.register({
       id: 'json',
     })

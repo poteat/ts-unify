@@ -11,10 +11,10 @@ import Tester from '../tester'
 
 describe('singular-function-to-arrow.eslint', () => {
   Tester.run(
-    'singular-function-to-arrow',
     createRule(singularFunctionToArrow, {
       message: 'Convert single-statement function to arrow function',
     }),
+    'singular-function-to-arrow',
     {
       valid: [
         'const f = (x) => x + 1;',

@@ -19,7 +19,7 @@ export const tsGenerator: GeneratorTable = {
 
   Identifier(node: GeneratorNode, state: State) {
     state.write(node.name, node)
-    Write.writeTypeAnnotation(this, node, state)
+    Write.writeTypeAnnotation(this, state, node)
   },
 
   ArrowFunctionExpression(node: GeneratorNode, state: State) {
@@ -27,11 +27,12 @@ export const tsGenerator: GeneratorTable = {
     const { params } = node
 
     if (params != null) {
-      if (
+      const isBareParam =
         params.length === 1 &&
         params[0].type === 'Identifier' &&
         !params[0].typeAnnotation
-      ) {
+
+      if (isBareParam) {
         state.write(params[0].name, params[0])
       } else {
         state.write('(')
@@ -54,7 +55,7 @@ export const tsGenerator: GeneratorTable = {
 
   TSTypeAnnotation(node: GeneratorNode, state: State) {
     state.write(': ')
-    Write.writeWrappedType(this, node, state)
+    Write.writeWrappedType(this, state, node)
   },
   TSStringKeyword(_n: GeneratorNode, state: State) {
     state.write('string')
@@ -135,7 +136,9 @@ export const tsGenerator: GeneratorTable = {
     state.write(']')
   },
   TSLiteralType(node: GeneratorNode, state: State) {
-    node.literal.type === 'Literal'
+    const isLiteral = node.literal.type === 'Literal'
+
+    isLiteral
       ? this.Literal(node.literal, state)
       : this[node.literal.type](node.literal, state)
   },
@@ -153,7 +156,7 @@ export const tsGenerator: GeneratorTable = {
     if (node.readonly) state.write('readonly ')
     this[node.key.type](node.key, state)
     if (node.optional) state.write('?')
-    Write.writeTypeAnnotation(this, node, state)
+    Write.writeTypeAnnotation(this, state, node)
   },
   TSFunctionType(node: GeneratorNode, state: State) {
     state.write('(')
@@ -167,15 +170,16 @@ export const tsGenerator: GeneratorTable = {
 
     if (ret) {
       state.write(' => ')
+      const isTypeAnnotation = ret.type === 'TSTypeAnnotation'
 
-      ret.type === 'TSTypeAnnotation'
-        ? Write.writeWrappedType(this, ret, state)
-        : Write.writeNode(this, ret, state)
+      isTypeAnnotation
+        ? Write.writeWrappedType(this, state, ret)
+        : Write.writeNode(this, state, ret)
     }
   },
   TSParenthesizedType(node: GeneratorNode, state: State) {
     state.write('(')
-    Write.writeWrappedType(this, node, state)
+    Write.writeWrappedType(this, state, node)
     state.write(')')
   },
   TSTypeQuery(node: GeneratorNode, state: State) {
@@ -185,6 +189,6 @@ export const tsGenerator: GeneratorTable = {
   TSAsExpression(node: GeneratorNode, state: State) {
     this[node.expression.type](node.expression, state)
     state.write(' as ')
-    Write.writeWrappedType(this, node, state)
+    Write.writeWrappedType(this, state, node)
   },
 }

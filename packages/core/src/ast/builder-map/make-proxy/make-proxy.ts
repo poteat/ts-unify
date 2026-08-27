@@ -9,6 +9,8 @@ import Util from './util'
  * arguments; on a node, each read and call appends to the chain.
  *
  * @param node the descriptor built so far; none at the root
+ * @returns a callable proxy; `NODE` reads the descriptor, any other read or
+ *          call gives a proxy one step deeper
  */
 export const makeProxy = (node?: ProxyNode): unknown =>
   new Proxy(function () {}, {
@@ -20,7 +22,7 @@ export const makeProxy = (node?: ProxyNode): unknown =>
       if (!node && prop in Util.VALUES) return Util.VALUES[prop]
 
       if (node) {
-        const method = prop as string
+        const method = prop
 
         return (...args: unknown[]) =>
           makeProxy({
@@ -36,7 +38,7 @@ export const makeProxy = (node?: ProxyNode): unknown =>
           })
       }
 
-      const tag = prop as string
+      const tag = prop
 
       return (...args: unknown[]) =>
         makeProxy({

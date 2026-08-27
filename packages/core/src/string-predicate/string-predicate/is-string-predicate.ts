@@ -10,4 +10,5 @@ export const isStringPredicate = (
 ): value is StringPredicate | RegExp =>
   value instanceof RegExp ||
   (typeof value === 'function' &&
-    (value as Partial<StringPredicate>)[Brand.STRING_PREDICATE_BRAND] === true)
+    ((value as Partial<StringPredicate>)[Brand.STRING_PREDICATE_BRAND] ??
+      false))

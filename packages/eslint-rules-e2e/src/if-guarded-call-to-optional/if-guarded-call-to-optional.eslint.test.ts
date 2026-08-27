@@ -11,10 +11,10 @@ import Tester from '../tester'
 
 describe('if-guarded-call-to-optional.eslint', () => {
   Tester.run(
-    'if-guarded-call-to-optional',
     createRule(ifGuardedCallToOptional, {
       message: 'Use optional call instead of if-guarded call',
     }),
+    'if-guarded-call-to-optional',
     {
       valid: [
         'fn?.(arg1, arg2);',

@@ -11,12 +11,12 @@ import Tester from '../tester'
 
 describe('array-from-map-to-array-from.eslint', () => {
   Tester.run(
-    'array-from-map-to-array-from',
     createRule(arrayFromMapToArrayFrom, {
       message:
         'Use Array.from(iterable, mapFn) instead of ' +
         'Array.from(iterable).map(mapFn)',
     }),
+    'array-from-map-to-array-from',
     {
       valid: [
         'Array.from(items, x => x + 1);',

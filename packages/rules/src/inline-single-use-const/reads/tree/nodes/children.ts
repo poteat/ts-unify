@@ -5,6 +5,7 @@ import type { Node } from './types'
  * and the range are left out.
  *
  * @param node the node
+ * @returns the child values, in key order
  */
 export const children = (node: Node) =>
   Object.entries(node)

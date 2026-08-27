@@ -7,6 +7,8 @@ import type { Located } from './types'
  *
  * @param root the tree walked
  * @param path the path into it
+ * @returns the container and the last segment, or nulls for both when the path
+ *          is empty or leaves the tree
  */
 export function locateParent(root: unknown, path: Path): Located {
   if (path.length === 0) return { parent: null, key: null }

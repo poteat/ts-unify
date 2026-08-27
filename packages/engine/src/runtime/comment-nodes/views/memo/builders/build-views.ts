@@ -12,6 +12,8 @@ import ToCommentNode from './to-comment-node'
  * the first comment is the header when it ends before the first token.
  *
  * @param program the parsed program
+ * @returns the `Comment` nodes in source order, and a lookup from each raw
+ *          comment to its node
  */
 export function buildViews(program: ParsedProgram): Views {
   const raws = program.comments ?? []

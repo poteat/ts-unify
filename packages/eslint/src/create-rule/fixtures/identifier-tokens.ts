@@ -3,6 +3,7 @@
  * lowercased.
  *
  * @param name an identifier
+ * @returns the set of lowercase words, empty pieces dropped
  */
 export const identifierTokens = (name: string): ReadonlySet<string> =>
   new Set(

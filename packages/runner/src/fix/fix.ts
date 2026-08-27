@@ -1,8 +1,7 @@
 import Lint from '@ts-unify/runner/lint'
-import type { LintMatch } from '@ts-unify/runner/lint'
 import type { RuleMeta } from '@ts-unify/runner/types'
 
-import type { FixOptions } from './types'
+import type Types from './types'
 import Util from './util'
 
 /**
@@ -12,14 +11,16 @@ import Util from './util'
  * Each iteration lints, keeps the non-overlapping fixable matches, and
  * splices their serialized rewrites in, last to first.
  *
- * @param source the text to fix
  * @param rules the rules to run
+ * @param source the text to fix
  * @param options how to parse and serialize, and the iteration cap
+ * @returns the fixed text; the source unchanged when nothing applies or it
+ *          fails to parse
  */
 export function fix(
-  source: string,
   rules: readonly RuleMeta[],
-  options: FixOptions,
+  source: string,
+  options: Types.FixOptions,
 ) {
   const { parse, serialize, maxIterations = Util.MAX_ITERATIONS } = options
   let current = source
@@ -34,11 +35,7 @@ export function fix(
     }
 
     const fixable = Lint.lint(ast, rules).filter(
-      (
-        m,
-      ): m is LintMatch & {
-        reified: object
-      } => m.reified != null,
+      (m): m is Types.Fixable => m.reified != null,
     )
 
     if (fixable.length === 0) break

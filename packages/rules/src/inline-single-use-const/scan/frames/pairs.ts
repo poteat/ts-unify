@@ -8,6 +8,7 @@ import type { ReadEvent } from './types'
  * read, nearest pair first; the first pair holds the read itself.
  *
  * @param read the read
+ * @returns each ancestor with the node it holds on the way down, nearest first
  */
 export function* pairs(read: ReadEvent): Generator<[Node, Node]> {
   let below = read.node

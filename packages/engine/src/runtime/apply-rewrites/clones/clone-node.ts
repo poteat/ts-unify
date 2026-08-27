@@ -5,6 +5,7 @@ import Sub from '@ts-unify/engine/runtime/sub'
  * mutate and to serialize.
  *
  * @param node the node copied; arrays and primitives pass through
+ * @returns the copy, arrays mapped element by element and leaves passed through
  */
 export function cloneNode(node: unknown): unknown {
   if (Array.isArray(node)) return node.map(cloneNode)

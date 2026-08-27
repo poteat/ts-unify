@@ -1,4 +1,4 @@
-import type { CAPTURE_MODS_BRAND } from '@/capture/capture-mods'
+import type { CaptureMods } from '@/capture/capture-mods'
 
 /**
  * The modifier record a capture token carries under the mods brand; empty
@@ -6,8 +6,4 @@ import type { CAPTURE_MODS_BRAND } from '@/capture/capture-mods'
  *
  * @typeParam P capture token read for its modifiers
  */
-export type ExtractMods<P> = P extends {
-  readonly [CAPTURE_MODS_BRAND]: infer M
-}
-  ? M
-  : {}
+export type ExtractMods<P> = P extends CaptureMods<infer M> ? M : {}

@@ -4,9 +4,22 @@ import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
+/**
+ * A path under a workspace package's `src`, so the aliases resolve to the
+ * sources and not to a build.
+ *
+ * @param pkg the package's folder under `packages`
+ * @param file the path under its `src`; the barrel by default
+ * @returns the absolute path
+ */
 const src = (pkg: string, file = 'index.ts') =>
-  path.join(root, 'packages', pkg, 'src', file)
+  path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '../../packages',
+    pkg,
+    'src',
+    file,
+  )
 
 export default defineConfig({
   plugins: [react(), nodePolyfills()],
@@ -21,8 +34,8 @@ export default defineConfig({
       '@ts-unify/engine': src('engine'),
       '@ts-unify/runner': src('runner'),
       '@ts-unify/rules': src('rules'),
-      '@ts-unify/playground': path.join(root, 'packages/playground/src'),
-      '@/': path.join(root, 'packages/core/src/') + path.sep,
+      '@ts-unify/playground': src('playground', ''),
+      '@/': src('core', '') + path.sep,
       '@': src('core'),
     },
   },

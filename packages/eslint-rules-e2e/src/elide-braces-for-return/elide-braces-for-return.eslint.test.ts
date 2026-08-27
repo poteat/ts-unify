@@ -11,10 +11,10 @@ import Tester from '../tester'
 
 describe('elide-braces-for-return.eslint', () => {
   Tester.run(
-    'elide-braces-for-return',
     createRule(elideBracesForReturn, {
       message: 'Elide braces for arrow function with single return',
     }),
+    'elide-braces-for-return',
     {
       valid: [
         'const f = (x) => x + 1;',

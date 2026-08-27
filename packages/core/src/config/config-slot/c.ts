@@ -6,6 +6,7 @@ import type { ConfigSlot } from '@/config/config-type'
  * value comes from the user's config.
  *
  * @param name the slot's name, kept as a literal type
+ * @returns a frozen slot carrying the config brand and the name
  */
 export const C = <const Name extends string>(
   name: Name,

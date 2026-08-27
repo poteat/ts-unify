@@ -1,13 +1,15 @@
-import type { Suppressed } from './types'
+import type { Site } from './types'
 
 /**
- * Whether a name is among the suppressed ones.
+ * Whether a name is among the ones suppressed at a site.
  *
- * @param suppressed the names, innermost first; none at the top
+ * @param site where the identifier stands, with the names suppressed there,
+ *             innermost first; none at the top
  * @param name the name
+ * @returns true when the name is in the site's suppressed chain
  */
-export function isSuppressed(suppressed: Suppressed | null, name: string) {
-  for (let at = suppressed; at !== null; at = at.up) {
+export function isSuppressed(site: Site, name: string) {
+  for (let at = site.suppressed; at !== null; at = at.up) {
     if (at.name === name) return true
   }
 

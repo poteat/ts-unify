@@ -1,5 +1,5 @@
 import { CONFIG_BRAND } from '@ts-unify/core/internal'
-import type { ChainEntry } from '@ts-unify/core/internal'
+import type { ChainEntry, ConfigSlot } from '@ts-unify/core/internal'
 import { symGet } from '@ts-unify/engine'
 
 /**
@@ -7,6 +7,8 @@ import { symGet } from '@ts-unify/engine'
  * slot resolved against the chain's config defaults; null when none.
  *
  * @param chain a rule's fluent chain
+ * @returns each specifier to its module path, or null when the chain declares
+ *          no usable import
  */
 export function resolveImports(
   chain: readonly ChainEntry[],
@@ -22,14 +24,15 @@ export function resolveImports(
   const resolved: Record<string, string> = {}
 
   for (const [specifier, value] of Object.entries(raw)) {
+    const isConfigSlot =
+      typeof value === 'object' &&
+      value !== null &&
+      symGet(value, CONFIG_BRAND) === true
+
     if (typeof value === 'string') {
       resolved[specifier] = value
-    } else if (
-      value &&
-      typeof value === 'object' &&
-      symGet(value, CONFIG_BRAND) === true
-    ) {
-      const defaultVal = configDefaults[(value as { name: string }).name]
+    } else if (isConfigSlot) {
+      const defaultVal = configDefaults[(value as ConfigSlot).name]
 
       if (typeof defaultVal === 'string') {
         resolved[specifier] = defaultVal

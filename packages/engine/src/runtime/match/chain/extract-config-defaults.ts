@@ -7,6 +7,8 @@ import Reads from './reads'
  * config slots of the pattern and the output; empty without one.
  *
  * @param chain the chain
+ * @returns the record the `.config()` entry was given, or an empty bag without
+ *          one
  */
 export function extractConfigDefaults(chain: ChainEntry[]): Bag {
   const configEntry = Reads.chainGet(chain, 'config')

@@ -11,10 +11,10 @@ import Tester from '../tester'
 
 describe('if-to-ternary-side-effect.eslint', () => {
   Tester.run(
-    'if-to-ternary-side-effect',
     createRule(ifToTernarySideEffect, {
       message: 'Use ternary expression instead of if/else side effects',
     }),
+    'if-to-ternary-side-effect',
     {
       valid: [
         'cond ? doA() : doB();',

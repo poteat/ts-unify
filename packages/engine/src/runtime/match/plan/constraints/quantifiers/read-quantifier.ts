@@ -1,37 +1,27 @@
 import type { ChainEntry } from '@ts-unify/core/internal'
 import Chain from '@ts-unify/engine/runtime/match/chain'
 import type { Quantifier } from '@ts-unify/engine/runtime/match/plan/constraints/types'
+
+import Bounded from './bounded'
 /**
  * The quantifier a constraint's chain carries: `.none()`, `.some()`,
  * `.atLeast(n)`, `.atMost(n)` or `.exactly(n)`; null without one.
  *
  * @param chain the constraint's chain
+ * @returns the quantifier's kind and its test over a count, or null without one
  */
 export function readQuantifier(chain: ChainEntry[]): Quantifier | null {
   if (Chain.chainHas(chain, 'none')) return { kind: 'none', test: n => n === 0 }
   if (Chain.chainHas(chain, 'some')) return { kind: 'some', test: n => n > 0 }
-  const atLeast = Chain.chainGet(chain, 'atLeast')
 
-  if (atLeast) {
-    const k = (atLeast.args[0] ?? 0) as number
+  for (const { kind, holds } of Bounded.BOUNDED) {
+    const entry = Chain.chainGet(chain, kind)
 
-    return { kind: 'atLeast', test: n => n >= k }
-  }
+    if (entry) {
+      const k = (entry.args[0] ?? 0) as number
 
-  const atMost = Chain.chainGet(chain, 'atMost')
-
-  if (atMost) {
-    const k = (atMost.args[0] ?? 0) as number
-
-    return { kind: 'atMost', test: n => n <= k }
-  }
-
-  const exactly = Chain.chainGet(chain, 'exactly')
-
-  if (exactly) {
-    const k = (exactly.args[0] ?? 0) as number
-
-    return { kind: 'exactly', test: n => n === k }
+      return { kind, test: n => holds(n, k) }
+    }
   }
 
   return null

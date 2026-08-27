@@ -2,13 +2,14 @@ import type {
   ParsedProgram,
   Views,
 } from '@ts-unify/engine/runtime/comment-nodes/views/types'
+import type { Memo } from '@ts-unify/engine/runtime/types'
 
 import Builders from './builders'
 /**
  * A memo of the views of each program, built once per program object
  * and held weakly; a value that is no program has empty views.
  */
-export function viewsMemo(): { of: (program: unknown) => Views } {
+export function viewsMemo(): Memo<unknown, Views> {
   const memo = new WeakMap<object, Views>()
 
   return {

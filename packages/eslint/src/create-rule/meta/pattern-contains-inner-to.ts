@@ -7,6 +7,7 @@ import type { PatternEntry } from '@ts-unify/engine'
  * Whether any pattern entry contains a proxy with `.to()` anywhere.
  *
  * @param entries the rule's entry patterns
+ * @returns true when a proxy under any entry's pattern has `.to()` in its chain
  */
 export function patternContainsInnerTo(entries: readonly PatternEntry[]) {
   function walk(v: unknown): boolean {
@@ -14,8 +15,9 @@ export function patternContainsInnerTo(entries: readonly PatternEntry[]) {
 
     if (typeof v === 'function' && symGet(v, NODE)) {
       const pn = symGet(v, NODE) as ProxyNode
+      const hasToCall = pn.chain.some(c => c.method === 'to')
 
-      return pn.chain.some(c => c.method === 'to') ? true : pn.args.some(walk)
+      return hasToCall ? true : pn.args.some(walk)
     }
 
     return (

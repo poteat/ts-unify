@@ -8,6 +8,7 @@ import Locate from './locate'
  * @param root the tree written into
  * @param path the path written at
  * @param value what is written there
+ * @returns the same tree, or what was written when the path is empty
  */
 export function setAt(root: unknown, path: Path, value: unknown): unknown {
   if (path.length === 0) return value

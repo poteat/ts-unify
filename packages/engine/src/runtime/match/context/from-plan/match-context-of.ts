@@ -10,6 +10,8 @@ import type { Path } from '@ts-unify/engine/runtime/types'
  *
  * @param chain the root chain's plan, whose config defaults the match reads
  * @param program the root node when it is a `Program`
+ * @returns a context with empty sites, bindings and capture paths, holding the
+ *          plan's config defaults and the program
  */
 export function matchContextOf(
   chain: ChainPlan,

@@ -16,6 +16,8 @@ import Where from '@ts-unify/engine/runtime/match/where'
  * @param node the AST node
  * @param pattern a fields record or a root proxy
  * @param chain the root proxy's chain
+ * @returns the bag, sites and capture paths, or null on mismatch, disagreeing
+ *          bindings, a failed guard or constraint
  */
 export function matchAdmitted(
   node: unknown,
@@ -29,12 +31,13 @@ export function matchAdmitted(
   )
   const at: Context.Cursor = { ctx, path: [] }
   const root = Plan.rootPlanOf(pattern)
-  const bag =
-    root.kind === 'proxy'
-      ? Inner.matchProxyPlan(node, root, at)
-      : root.kind === 'dollar'
-        ? Context.captureRest(node, at, Context.NO_KEYS)
-        : Inner.matchFields(node, root, at)
+  const isProxy = root.kind === 'proxy'
+  const isDollar = root.kind === 'dollar'
+  const bag = isProxy
+    ? Inner.matchProxyPlan(node, root, at)
+    : isDollar
+      ? Context.captureRest(node, at, Context.NO_KEYS)
+      : Inner.matchFields(node, root, at)
   if (!bag) return null
   if (!Context.bindingsAgree(ctx.namedBindings)) return null
 
@@ -42,7 +45,7 @@ export function matchAdmitted(
     if (!guard(bag)) return null
   }
 
-  if (!Where.applyConstraints(plan.constraints, node)) return null
+  if (!Where.applyConstraints(node, plan)) return null
 
   for (const site of ctx.sites) site.scopeBag = bag
 

@@ -14,6 +14,7 @@ import WithSites from './with-sites'
  * @param pattern the pattern
  * @param chain the root proxy's chain, whose `.when()`, `.where()` and
  * `.config()` entries apply
+ * @returns the capture bag, or null on mismatch
  */
 export function match(
   node: unknown,

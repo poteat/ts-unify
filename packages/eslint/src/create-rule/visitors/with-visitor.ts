@@ -12,6 +12,8 @@ import type { TSESTree } from '@typescript-eslint/types'
  * @param visitors the visitors so far
  * @param tag the node type the visitor is for
  * @param visit the visitor
+ * @returns a new table with the visitor added, the `Program` visitor wrapped
+ *          when needed
  */
 export function withVisitor(
   visitors: ReadonlyMap<string, Visitor>,
@@ -19,26 +21,27 @@ export function withVisitor(
   visit: Visitor,
 ): ReadonlyMap<string, Visitor> {
   const prev = visitors.get('Program')
-  const entry: readonly [string, Visitor] =
-    tag === 'Comment'
+  const isComment = tag === 'Comment'
+  const isProgramWithPrev = tag === 'Program' && prev
+  const entry: readonly [string, Visitor] = isComment
+    ? [
+        'Program',
+        (program: TSESTree.Node) => {
+          prev?.(program)
+
+          for (const c of commentNodes(program))
+            visit(c as unknown as TSESTree.Node)
+        },
+      ]
+    : isProgramWithPrev
       ? [
           'Program',
           (program: TSESTree.Node) => {
-            prev?.(program)
-
-            for (const c of commentNodes(program))
-              visit(c as unknown as TSESTree.Node)
+            visit(program)
+            prev(program)
           },
         ]
-      : tag === 'Program' && prev
-        ? [
-            'Program',
-            (program: TSESTree.Node) => {
-              visit(program)
-              prev(program)
-            },
-          ]
-        : [tag, visit]
+      : [tag, visit]
 
   return new Map([...visitors, entry])
 }

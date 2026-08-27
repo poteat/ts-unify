@@ -6,6 +6,7 @@ import type { ChainMethod } from './types'
  *
  * @param chain the chain
  * @param method the method
+ * @returns true when some entry's method matches
  */
 export const chainHas = (chain: ChainEntry[], method: ChainMethod) =>
   chain.some(e => e.method === method)

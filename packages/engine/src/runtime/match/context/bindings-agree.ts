@@ -5,6 +5,8 @@ import type { NamedBinding } from './types'
  * Whether every name bound more than once was bound to equal values.
  *
  * @param bindings the named captures of a match, in match order
+ * @returns false at the first name whose values differ by `deepEqual`, else
+ *          true
  */
 export function bindingsAgree(bindings: readonly NamedBinding[]) {
   const seen: Record<string, unknown> = {}

@@ -5,6 +5,7 @@ import type { Node } from './nodes'
  *
  * @param node the node
  * @param name the name
+ * @returns true when the node is an `Identifier` of that name
  */
 export const spells = (node: Node, name: string) =>
   node.type === 'Identifier' && node.name === name

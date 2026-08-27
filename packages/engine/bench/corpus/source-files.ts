@@ -6,6 +6,7 @@ import path from 'node:path'
  * path order; tests and specs included, `node_modules` and `dist` not.
  *
  * @param root the repository root
+ * @returns the file paths, sorted
  */
 export function sourceFiles(root: string): string[] {
   const files: string[] = []

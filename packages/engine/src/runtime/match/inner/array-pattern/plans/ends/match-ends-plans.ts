@@ -1,4 +1,5 @@
 import type { Cursor } from '@ts-unify/engine/runtime/match/context'
+import type { Ends } from '@ts-unify/engine/runtime/match/inner/array-pattern/types'
 import Util from '@ts-unify/engine/runtime/match/inner/util'
 import type { Plan } from '@ts-unify/engine/runtime/match/plan'
 import type { Bag } from '@ts-unify/engine/runtime/types'
@@ -13,10 +14,12 @@ import Runs from './runs'
  * @param actual the array
  * @param ends the element plans before the first spread and after the last
  * @param at where the array sits in the match
+ * @returns the merged captures of both runs, or null when either fails or the
+ *          array is too short
  */
 export function matchEndsPlans(
   actual: unknown[],
-  ends: { before: readonly Plan[]; after: readonly Plan[] },
+  ends: Ends<Plan>,
   at: Cursor,
 ): Bag | null {
   if (actual.length < ends.before.length + ends.after.length) return null
@@ -27,11 +30,10 @@ export function matchEndsPlans(
   )
   if (!bag) return null
   const start = actual.length - ends.after.length
-
-  return Util.absorb(
+  const doesAfterRunMatch = Util.absorb(
     bag,
     Runs.matchRunPlans(actual, { elements: ends.after, start }, at),
   )
-    ? bag
-    : null
+
+  return doesAfterRunMatch ? bag : null
 }

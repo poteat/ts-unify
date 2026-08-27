@@ -6,6 +6,8 @@ import type { DecisionTree } from '@ts-unify/engine/runtime/dispatch/tree/types'
  * @param path the path read at the node
  * @param branches the subtree per value
  * @param rest the subtree for a value no branch names
+ * @returns a non-leaf tree node holding the path, its branches and the rest
+ *          subtree
  */
 export const innerNode = <E>(
   path: readonly string[],

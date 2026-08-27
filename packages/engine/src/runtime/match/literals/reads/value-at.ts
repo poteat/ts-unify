@@ -4,6 +4,7 @@
  *
  * @param node the node
  * @param path the property keys and array indices, outermost first
+ * @returns what sits at the end of the path, or undefined past a non-object
  */
 export function valueAt(node: unknown, path: readonly string[]): unknown {
   let value = node

@@ -5,6 +5,7 @@ import Tags from './tags'
  *
  * @param lines the JSDoc's lines
  * @param i the index
+ * @returns true when the line exists, is not blank, and opens no tag
  */
 export const isParagraphLine = (lines: readonly string[], i: number) =>
   i < lines.length && lines[i] !== '' && !Tags.isTagLine(lines[i])

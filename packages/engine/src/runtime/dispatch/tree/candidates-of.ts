@@ -9,6 +9,7 @@ import type { DecisionTree } from './types'
  *
  * @param tree the decision tree
  * @param node the node
+ * @returns the entries of the leaf reached, in the list's order
  */
 export function candidatesOf<E>(
   tree: DecisionTree<E>,

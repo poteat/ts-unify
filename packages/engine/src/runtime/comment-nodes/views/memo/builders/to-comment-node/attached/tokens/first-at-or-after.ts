@@ -4,6 +4,8 @@
  *
  * @param sorted the numbers, ascending
  * @param at the bound
+ * @returns the first element at or after the bound, or undefined when all are
+ *          before it
  */
 export function firstAtOrAfter(
   sorted: readonly number[],

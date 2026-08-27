@@ -7,6 +7,7 @@ import Util from './util'
  * @param source the file's full text
  * @param specifier the named import
  * @param modulePath the module it comes from
+ * @returns true when such an import statement is in the source
  */
 export function hasImport(
   source: string,

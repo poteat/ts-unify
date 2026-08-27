@@ -1,8 +1,8 @@
 import { U, $ } from '@ts-unify/core'
 import { AST_NODE_TYPES } from '@typescript-eslint/types'
-import type { TSESTree } from '@typescript-eslint/types'
 
 import Patterns from './patterns'
+import type Types from './types'
 import Util from './util'
 
 /**
@@ -24,10 +24,7 @@ export const singularFunctionToArrow = U.fromNode({
   parent: $('parent'),
   ...$,
 })
-  .when(
-    bag =>
-      !Util.isMethodBody((bag as { parent?: TSESTree.Node | null }).parent),
-  )
+  .when(bag => !Util.isMethodBody((bag as Types.WithParent).parent))
   .where(
     U.or(U.ThisExpression(), U.Identifier({ name: 'arguments' }))
       .until(Patterns.fnBoundary)

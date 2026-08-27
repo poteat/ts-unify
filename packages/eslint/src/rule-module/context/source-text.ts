@@ -3,6 +3,8 @@
  * none.
  *
  * @param sourceCode a context's source, of either surface
+ * @returns the source's `text`, else what `getText()` gives, else an empty
+ *          string
  */
 export function sourceText(sourceCode: unknown) {
   if (typeof sourceCode !== 'object' || !sourceCode) return ''

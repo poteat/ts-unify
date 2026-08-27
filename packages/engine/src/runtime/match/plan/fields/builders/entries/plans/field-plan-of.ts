@@ -7,6 +7,7 @@ import type { Plan } from '@ts-unify/engine/runtime/match/plan/types'
  * array is an array pattern there, anything else as at a value position.
  *
  * @param value the pattern value
+ * @returns an `ArrayPlan` for an array, else its `Plan` as at a value position
  */
 export const fieldPlanOf = (value: unknown): Plan | ArrayPlan =>
   Array.isArray(value) ? Arrays.arrayPlanOf(value) : planOf(value)

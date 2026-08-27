@@ -5,6 +5,8 @@ import Util from './util'
  *
  * @param tree the tree searched
  * @param target the node looked for
+ * @returns true when the tree or some node under it is `deepEqual` to the
+ *          target
  */
 export function contains(tree: unknown, target: unknown): boolean {
   if (Util.deepEqual(tree, target)) return true

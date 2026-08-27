@@ -4,5 +4,8 @@
   "private": true,
   "scripts": {
     "set-version": "npx tsx src/set-version/set-version.ts"
+  },
+  "exports": {
+    "./*": "./src/*"
   }
 }

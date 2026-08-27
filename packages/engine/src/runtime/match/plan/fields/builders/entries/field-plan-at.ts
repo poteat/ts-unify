@@ -6,6 +6,7 @@ import Plans from './plans'
  *
  * @param key the property's key
  * @param value the pattern value under it
+ * @returns the key paired with the plan of what sits under it
  */
 export const fieldPlanAt = (key: string, value: unknown): FieldPlan => ({
   key,

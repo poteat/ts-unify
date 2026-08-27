@@ -11,11 +11,11 @@ import Tester from '../tester'
 
 describe('typeof-undefined-to-nullish-check.eslint', () => {
   Tester.run(
-    'typeof-undefined',
     createRule(typeofUndefinedToNullishCheck, {
       message: "Use == null instead of typeof === 'undefined'",
       canFix: true,
     }),
+    'typeof-undefined',
     {
       valid: ["typeof x === 'string';", 'x === undefined;'],
       invalid: [

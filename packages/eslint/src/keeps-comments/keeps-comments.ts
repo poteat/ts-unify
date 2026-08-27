@@ -9,6 +9,7 @@ import type { TSESTree } from '@typescript-eslint/types'
  *
  * @param comments the comments inside the replaced range
  * @param text the replacement
+ * @returns true when the text includes every comment's value
  */
 export const keepsComments = (
   comments: readonly TSESTree.Comment[],

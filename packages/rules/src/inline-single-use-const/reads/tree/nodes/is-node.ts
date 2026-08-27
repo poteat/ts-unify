@@ -4,6 +4,7 @@ import type { Node } from './types'
  * Whether a value is a parser node: an object with a string `type`.
  *
  * @param v the value
+ * @returns true when the value is an object with a string `type`
  */
 export const isNode = (v: unknown): v is Node =>
   typeof v === 'object' && v !== null && typeof (v as Node).type === 'string'

@@ -1,7 +1,7 @@
 import { dispatcherOf, matchAdmitted } from '@ts-unify/engine'
 import type { RuleMeta } from '@ts-unify/runner'
 
-import type { MatchRecord } from './types'
+import type { MatchRecord, TryCounters } from './types'
 /**
  * Every match one rule makes over the corpus, as the ESLint adapter's
  * visitor makes them.
@@ -14,11 +14,13 @@ import type { MatchRecord } from './types'
  * @param byType the corpus nodes by type
  * @param tried counters of the nodes tried and of the entries admitted,
  * added to
+ * @returns one record per matched node: the rule, the node and the entry it
+ *          matched
  */
 export function matchRule(
   rule: RuleMeta,
   byType: ReadonlyMap<string, readonly object[]>,
-  tried: { count: number; admitted: number },
+  tried: TryCounters,
 ): MatchRecord[] {
   const records: MatchRecord[] = []
   const seen = new Set<string>()

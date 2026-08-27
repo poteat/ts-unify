@@ -12,22 +12,27 @@ import Boundaries from './boundaries'
  *
  * @param pattern the constraint's proxy node
  * @param boundary the `.until()` argument, null without one
+ * @returns a `CountPlan` with a tag and fields plan per alternative, and the
+ *          boundary's tags
  */
-export const countPlanOf = (
-  pattern: ProxyNode,
-  boundary: unknown,
-): CountPlan => ({
-  alternatives: (pattern.tag === 'or'
-    ? pattern.args.filter(Pattern.isProxyNode).map(Pattern.patternNodeOf)
-    : [pattern]
-  ).map(alt => ({
-    tag: alt.tag,
+export function countPlanOf(pattern: ProxyNode, boundary: unknown): CountPlan {
+  const isOr = pattern.tag === 'or'
 
-    fields:
-      alt.args[0] === $
-        ? Values.DOLLAR
-        : Fields.fieldsPlanOf(alt.args[0] ?? {}),
-  })),
+  return {
+    alternatives: (isOr
+      ? pattern.args.filter(Pattern.isProxyNode).map(Pattern.patternNodeOf)
+      : [pattern]
+    ).map(alt => {
+      const isDollar = alt.args[0] === $
 
-  boundaryTags: Boundaries.boundaryTagsOf(boundary),
-})
+      return {
+        tag: alt.tag,
+        fields: isDollar
+          ? Values.DOLLAR
+          : Fields.fieldsPlanOf(alt.args[0] ?? {}),
+      }
+    }),
+
+    boundaryTags: Boundaries.boundaryTagsOf(boundary),
+  }
+}

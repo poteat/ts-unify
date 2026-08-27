@@ -5,6 +5,7 @@ import Util from './util'
  *
  * @param count how many
  * @param ms in how many milliseconds
+ * @returns the rounded per-second count with thousands separators, as `12,345`
  */
 export const rate = (count: number, ms: number) =>
   Math.round((count * Util.MS_PER_S) / ms).toLocaleString('en-US')

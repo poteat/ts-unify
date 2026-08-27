@@ -1,12 +1,12 @@
 import ExtractPatterns from '../extract-patterns'
 import Match from '../match'
-import MatchFixtures from '../match/fixtures'
+import Fixtures from '../match/fixtures'
 import { dispatcherOf } from './dispatcher-of'
-import Fixtures from './fixtures'
+import DispatchFixtures from './fixtures'
 import Tree from './tree'
 
 const names = (node: unknown) =>
-  dispatcherOf(Fixtures.ENTRIES)(node).map(it => it.name)
+  dispatcherOf(DispatchFixtures.ENTRIES)(node).map(it => it.name)
 
 describe('dispatcher-of', () => {
   it('names the entries whose literals the node holds, in order', () => {
@@ -29,7 +29,7 @@ describe('dispatcher-of', () => {
 
   it('reads each path once, down a tree as deep as the literals', () => {
     const tree = Tree.buildTree(
-      Fixtures.ENTRIES.map(entry => ({
+      DispatchFixtures.ENTRIES.map(entry => ({
         entry,
         literals: Match.rootLiteralsOf(entry.pattern),
       })),
@@ -44,18 +44,17 @@ describe('dispatcher-of', () => {
     expect(under.path).toEqual(['left', 'type'])
     expect(tree.rest).toEqual({
       isLeaf: true,
-      entries: [Fixtures.ENTRIES[2]],
+      entries: [DispatchFixtures.ENTRIES[2]],
     })
   })
 
   it('admits every entry that matches, over a program', () => {
     const admitted = dispatcherOf(
-      ExtractPatterns.extractPatterns(Fixtures.THREE_EXPRESSIONS),
+      ExtractPatterns.extractPatterns(DispatchFixtures.THREE_EXPRESSIONS),
     )
     const expressions = (
-      MatchFixtures.program(
-        'a && b.c; x || y; typeof z === "undefined"; p ?? q',
-      ).body as { expression: unknown }[]
+      Fixtures.program('a && b.c; x || y; typeof z === "undefined"; p ?? q')
+        .body as { expression: unknown }[]
     ).map(it => it.expression)
     expect(
       expressions.map(

@@ -10,6 +10,7 @@ export type NodeWithAtMost<N> = {
    * at most the given count of nodes matching this pattern.
    *
    * @param n the largest count that passes
+   * @returns this node with the count constraint attached
    */
   readonly atMost: (n: number) => FluentNode<N>
 }

@@ -13,6 +13,7 @@ import { fileURLToPath } from 'node:url'
  * tags, the rewrite and print of every match, and the setup of every rule.
  *
  * @param root the repository root; this repository's by default
+ * @returns the report text over that repository's sources
  */
 export function runBench(root?: string): string {
   const corpus = Corpus.parseCorpus(

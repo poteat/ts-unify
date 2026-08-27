@@ -1,4 +1,5 @@
-import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { declarationsUnder } from '@ts-unify/scripts/files/declarations-under.mjs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 
 /**
@@ -14,17 +15,6 @@ import { dirname, join, relative, resolve } from 'node:path'
 export function rewriteSelfImports(dist) {
   const self = JSON.parse(readFileSync('package.json', 'utf8')).name
 
-  const walk = dir =>
-    readdirSync(dir).flatMap(name => {
-      const p = join(dir, name)
-
-      return statSync(p).isDirectory()
-        ? walk(p)
-        : p.endsWith('.d.ts')
-          ? [p]
-          : []
-    })
-
   function relativeTo(file, target) {
     const rel = relative(dirname(file), join(dist, target))
       .split('\\')
@@ -33,7 +23,7 @@ export function rewriteSelfImports(dist) {
     return rel.startsWith('.') ? rel : `./${rel}`
   }
 
-  const rewritten = walk(dist).reduce((count, file) => {
+  const rewritten = declarationsUnder(dist).reduce((count, file) => {
     const before = readFileSync(file, 'utf8')
     const after = before.replace(
       new RegExp(
@@ -48,7 +38,11 @@ export function rewriteSelfImports(dist) {
     return count + 1
   }, 0)
 
-  if (walk(dist).some(f => readFileSync(f, 'utf8').includes(`'${self}/`))) {
+  const hasSelfImport = declarationsUnder(dist).some(f =>
+    readFileSync(f, 'utf8').includes(`'${self}/`),
+  )
+
+  if (hasSelfImport) {
     console.error(`imports of ${self} by name remain under dist`)
     process.exit(1)
   }

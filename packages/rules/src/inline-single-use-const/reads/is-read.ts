@@ -8,6 +8,7 @@ import type { Node } from './tree'
  *
  * @param id the identifier
  * @param parent the node holding it; none at the top of a tree
+ * @returns true when the identifier reads its name, or has no parent
  */
 export const isRead = (id: Node, parent: Node | undefined) =>
   !parent ||

@@ -2,6 +2,7 @@ import type { FluentNode } from '@/ast/fluent-node'
 import type { NodeByKind } from '@/ast/node-by-kind'
 import type { NodeKind } from '@/ast/node-kind'
 import type { OmitDistributive } from '@/ast/omit-distributive'
+import type AstTypes from '@/ast/types'
 import type { Pattern } from '@/pattern'
 import type { WithoutInternalAstFields } from '@/type-utils'
 
@@ -22,9 +23,7 @@ export type PatternBuilder<K extends NodeKind> = {
 
   <P extends Pattern<NodeByKind[K]>>(
     pattern: P,
-  ): FluentNode<
-    { readonly type: NodeByKind[K]['type'] } & BindAgainstNodeKind<P, K>
-  >
+  ): FluentNode<AstTypes.KindOnly<K> & BindAgainstNodeKind<P, K>>
 
-  (): FluentNode<{ readonly type: NodeByKind[K]['type'] }>
+  (): FluentNode<AstTypes.KindOnly<K>>
 } & { readonly [PATTERN_BUILDER_BRAND]: true }

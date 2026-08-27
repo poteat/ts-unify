@@ -14,6 +14,8 @@ import Ors from './ors'
  *
  * @param plan the proxy plan
  * @param path the path under the node the plan applies at
+ * @returns the `type` literal and the fields' literals, the or's literal if
+ *          any, or none
  */
 export function proxyLiterals(
   plan: ProxyPlan,
@@ -22,13 +24,14 @@ export function proxyLiterals(
   const body = plan.body
 
   if (body.shape === 'node') {
-    return plan.tag === 'Comment'
+    const isComment = plan.tag === 'Comment'
+    const hasFields = body.fields.kind === 'fields'
+
+    return isComment
       ? []
       : [
           Util.literalAt([...path, 'type'], [plan.tag]),
-          ...(body.fields.kind === 'fields'
-            ? Plans.planLiterals(body.fields, path)
-            : []),
+          ...(hasFields ? Plans.planLiterals(body.fields, path) : []),
         ]
   }
 

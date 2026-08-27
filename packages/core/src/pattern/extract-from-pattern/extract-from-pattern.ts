@@ -1,6 +1,6 @@
 import type { TSESTree } from '@typescript-eslint/types'
 
-import type { OR_BRAND } from '@/ast/or'
+import type OrTypes from '@/ast/or/types'
 import type { Sealed } from '@/ast/sealed'
 import type { StripOr } from '@/pattern/strip-or'
 import type { StripSeal } from '@/pattern/strip-seal'
@@ -19,7 +19,7 @@ import type { TokenBag } from './types'
 export type ExtractFromPattern<P, Token, Key extends string = ''> =
   P extends Sealed<infer _Inner>
     ? ExtractFromPattern<StripSeal<P>, Token, Key>
-    : P extends { readonly [OR_BRAND]: true }
+    : P extends OrTypes.OrBranded
       ? StripOr<P> extends infer U
         ? U extends unknown
           ? ExtractFromPattern<U, Token, Key>

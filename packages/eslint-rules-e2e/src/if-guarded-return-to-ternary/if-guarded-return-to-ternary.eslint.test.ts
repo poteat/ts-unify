@@ -11,10 +11,10 @@ import Tester from '../tester'
 
 describe('if-guarded-return-to-ternary.eslint', () => {
   Tester.run(
-    'if-guarded-return-to-ternary',
     createRule(ifGuardedReturnToTernary, {
       message: 'Use ternary instead of if-guarded return',
     }),
+    'if-guarded-return-to-ternary',
     {
       valid: [
         'function f() { return cond ? a : b; }',

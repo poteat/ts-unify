@@ -4,6 +4,8 @@ import SymGet from '@ts-unify/engine/runtime/sym-get'
  * the form recast's `print()` takes.
  *
  * @param value a proxy, a node, an array of either, or a primitive
+ * @returns a plain object with the proxy's tag as `type` and its reified
+ *          fields; arrays mapped, anything else as given
  */
 export function reify(value: unknown): unknown {
   const node = SymGet.proxyNodeOf(value)

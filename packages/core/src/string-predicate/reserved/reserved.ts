@@ -13,6 +13,7 @@ import Words from './words'
  * count too. With `isTypeScript`, TypeScript's contextual keywords count.
  *
  * @param options Which sets to consult; an omitted field takes its default.
+ * @returns a branded predicate, true for a word reserved under the chosen sets
  * @example
  * U.Identifier({ name: U.string.reserved({ isTypeScript: true }) })
  */

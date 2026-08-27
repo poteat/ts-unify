@@ -11,10 +11,10 @@ import Tester from '../tester'
 
 describe('inline-single-use-const.eslint', () => {
   Tester.run(
-    'inline-single-use-const',
     createRule(inlineSingleUseConst, {
       message: 'Inline single-use const',
     }),
+    'inline-single-use-const',
     {
       valid: [
         {

@@ -6,5 +6,6 @@ import SymGet from '@ts-unify/engine/runtime/sym-get'
  * has checked {@link isProxyNode}.
  *
  * @param v a proxy node, as {@link isProxyNode} admits
+ * @returns the `ProxyNode` descriptor under the proxy's `NODE` symbol
  */
 export const patternNodeOf = (v: unknown) => SymGet.symGet(v, NODE) as ProxyNode

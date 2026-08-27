@@ -6,6 +6,7 @@ import Util from './util'
  * Parents are visited before children, so the first writer wins.
  *
  * @param program the program walked
+ * @returns a map from start offset to the outermost declaration starting there
  */
 export function declarationStarts(
   program: unknown,

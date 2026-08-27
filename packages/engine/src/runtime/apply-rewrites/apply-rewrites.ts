@@ -8,13 +8,15 @@ import Paths from './paths'
  * The rewritten copy of a matched node once every inner `.to()` site of
  * the match has run, or null when the match has no sites.
  *
- * Sites run deepest first; a site at the empty path replaces the root,
- * and then no copy is made, as no site reads one. A capture sourced at
- * or under a rewritten position is rebound to the rewrite.
+ * Sites run deepest first, so an inner rewrite lands before the outer
+ * one reads its captures; siblings are disjoint, so their order is free.
+ * A site at the empty path replaces the root, and then no copy is made.
  *
  * @param matchedNode the node the pattern matched; left as it was
  * @param sites the rewrite sites the match recorded
- * @param capturePaths where each named capture was sourced from
+ * @param capturePaths where each named capture was sourced from; a capture at
+ *                     or under a rewritten position is rebound to the rewrite
+ * @returns the rewritten copy, or null when the match recorded no sites
  */
 export function applyRewrites(
   matchedNode: unknown,
@@ -23,10 +25,6 @@ export function applyRewrites(
 ): unknown {
   if (sites.length === 0) return null
 
-  /**
-   * Deepest first, so an inner rewrite lands before the outer one reads
-   * its captures; sibling sites are disjoint, so their order is free.
-   */
   const ordered = [...sites].sort((a, b) => b.path.length - a.path.length)
   const rootSite = ordered[ordered.length - 1].path.length === 0
   let root: unknown = rootSite

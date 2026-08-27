@@ -3,6 +3,8 @@
  * path of a resolved imports map, joined.
  *
  * @param imports `{ specifier: modulePath }`
+ * @returns the import statements joined, one per module path; empty for no
+ *          imports
  */
 export function buildImportStatements(imports: Record<string, string>) {
   const byModule = new Map<string, readonly string[]>()

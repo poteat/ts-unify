@@ -5,6 +5,7 @@ import type { LintMatch } from '@ts-unify/runner/lint'
  * span of one kept before it, so their rewrites can be spliced in together.
  *
  * @param matches the matches to choose among
+ * @returns the kept matches, in source order
  */
 export function nonOverlapping<M extends LintMatch>(
   matches: readonly M[],
@@ -17,10 +18,10 @@ export function nonOverlapping<M extends LintMatch>(
   let lastEndCol = -1
 
   for (const m of sorted) {
-    if (
-      m.line > lastEndLine ||
-      (m.line === lastEndLine && m.column >= lastEndCol)
-    ) {
+    const isAfterLast =
+      m.line > lastEndLine || (m.line === lastEndLine && m.column >= lastEndCol)
+
+    if (isAfterLast) {
       kept.push(m)
       lastEndLine = m.endLine
       lastEndCol = m.endColumn

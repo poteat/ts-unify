@@ -10,6 +10,7 @@ export type NodeWithAtLeast<N> = {
    * at least the given count of nodes matching this pattern.
    *
    * @param n the smallest count that passes
+   * @returns this node with the count constraint attached
    */
   readonly atLeast: (n: number) => FluentNode<N>
 }

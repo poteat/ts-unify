@@ -11,6 +11,8 @@ import { fileURLToPath } from 'node:url'
  *
  * @param root the repository root; this repository's by default
  * @param rounds how many times every rule runs over the corpus
+ * @returns a line naming the rounds run, the matches made and the rewrites
+ *          printed
  */
 export function profileEngine(root: string | undefined, rounds: number) {
   const byType = Nodes.nodesByType(

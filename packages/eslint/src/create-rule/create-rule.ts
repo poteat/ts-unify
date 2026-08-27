@@ -22,6 +22,8 @@ import Visitors from './visitors'
  *
  * @param transform the pattern, with or without `.to()`
  * @param opts the parts of `RuleOptions` the caller sets
+ * @returns a rule module whose `create` reports each match, with a fix when the
+ *          rule rewrites
  */
 export function createRule(
   transform: TransformLike,
@@ -63,31 +65,27 @@ export function createRule(
           const data: Record<string, string> = {}
 
           for (const [k, v] of Object.entries(bag)) {
-            data[k] =
+            const isIdentifierNode =
               typeof v === 'object' &&
               v &&
               'type' in v &&
               v.type === 'Identifier' &&
               'name' in v
-                ? String(v.name)
-                : String(v)
+
+            data[k] = isIdentifierNode ? String(v.name) : String(v)
           }
 
           const sites = canFix ? rootSites(result, factory) : []
+          const isComment = tag === 'Comment'
+          const hasSites = sites.length > 0
 
           context.report({
-            ...(tag === 'Comment'
-              ? {
-                  loc: node.loc,
-                }
-              : {
-                  node,
-                }),
+            ...(isComment ? { loc: node.loc } : { node }),
 
             messageId: 'match',
             data,
 
-            ...(sites.length > 0
+            ...(hasSites
               ? {
                   fix(fixer) {
                     if (withEntries.length > 0) {
@@ -106,14 +104,12 @@ export function createRule(
                       applyRewrites(node, sites, result.capturePaths),
                     )
 
-                    if (
-                      !KeepsComments.keepsComments(
-                        KeepsComments.commentsInside(sourceCode, node),
-                        text,
-                      )
-                    ) {
-                      return null
-                    }
+                    const doesKeepComments = KeepsComments.keepsComments(
+                      KeepsComments.commentsInside(sourceCode, node),
+                      text,
+                    )
+
+                    if (!doesKeepComments) return null
 
                     if (importMap) {
                       const fullSource = RuleModule.sourceText(sourceCode)

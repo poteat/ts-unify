@@ -1,7 +1,6 @@
 import BuilderMap from '@/ast/builder-map'
 import Capture from '@/capture'
-import type { Spread } from '@/capture'
-import CaptureSpread from '@/capture/spread'
+import Spread from '@/capture/spread'
 
 import type { Pattern } from '.'
 
@@ -33,9 +32,9 @@ describe('pattern', () => {
       Array.isArray(
         accepted<Shape>([
           {
-            [CaptureSpread.SPREAD_BRAND]: true,
+            [Spread.SPREAD_BRAND]: true,
             name: 'rest',
-          } satisfies Spread<'rest', number>,
+          } satisfies Spread.Spread<'rest', number>,
         ]),
       ),
     ).toBe(true)

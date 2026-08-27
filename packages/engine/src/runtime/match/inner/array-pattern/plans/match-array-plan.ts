@@ -15,6 +15,8 @@ import Ends from './ends'
  * @param actual the array
  * @param plan the plan of the array pattern
  * @param at where the array sits in the match
+ * @returns the captures of the elements and spreads, or null on mismatch or
+ *          more than two spreads
  */
 export function matchArrayPlan(
   actual: unknown[],
@@ -66,14 +68,12 @@ export function matchArrayPlan(
     const mEnd = actual.length - after.length
 
     for (let pos = before.length; pos + middle.length <= mEnd; pos++) {
-      if (
-        !Util.absorb(
-          bag,
-          Ends.matchRunPlans(actual, { elements: middle, start: pos }, at),
-        )
-      ) {
-        continue
-      }
+      const isRunMatched = Util.absorb(
+        bag,
+        Ends.matchRunPlans(actual, { elements: middle, start: pos }, at),
+      )
+
+      if (!isRunMatched) continue
 
       const n1 = spreads[0].name || at.key
 

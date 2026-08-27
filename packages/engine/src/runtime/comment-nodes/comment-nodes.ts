@@ -7,6 +7,7 @@ import Views from './views'
  *
  * @param program a `Program` node with `comments` (and, for attachment,
  * `tokens`) as produced by a parser with `comment: true, tokens: true`
+ * @returns the program's `Comment` nodes, in source order
  */
 export const commentNodes = (program: unknown): CommentNode[] =>
   Views.commentViews.of(program).list

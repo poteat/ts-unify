@@ -4,6 +4,7 @@ import type { Walked } from './types'
  * Whether a value is a node: an object carrying a string `type`.
  *
  * @param value anything found under a node's keys
+ * @returns true when the value is an object with a string `type`
  */
 export const isNode = (value: unknown): value is Walked =>
   typeof value === 'object' &&

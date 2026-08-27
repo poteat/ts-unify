@@ -6,6 +6,8 @@ import type { RootLiteral } from './types'
  *
  * @param node the node
  * @param literals the pattern's root literals
+ * @returns false at the first literal whose value the node does not hold, else
+ *          true
  */
 export function agrees(
   node: unknown,

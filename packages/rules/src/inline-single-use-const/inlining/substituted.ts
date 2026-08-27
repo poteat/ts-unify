@@ -6,6 +6,8 @@ import Tree from '@ts-unify/rules/inline-single-use-const/reads/tree'
  * @param tree the tree
  * @param target the node replaced
  * @param replacement what takes its place
+ * @returns the replacement for the target itself, a copy for a node or array
+ *          above it, a leaf as is
  */
 export function substituted<T>(
   tree: T,

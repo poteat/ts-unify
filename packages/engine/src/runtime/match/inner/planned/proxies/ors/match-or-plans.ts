@@ -9,6 +9,7 @@ import type { Bag } from '@ts-unify/engine/runtime/types'
  * @param actual the value
  * @param alternatives the alternatives' plans
  * @param at where the value sits in the match
+ * @returns the first matching alternative's captures, or null when none matches
  */
 export function matchOrPlans(
   actual: unknown,

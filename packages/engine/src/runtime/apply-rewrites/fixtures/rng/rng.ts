@@ -5,6 +5,7 @@ import { XORSHIFT } from './xorshift'
  * property run is reproducible.
  *
  * @param seed the starting state; zero is read as one
+ * @returns a function yielding the next number in `[0, 1)` on each call
  */
 export function rng(seed: number): () => number {
   const [a, b, c] = XORSHIFT.shifts

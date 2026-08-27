@@ -14,6 +14,8 @@ import Admitted from './admitted'
  * @param node the AST node
  * @param pattern a fields record or a root proxy
  * @param chain the root proxy's chain
+ * @returns the bag, sites and capture paths of `matchAdmitted`, or null when a
+ *          root literal is missing or it fails
  */
 export const matchWithSites = (
   node: unknown,

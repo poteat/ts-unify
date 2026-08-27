@@ -5,6 +5,7 @@ import Numbers from './numbers'
  *
  * @param header the column names
  * @param rows the cells, one row per line
+ * @returns the header line and one line per row, joined by newlines
  */
 export function formatTable(
   header: readonly string[],

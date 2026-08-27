@@ -14,6 +14,8 @@ import type { Bag } from '@ts-unify/engine/runtime/types'
  * @param node the node
  * @param plan the plan of the fields record
  * @param at where the node sits in the match
+ * @returns the captures of the fields, the rest's too for `{ ...$ }`; null for
+ *          a non-object or a failed field
  */
 export function matchFields(
   node: unknown,
@@ -43,49 +45,46 @@ export function matchFields(
       case 'string':
         if (!expected.test(actual)) return null
         continue
-      case 'proxy':
-        if (
-          !Util.absorb(
-            bag,
-            Proxies.matchProxyPlan(
-              actual,
-              expected,
-              Context.childCursor(at, key),
-            ),
-          )
-        ) {
-          return null
-        }
+      case 'proxy': {
+        const isProxyMatched = Util.absorb(
+          bag,
+          Proxies.matchProxyPlan(
+            actual,
+            expected,
+            Context.childCursor(at, key),
+          ),
+        )
+
+        if (!isProxyMatched) return null
 
         continue
-      case 'fields':
-        if (
-          !Util.absorb(
-            bag,
-            matchFields(actual, expected, Context.childCursor(at, key)),
-          )
-        ) {
-          return null
-        }
+      }
+      case 'fields': {
+        const isFieldsMatched = Util.absorb(
+          bag,
+          matchFields(actual, expected, Context.childCursor(at, key)),
+        )
+
+        if (!isFieldsMatched) return null
 
         continue
-      case 'array':
+      }
+      case 'array': {
         if (!Array.isArray(actual)) return null
 
-        if (
-          !Util.absorb(
-            bag,
-            ArrayPattern.matchArrayPlan(
-              actual,
-              expected,
-              Context.childCursor(at, key),
-            ),
-          )
-        ) {
-          return null
-        }
+        const isArrayMatched = Util.absorb(
+          bag,
+          ArrayPattern.matchArrayPlan(
+            actual,
+            expected,
+            Context.childCursor(at, key),
+          ),
+        )
+
+        if (!isArrayMatched) return null
 
         continue
+      }
       case 'literal':
         if (actual !== expected.value) return null
     }

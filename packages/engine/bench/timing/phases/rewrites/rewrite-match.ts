@@ -3,6 +3,7 @@ import { applyRewrites, matchWithSites } from '@ts-unify/engine'
 import { printNode } from '@ts-unify/eslint/internal'
 import { rootSites } from '@ts-unify/runner'
 
+import type { PrintedRewrite } from './types'
 /**
  * The printed rewrite of one match, as the ESLint adapter's fix builds
  * it, and the milliseconds the rewrite and its print took.
@@ -11,11 +12,10 @@ import { rootSites } from '@ts-unify/runner'
  * whose rule carries no rewrite, or whose rewrite does not print.
  *
  * @param record the match
+ * @returns the printed text and its milliseconds; null text and 0 ms when
+ *          nothing prints
  */
-export function rewriteMatch(record: MatchRecord): {
-  text: string | null
-  ms: number
-} {
+export function rewriteMatch(record: MatchRecord): PrintedRewrite {
   const result = matchWithSites(
     record.node,
     record.entry.pattern,

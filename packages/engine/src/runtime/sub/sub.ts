@@ -6,6 +6,8 @@ import Util from './util'
  * @param tree the tree substituted in, left as it was
  * @param target the node replaced wherever it appears
  * @param replacement what stands in its place
+ * @returns a new tree with the replacement at every match, position keys
+ *          carried over; the replacement itself when the tree is the target
  */
 export function sub<T>(tree: T, target: unknown, replacement: unknown): T {
   if (Util.deepEqual(tree, target)) return replacement as T

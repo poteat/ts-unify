@@ -10,6 +10,7 @@ import Planned from './planned'
  * @param actual the value
  * @param args the alternatives
  * @param at where the value sits in the match
+ * @returns the first matching alternative's captures, or null when none matches
  */
 export const matchOrInner = (
   actual: unknown,

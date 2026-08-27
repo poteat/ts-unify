@@ -8,12 +8,17 @@ import Util from './util'
  * comparison with its operator flipped to the equality.
  *
  * @param bag what the matched ternary captured from its test
+ * @returns the condition under the `!`, or a `BinaryExpression` with the
+ *          flipped operator
  */
-export const positiveTest = (bag: TernaryTest) =>
-  'condition' in bag
+export function positiveTest(bag: TernaryTest) {
+  const isNegation = 'condition' in bag
+
+  return isNegation
     ? bag.condition
     : U.BinaryExpression({
         operator: Util.flipOp[bag.operator as keyof typeof Util.flipOp],
         left: bag.left,
         right: bag.right,
       })
+}

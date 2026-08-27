@@ -15,6 +15,7 @@ export type RuleModule = {
    * Builds the rule's visitors for one file, given its context.
    *
    * @param context the file's ESLint rule context
+   * @returns the node-type visitors ESLint calls over the file
    */
   create: (context: RuleContext) => Visitors
 }

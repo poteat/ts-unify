@@ -5,6 +5,7 @@ import type { Bag } from '@ts-unify/engine/runtime/types'
  *
  * @param bag the captures so far, extended in place
  * @param part the part's captures, or null where it did not match
+ * @returns true when the part matched and its captures were added
  */
 export function absorb(bag: Bag, part: Bag | null) {
   if (!part) return false

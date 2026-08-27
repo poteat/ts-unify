@@ -1,3 +1,4 @@
+import type { Timed } from './types'
 import Util from './util'
 /**
  * The shortest of several timings of a function, with the result of that
@@ -8,11 +9,9 @@ import Util from './util'
  *
  * @param rounds how many times the function runs
  * @param run the function timed
+ * @returns the shortest round's milliseconds and what that round returned
  */
-export function bestOf<T>(
-  rounds: number,
-  run: () => T,
-): { ms: number; result: T } {
+export function bestOf<T>(rounds: number, run: () => T): Timed<T> {
   let best = Infinity
   let result!: T
 

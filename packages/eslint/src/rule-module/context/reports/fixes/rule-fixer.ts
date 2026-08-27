@@ -12,6 +12,7 @@ export type RuleFixer = {
    *
    * @param node the node to replace
    * @param text the new text
+   * @returns the edit replacing the node's range with the text
    */
   readonly replaceText: (node: TSESTree.Node, text: string) => RuleFix
 
@@ -20,6 +21,7 @@ export type RuleFixer = {
    *
    * @param range the range, as `[start, end]` offsets
    * @param text the text to insert
+   * @returns the edit inserting the text at the range's start
    */
   readonly insertTextBeforeRange: (
     range: [number, number],

@@ -1,3 +1,5 @@
+import type Types from '@ts-unify/rules/ternary-to-boolean-op/forms/types'
+
 /**
  * Whether an expression is boolean by shape: a comparison, a negation, a
  * logical of such, or a boolean literal.
@@ -7,20 +9,19 @@
  * boolean-shaped test is rewritten.
  *
  * @param e the expression
+ * @returns true when the expression is a comparison, a `!`, a logical of such,
+ *          or a boolean literal
  */
 export function booleanShaped(e: unknown): boolean {
   if (e === null || typeof e !== 'object') return false
 
-  const n = e as {
-    type: string
-    operator?: string
-    left?: unknown
-    right?: unknown
-    argument?: unknown
-    value?: unknown
-  }
+  const n = e as Types.Test
 
-  return n.type === 'BinaryExpression'
+  const isBinary = n.type === 'BinaryExpression'
+  const isUnary = n.type === 'UnaryExpression'
+  const isLogical = n.type === 'LogicalExpression'
+
+  return isBinary
     ? [
         '===',
         '!==',
@@ -33,9 +34,9 @@ export function booleanShaped(e: unknown): boolean {
         'in',
         'instanceof',
       ].includes(n.operator ?? '')
-    : n.type === 'UnaryExpression'
+    : isUnary
       ? n.operator === '!'
-      : n.type === 'LogicalExpression'
+      : isLogical
         ? (n.operator === '&&' || n.operator === '||') &&
           booleanShaped(n.left) &&
           booleanShaped(n.right)

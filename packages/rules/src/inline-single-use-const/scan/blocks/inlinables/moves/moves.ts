@@ -16,6 +16,8 @@ import Branches from './branches'
  * @param read the one read of the name
  * @param init the initializer
  * @param effectEnd the earliest end of an effect in the read's statement
+ * @returns true when inlining would change when the initializer runs or how the
+ *          statement reads
  */
 export function moves(read: ReadEvent, init: Tree.Node, effectEnd: number) {
   const parent = read.frame.up?.node
@@ -28,9 +30,11 @@ export function moves(read: ReadEvent, init: Tree.Node, effectEnd: number) {
     }
   }
 
-  if (![...Tree.walk(init)].some(([n]) => Kinds.EFFECTS.has(n.type))) {
-    return false
-  }
+  const hasEffects = [...Tree.walk(init)].some(([n]) =>
+    Kinds.EFFECTS.has(n.type),
+  )
+
+  if (!hasEffects) return false
 
   const [start] = read.node.range as [number, number]
   if (effectEnd <= start) return true

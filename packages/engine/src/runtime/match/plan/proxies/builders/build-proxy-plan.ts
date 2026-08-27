@@ -7,6 +7,8 @@ import Bodies from './bodies'
  * What a proxy node asks, read through its `NODE` descriptor.
  *
  * @param proxy a proxy node, as `isProxyNode` admits
+ * @returns a `ProxyPlan` with the node's tag, its body's plan and its chain's
+ *          plan
  */
 export function buildProxyPlan(proxy: object): ProxyPlan {
   const node = Pattern.patternNodeOf(proxy)

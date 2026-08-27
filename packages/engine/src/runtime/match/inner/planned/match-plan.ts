@@ -13,6 +13,7 @@ import Proxies from './proxies'
  * @param actual the value
  * @param plan the plan of the pattern value
  * @param at where the value sits in the match
+ * @returns the captures for the plan's kind, or null on mismatch
  */
 export function matchPlan(actual: unknown, plan: Plan, at: Cursor): Bag | null {
   switch (plan.kind) {

@@ -9,6 +9,7 @@ import type { Node } from '@ts-unify/rules/inline-single-use-const/reads/tree'
  *
  * @param parent the node holding the identifier
  * @param id the identifier
+ * @returns true when the parent binds the identifier outright
  */
 export const isDirectBinding = (parent: Node, id: Node) =>
   (parent.type === 'VariableDeclarator' && parent.id === id) ||

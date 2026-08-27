@@ -7,11 +7,14 @@ import Views from './views'
  *
  * @param program the `Program` node the comment is under
  * @param raw the parser's comment
+ * @returns the view's `Comment` node for the raw comment, or undefined without
+ *          one
  */
-export const commentNodeOf = (
+export function commentNodeOf(
   program: unknown,
   raw: unknown,
-): CommentNode | undefined =>
-  !raw || typeof raw !== 'object'
-    ? undefined
-    : Views.commentViews.of(program).byRaw.get(raw)
+): CommentNode | undefined {
+  const isObject = typeof raw === 'object' && raw !== null
+
+  return isObject ? Views.commentViews.of(program).byRaw.get(raw) : undefined
+}

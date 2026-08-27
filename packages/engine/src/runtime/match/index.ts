@@ -1,3 +1,4 @@
+export * from './bags'
 export * from './chain'
 export * from './context'
 export * from './inner'

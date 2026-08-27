@@ -11,10 +11,10 @@ import Tester from '../tester'
 
 describe('add-return-to-block.eslint', () => {
   Tester.run(
-    'add-return-to-block',
     createRule(addReturnToBlock, {
       message: 'Add return to single-expression function body',
     }),
+    'add-return-to-block',
     {
       valid: [
         'function foo() { return bar(); }',

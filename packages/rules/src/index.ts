@@ -3,7 +3,10 @@ export { arrayFromMapToArrayFrom } from './array-from-map-to-array-from'
 export { collapseNullGuard } from './collapse-null-guard'
 export { elideBracesForReturn } from './elide-braces-for-return'
 export * from './guard-and-access-to-optional-chain'
-export { guardedForPushToFilterMap } from './guarded-for-push-to-filter-map'
+export {
+  guardedForPushToFilterMap,
+  skippedForPushToFilterMap,
+} from './guarded-for-push-to-filter-map'
 export { ifGuardedCallToOptional } from './if-guarded-call-to-optional'
 export { ifGuardedReturnToTernary } from './if-guarded-return-to-ternary'
 export { ifReturnToTernary } from './if-return-to-ternary'

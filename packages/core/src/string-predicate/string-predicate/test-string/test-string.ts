@@ -5,10 +5,11 @@ import Regex from './regex'
 /**
  * Apply a string predicate, or the `RegExp` sugar for one, to a matched value.
  */
-export const testString = (
+export function testString(
   predicate: StringPredicate | RegExp,
   actual: unknown,
-) =>
-  predicate instanceof RegExp
-    ? Regex.regex(predicate)(actual)
-    : predicate(actual)
+) {
+  const isRegex = predicate instanceof RegExp
+
+  return isRegex ? Regex.regex(predicate)(actual) : predicate(actual)
+}

@@ -10,6 +10,8 @@ import type { ConstraintPlan } from './types'
  * order; a constraint that is no proxy, or has no quantifier, is left out.
  *
  * @param chain the chain
+ * @returns a plan per quantified constraint, with its count plan, quantifier
+ *          and early-stop limit
  */
 export function constraintPlansOf(chain: ChainEntry[]): ConstraintPlan[] {
   const plans: ConstraintPlan[] = []

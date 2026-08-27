@@ -1,10 +1,9 @@
 import { extractPatterns } from '@ts-unify/engine'
 import { createRule } from '@ts-unify/eslint/internal'
-import type { RuleMeta } from '@ts-unify/runner'
 
 import Best from './best'
 import Phases from './phases'
-import type { RuleTiming } from './types'
+import type { BenchRule, RuleTiming } from './types'
 import Util from './util'
 /**
  * The timings of every rule over the corpus: the match phase, the
@@ -12,9 +11,10 @@ import Util from './util'
  *
  * @param rules each rule's meta beside the transform it came from
  * @param byType the corpus nodes by type
+ * @returns one timing per rule, in the order given
  */
 export const timeRules = (
-  rules: readonly { meta: RuleMeta; transform: unknown }[],
+  rules: readonly BenchRule[],
   byType: ReadonlyMap<string, readonly object[]>,
 ): RuleTiming[] =>
   rules.map(({ meta, transform }) => {
@@ -35,16 +35,14 @@ export const timeRules = (
       }
     })
     const rewriting = Phases.bestRewriteRound(matching.result.records)
-    const extracting = Best.bestOf(Util.ROUNDS.setup, () => {
-      for (let i = 0; i < Util.ROUNDS.setupBatch; i++) {
-        extractPatterns(transform)
-      }
-    })
-    const creating = Best.bestOf(Util.ROUNDS.setup, () => {
-      for (let i = 0; i < Util.ROUNDS.setupBatch; i++) {
-        createRule(transform as Parameters<typeof createRule>[0])
-      }
-    })
+    const [extracting, creating] = [
+      () => extractPatterns(transform),
+      () => createRule(transform as Parameters<typeof createRule>[0]),
+    ].map(setup =>
+      Best.bestOf(Util.ROUNDS.setup, () => {
+        for (let i = 0; i < Util.ROUNDS.setupBatch; i++) setup()
+      }),
+    )
 
     return {
       rule: meta.kebab,

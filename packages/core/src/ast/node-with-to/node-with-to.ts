@@ -1,16 +1,13 @@
 import type { NodeByKind } from '@/ast/node-by-kind'
 import type { NodeKind } from '@/ast/node-kind'
 import type { NormalizeCaptured } from '@/ast/normalize-captured'
-import type {
-  PatternBuilder,
-  PATTERN_BUILDER_BRAND,
-} from '@/ast/pattern-builder'
+import type { PatternBuilder } from '@/ast/pattern-builder'
 import type { SingleCaptureOnly } from '@/ast/single-capture-only'
 import type { ExtractCaptures } from '@/pattern'
 import type { WithoutInternalAstFields } from '@/type-utils'
 import type { SingleValueOf } from '@/type-utils/single-value-of'
 
-import type { ToAttached } from './types'
+import type { NotBuilder, ToAttached } from './types'
 
 /**
  * Adds a `.to` method to a node value `N`, attaching a rewrite factory
@@ -35,6 +32,8 @@ export type NodeWithTo<Node> = {
    * `.to(bag => Builder(bag))` would.
    *
    * @param builder the builder of the output kind
+   * @returns the node as a transform carrying the rewrite, still embeddable in
+   *          a pattern
    */
   to<K extends NodeKind>(
     builder: PatternBuilder<K>,
@@ -50,10 +49,10 @@ export type NodeWithTo<Node> = {
    * Attaches the rewrite whose output the factory builds from the bag.
    *
    * @param factory receives the capture bag of a match
+   * @returns the node as a transform carrying the factory's rewrite, still
+   *          embeddable in a pattern
    */
   to<Result>(
-    factory: ((bag: ExtractCaptures<Node>) => Result) & {
-      readonly [PATTERN_BUILDER_BRAND]?: never
-    },
+    factory: ((bag: ExtractCaptures<Node>) => Result) & NotBuilder,
   ): ToAttached<Node, Result>
 }

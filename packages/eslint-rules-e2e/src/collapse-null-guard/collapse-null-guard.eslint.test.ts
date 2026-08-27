@@ -11,10 +11,10 @@ import Tester from '../tester'
 
 describe('collapse-null-guard.eslint', () => {
   Tester.run(
-    'collapse-null-guard',
     createRule(collapseNullGuard, {
       message: 'Use ?? instead of null guard with early return',
     }),
+    'collapse-null-guard',
     {
       valid: [
         'function f(x) { return x ?? def; }',

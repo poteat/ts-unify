@@ -10,6 +10,8 @@ import Util from './util'
  *
  * @param exportName the rule's camelCase export name
  * @param transform the rule's transform value
+ * @returns the rule's kebab name, message, patterns, factory, withs and
+ *          recommended flag
  */
 export function extractRuleMeta(
   exportName: string,

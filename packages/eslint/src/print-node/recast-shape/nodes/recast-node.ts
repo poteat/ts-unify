@@ -14,6 +14,7 @@ import Util from './util'
  * operator type, and `parenthesized` on an operand recast would print bare.
  *
  * @param node the node
+ * @returns the copied node with the fields recast's printer reads
  */
 export function recastNode(node: object): Record<string, unknown> {
   const copy: Record<string, unknown> = {}
@@ -23,11 +24,12 @@ export function recastNode(node: object): Record<string, unknown> {
     copy[k] = RecastShape.toRecastShape(v)
   }
 
-  if (
+  const shouldMoveTypeArguments =
     copy.typeArguments !== undefined &&
     copy.typeParameters === undefined &&
     !RenamedFields.READS_TYPE_ARGUMENTS.has(copy.type as string)
-  ) {
+
+  if (shouldMoveTypeArguments) {
     copy.typeParameters = copy.typeArguments
   }
 
@@ -51,12 +53,13 @@ export function recastNode(node: object): Record<string, unknown> {
     }
   }
 
-  if (
+  const shouldMoveReturnType =
     typeof copy.type === 'string' &&
     RenamedFields.RETURN_AS_TYPE_ANNOTATION.has(copy.type) &&
     copy.returnType !== undefined &&
     copy.typeAnnotation === undefined
-  ) {
+
+  if (shouldMoveReturnType) {
     copy.typeAnnotation = copy.returnType
   }
 

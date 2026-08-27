@@ -2,16 +2,19 @@ import type { RuleTiming } from '@bench/timing'
 
 import Rates from './rates'
 import Tables from './tables'
+import type { CorpusSize } from './types'
 /**
  * The benchmark's report: one line per rule, then the corpus totals as
  * rates.
  *
  * @param timings the rule timings
  * @param corpus how many files and nodes the corpus holds
+ * @returns the report text: the rule table, a blank line, then the corpus,
+ *          match, rewrite and setup lines
  */
 export function printReport(
   timings: readonly RuleTiming[],
-  corpus: { files: number; nodes: number },
+  corpus: CorpusSize,
 ): string {
   const rows = timings.map(t => [
     t.rule,

@@ -11,10 +11,10 @@ import Tester from '../tester'
 
 describe('object-assign-to-spread.eslint', () => {
   Tester.run(
-    'object-assign-to-spread',
     createRule(objectAssignToSpread, {
       message: 'Use object spread instead of Object.assign',
     }),
+    'object-assign-to-spread',
     {
       valid: [
         'const x = { ...a, ...b };',

@@ -6,20 +6,25 @@ import Pattern from '@ts-unify/engine/runtime/match/pattern'
  *
  * @param node the node
  * @param boundary the `.until()` argument
+ * @returns true when the node's type is a tag the boundary names; false for no
+ *          proxy
  */
 export function isBoundaryNode(node: unknown, boundary: unknown) {
   if (!Pattern.isProxyNode(boundary)) return false
 
   const bNode = Pattern.patternNodeOf(boundary)
   const actualType = Node.nodeType(node)
+  const isOr = bNode.tag === 'or'
 
-  return bNode.tag === 'or'
-    ? bNode.args.some((arg: unknown) =>
-        typeof arg === 'string'
+  return isOr
+    ? bNode.args.some((arg: unknown) => {
+        const isTagName = typeof arg === 'string'
+
+        return isTagName
           ? actualType === arg
           : Pattern.isProxyNode(arg)
             ? actualType === Pattern.patternNodeOf(arg).tag
-            : false,
-      )
+            : false
+      })
     : actualType === bNode.tag
 }

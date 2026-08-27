@@ -7,19 +7,18 @@ import Util from './util'
  * `U.or(...)`, the types of a `U.fromNode(...)`, or the one node.
  *
  * Two branches of a root `U.or` with the same tag yield two entries;
- * consumers merge them per tag. A rule that is no proxy yields none.
+ * consumers merge them per tag. The root's guards and config apply to
+ * whichever branch matched: each branch chain ends with them.
  *
  * @param rule the rule's pattern proxy
+ * @returns an entry per branch or type, each with its tag, fields record and
+ *          chain; none for a rule that is no proxy
  */
 export function extractPatterns(rule: unknown): PatternEntry[] {
   const proxyNode = SymGet.proxyNodeOf(rule)
   if (!proxyNode?.tag) return []
 
   if (proxyNode.tag === 'or') {
-    /**
-     * The guards and config on the root, which apply to whichever branch
-     * matched; each branch chain is extended with them after its own.
-     */
     const rootGuards = proxyNode.chain.filter(c =>
       Util.ROOT_INHERITED.has(c.method),
     )

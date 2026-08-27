@@ -1,4 +1,10 @@
 import type { Falsy, Truthy } from '@/ast/builder-helpers'
+import type {
+  ModDefault,
+  ModMap,
+  ModTruthy,
+  ModWhen,
+} from '@/capture/capture-mods'
 
 /**
  * The value type a capture binds to once its modifiers are applied.
@@ -12,14 +18,14 @@ import type { Falsy, Truthy } from '@/ast/builder-helpers'
  */
 export type ApplyMods<Base, Mods> = Mods extends infer M
   ? (
-      M extends { default: infer D }
+      M extends ModDefault<infer D>
         ? Exclude<Base, Falsy> | D
-        : M extends { map: infer New }
+        : M extends ModMap<infer New>
           ? New
           : Base
     ) extends infer Mapped
-    ? (M extends { when: infer Narrow } ? Narrow : Mapped) extends infer Guarded
-      ? M extends { isTruthy: true }
+    ? (M extends ModWhen<infer Narrow> ? Narrow : Mapped) extends infer Guarded
+      ? M extends ModTruthy
         ? Truthy<Guarded>
         : Guarded
       : never

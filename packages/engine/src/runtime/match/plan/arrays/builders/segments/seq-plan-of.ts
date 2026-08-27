@@ -6,6 +6,7 @@ import type { RewriteFactory } from '@ts-unify/engine/runtime/match/types'
  * The plan of one seq of an expanded array pattern.
  *
  * @param seq where the seq landed, with its chain
+ * @returns the seq's start, length and `.to()` factory, undefined without one
  */
 export const seqPlanOf = (seq: SeqInfo): SeqPlan => ({
   start: seq.start,

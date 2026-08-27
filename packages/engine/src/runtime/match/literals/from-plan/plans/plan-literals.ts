@@ -12,6 +12,8 @@ import type { ArrayPlan, Plan } from '@ts-unify/engine/runtime/match/plan'
  *
  * @param plan the plan
  * @param path the path under the node the plan applies at
+ * @returns the literals the plan requires, each at its path; none for a capture
+ *          or the like
  */
 export function planLiterals(
   plan: Plan | ArrayPlan,

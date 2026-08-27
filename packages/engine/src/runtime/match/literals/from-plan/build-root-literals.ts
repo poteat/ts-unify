@@ -7,6 +7,7 @@ import Plans from './plans'
  * its root plan; none for a bare `$`.
  *
  * @param pattern the pattern
+ * @returns the root literals under the empty path, none for a bare `$`
  */
 export const buildRootLiterals = (pattern: unknown): RootLiteral[] =>
   Plans.planLiterals(Plan.rootPlanOf(pattern), [])

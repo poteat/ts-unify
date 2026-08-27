@@ -13,9 +13,14 @@ import Values from './values'
  * the pattern object; an array is a fields record here.
  *
  * @param value the pattern value
+ * @returns the `Plan` of the kind found, a literal plan for anything
+ *          unrecognised
  */
-export const planOf = (value: unknown): Plan =>
-  value === $
+export function planOf(value: unknown): Plan {
+  const isDollar = value === $
+  const isRecord = typeof value === 'object' && value
+
+  return isDollar
     ? Values.DOLLAR
     : Pattern.isCapture(value)
       ? { kind: 'capture', name: value.name }
@@ -28,6 +33,7 @@ export const planOf = (value: unknown): Plan =>
             }
           : Pattern.isProxyNode(value)
             ? Proxies.proxyPlanOf(value)
-            : typeof value === 'object' && value
+            : isRecord
               ? Fields.fieldsPlanOf(value)
               : { kind: 'literal', value }
+}

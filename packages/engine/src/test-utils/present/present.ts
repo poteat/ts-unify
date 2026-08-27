@@ -4,6 +4,7 @@
  *
  * @param value the value, or nothing
  * @param what what the value is, for the error
+ * @returns the same thing, narrowed to `T`
  */
 export function present<T>(value: T | null | undefined, what: string): T {
   if (!value) throw new Error(`expected ${what}`)

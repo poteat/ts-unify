@@ -5,6 +5,7 @@ import Keys from './keys'
  *
  * @param a one value
  * @param b the other
+ * @returns true when both are the same primitive or equal member by member
  */
 export function deepEqual(a: unknown, b: unknown): boolean {
   if (a === b) return true
